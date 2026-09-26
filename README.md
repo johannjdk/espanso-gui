@@ -2,8 +2,6 @@
 
 Espanso GUI Qt is a desktop editor for [Espanso](https://espanso.org/) match files. It provides a native Qt interface for managing replacements, forms, variables, and the underlying YAML configuration.
 
-Author: [Johann Judek](https://github.com/johannjdk)
-
 ## Requirements
 
 - Python 3.10 or newer
