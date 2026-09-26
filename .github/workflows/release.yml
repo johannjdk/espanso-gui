@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-version:
+    name: Verify release version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure the tag matches pyproject.toml
+        shell: bash
+        run: |
+          project_version="$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          test -n "$project_version"
+          test "$tag_version" = "$project_version" || {
+            echo "Tag $GITHUB_REF_NAME does not match pyproject.toml version $project_version." >&2
+            exit 1
+          }
+
+      - name: Check Python syntax
+        run: python3 -m compileall -q espanso_gui
+
+  debian:
+    name: Build Debian package
+    needs: verify-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build package
+        run: scripts/build-deb.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: dist/*.deb
+          if-no-files-found: error
+
+  arch:
+    name: Build Arch Linux package
+    needs: verify-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build package in Arch Linux
+        shell: bash
+        run: |
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            archlinux:latest \
+            bash -c '
+              set -euo pipefail
+              pacman -Syu --noconfirm --needed base-devel
+              useradd --create-home builder
+              chown -R builder:builder /workspace
+              su --shell /bin/bash builder --command "cd /workspace && scripts/build-pacman.sh"
+            '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-package
+          path: dist/*.pkg.tar.*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: [debian, arch]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Create checksums
+        working-directory: release-artifacts
+        run: sha256sum * > SHA256SUMS
+
+      - name: Create release with generated notes
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: release-artifacts/*
