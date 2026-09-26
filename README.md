@@ -16,6 +16,7 @@ control.
 - Work with shell, script, form, and choice variables
 - Preserve additional supported YAML fields when saving match files
 - Edit and validate the complete YAML document in Expert YAML mode
+- Edit Espanso's default and app-specific configuration profiles
 - Restart Espanso directly after saving changes
 
 ## Installation
@@ -65,6 +66,12 @@ The application discovers Espanso's `match` directory automatically:
 Choose a configuration file in the left panel, edit its matches, and click
 **Save**. Use **Restart Espanso** when you want Espanso to reload the changes
 immediately. Existing YAML is validated before Expert YAML changes are saved.
+
+To edit how Espanso itself behaves, choose **File → Espanso configuration…**.
+This opens the `config` directory, including `default.yml` and app-specific
+profiles. The editor supports all Espanso YAML options, including application
+filters and `includes`/`excludes` rules. Espanso does not apply app-specific
+profiles on Wayland.
 
 Run this command from the directory containing both the package and
 `SHA256SUMS`.
