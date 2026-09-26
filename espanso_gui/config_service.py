@@ -27,14 +27,25 @@ EspansoYamlDumper.add_representer(str, _str_presenter)
 
 class ConfigService:
     @staticmethod
-    def detect_config_path() -> Path:
+    def detect_espanso_path() -> Path:
+        """Return Espanso's configuration root directory."""
         if sys.platform.startswith("win"):
             base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
-            return base / "espanso" / "match"
+            return base / "espanso"
         if sys.platform == "darwin":
-            return Path.home() / "Library" / "Application Support" / "espanso" / "match"
+            return Path.home() / "Library" / "Application Support" / "espanso"
         base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-        return base / "espanso" / "match"
+        return base / "espanso"
+
+    @staticmethod
+    def detect_config_path() -> Path:
+        """Return Espanso's match-file directory."""
+        return ConfigService.detect_espanso_path() / "match"
+
+    @staticmethod
+    def detect_options_path() -> Path:
+        """Return the directory containing Espanso configuration profiles."""
+        return ConfigService.detect_espanso_path() / "config"
 
     @staticmethod
     def parse_yaml(path: Path) -> list[EspansoMatch]:
@@ -81,8 +92,21 @@ class ConfigService:
             raise ValueError("'matches' must be a list.")
 
     @staticmethod
+    def validate_config_yaml(text: str) -> None:
+        """Ensure an Espanso configuration profile has a YAML mapping at its root."""
+        document = yaml.safe_load(text) or {}
+        if not isinstance(document, dict):
+            raise ValueError("The YAML root must be a mapping.")
+
+    @staticmethod
     def save_raw_yaml(path: Path, text: str) -> None:
         ConfigService.validate_yaml_text(text)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
+
+    @staticmethod
+    def save_config_yaml(path: Path, text: str) -> None:
+        ConfigService.validate_config_yaml(text)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
 
