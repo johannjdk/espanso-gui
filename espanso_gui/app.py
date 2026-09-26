@@ -23,6 +23,9 @@ from .config_service import ConfigService
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
 
 
+APP_NAME = "Espanso GUI"
+
+
 def setup_qt_environment() -> None:
     """Register system Qt6 plugin directories and desktop platform integration."""
     if not sys.platform.startswith("linux"):
@@ -126,7 +129,7 @@ class MainWindow(QMainWindow):
 
     def _build_ui(self) -> None:
         self.resize(1280, 820)
-        self.setWindowTitle("Espanso GUI Qt")
+        self.setWindowTitle(APP_NAME)
         self._load_window_icon()
         self._build_menu()
 
@@ -430,7 +433,7 @@ class MainWindow(QMainWindow):
         if not enabled:
             self.file_label.setText("No file selected")
             self.match_sidebar.setTitle("Matches")
-            self.setWindowTitle("Espanso GUI Qt")
+            self.setWindowTitle(APP_NAME)
 
     def _on_match_field_changed(self) -> None:
         if not self._loading and 0 <= self.selected_match < len(self.matches):
@@ -489,7 +492,7 @@ class MainWindow(QMainWindow):
         self.selected_match = -1
         self.file_label.setText(f"File: {path.name}")
         self.match_sidebar.setTitle(f"Matches — {path.name}")
-        self.setWindowTitle(f"Espanso GUI Qt — {path.name}")
+        self.setWindowTitle(f"{APP_NAME} — {path.name}")
         self._set_editor_enabled(True)
         self.refresh_match_table()
         if self.matches:
@@ -1043,7 +1046,7 @@ def main() -> int:
     setup_qt_environment()
 
     app = QApplication(sys.argv)
-    app.setApplicationName("Espanso GUI Qt")
+    app.setApplicationName(APP_NAME)
 
     # If the user did not specify -style / --style via command line, apply desktop style
     has_cli_style = any(arg in sys.argv for arg in ("-style", "--style"))
