@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         menu.addActions([new_config, save, expert_yaml])
 
         edit_menu = self.menuBar().addMenu("Edit")
-        duplicate = QAction("Match duplizieren", self)
+        duplicate = QAction("Duplicate match", self)
         duplicate.setShortcut("Ctrl+D")
         duplicate.triggered.connect(self.duplicate_match)
         edit_menu.addAction(duplicate)
