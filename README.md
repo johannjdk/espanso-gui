@@ -7,6 +7,8 @@ control.
 
 > Espanso GUI is an independent project and is not affiliated with Espanso.
 
+![Espanso GUI](images/demo.png)
+
 ## Features
 
 - Browse, create, duplicate, and delete Espanso match files
