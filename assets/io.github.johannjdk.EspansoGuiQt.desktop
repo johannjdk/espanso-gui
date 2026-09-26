@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Espanso GUI Qt
+GenericName=Espanso configuration editor
+Comment=Edit Espanso matches, forms, and variables
+Exec=espanso-gui-qt %U
+Icon=io.github.johannjdk.EspansoGuiQt
+Terminal=false
+Categories=Utility;TextEditor;Development;
+Keywords=espanso;text;expand;forms;match;yaml;
+StartupWMClass=espanso-gui-qt

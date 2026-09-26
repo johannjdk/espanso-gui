@@ -1,0 +1,11 @@
+Package: espanso-gui-qt
+Version: @VERSION@
+Architecture: all
+Maintainer: Johann Judek <johannjudek@users.noreply.github.com>
+Homepage: https://github.com/johannjdk/espanso-gui-qt
+Depends: python3, python3-pyside6.qtwidgets | python3-pyside6, python3-yaml
+Section: utils
+Priority: optional
+Description: Qt editor for Espanso configuration files
+ Espanso GUI Qt provides a native Qt interface for managing Espanso matches,
+ forms, variables, and YAML configuration files.
