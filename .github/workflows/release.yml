@@ -73,9 +73,36 @@ jobs:
           path: dist/espanso-gui-qt-any.pkg.tar.zst
           if-no-files-found: error
 
+  macos:
+    name: Build macOS DMG (${{ matrix.arch }})
+    needs: verify-version
+    strategy:
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+          - runner: macos-14
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build disk image
+        run: scripts/build-dmg.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg-${{ matrix.arch }}
+          path: dist/espanso-gui-qt-macos-${{ matrix.arch }}.dmg
+          if-no-files-found: error
+
   publish:
     name: Publish GitHub release
-    needs: [debian, arch]
+    needs: [debian, arch, macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
