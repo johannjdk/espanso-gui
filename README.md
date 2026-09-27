@@ -24,6 +24,15 @@ control.
 Install [Espanso](https://espanso.org/install/) first. Espanso GUI automatically
 locates its `match` directory and edits the same files used by Espanso.
 
+### Quick install on Linux
+
+The installer detects Debian/Ubuntu or Arch Linux, downloads the newest release,
+and installs the appropriate package:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh
+```
+
 ### Debian and Ubuntu
 
 Download the `.deb` file from the project's [Releases](https://github.com/johannjdk/espanso-gui-qt/releases)
