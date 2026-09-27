@@ -16,7 +16,9 @@ package() {
     install -Dm644 "${source_dir}/assets/io.github.johannjdk.EspansoGuiQt.desktop" \
         "${pkgdir}/usr/share/applications/io.github.johannjdk.EspansoGuiQt.desktop"
     install -Dm644 "${source_dir}/assets/espanso-gui-qt.png" \
-        "${pkgdir}/usr/share/icons/hicolor/160x160/apps/io.github.johannjdk.EspansoGuiQt.png"
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/io.github.johannjdk.EspansoGuiQt.png"
+    install -Dm644 "${source_dir}/assets/espanso-gui-qt.png" \
+        "${pkgdir}/usr/share/pixmaps/io.github.johannjdk.EspansoGuiQt.png"
     local site_packages
     site_packages="$(/usr/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
     mkdir -p "${pkgdir}${site_packages}"

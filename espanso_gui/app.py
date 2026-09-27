@@ -25,6 +25,23 @@ from .models import EspansoFormField, EspansoMatch, EspansoVariable
 
 
 APP_NAME = "Espanso GUI"
+APP_ID = "io.github.johannjdk.EspansoGuiQt"
+
+
+def application_icon() -> QIcon:
+    """Return the packaged application icon when one is available."""
+    resource_root = Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent))
+    candidates = [
+        resource_root / "assets" / "espanso-gui-qt.png",
+        Path(f"/usr/share/icons/hicolor/256x256/apps/{APP_ID}.png"),
+        Path(f"/usr/share/pixmaps/{APP_ID}.png"),
+        # Compatibility with packages built before the standard-size path.
+        Path(f"/usr/share/icons/hicolor/160x160/apps/{APP_ID}.png"),
+    ]
+    for icon_path in candidates:
+        if icon_path.is_file():
+            return QIcon(str(icon_path))
+    return QIcon()
 
 
 def setup_qt_environment() -> None:
@@ -324,15 +341,7 @@ class MainWindow(QMainWindow):
         self._build_menu()
 
     def _load_window_icon(self) -> None:
-        resource_root = Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent))
-        candidates = [
-            resource_root / "assets" / "espanso-gui-qt.png",
-            Path("/usr/share/icons/hicolor/160x160/apps/espanso-gui-qt.png"),
-        ]
-        for icon_path in candidates:
-            if icon_path.is_file():
-                self.setWindowIcon(QIcon(str(icon_path)))
-                break
+        self.setWindowIcon(application_icon())
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self._build_file_panel())
@@ -1247,6 +1256,8 @@ def main() -> int:
 
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
+    app.setDesktopFileName(APP_ID)
+    app.setWindowIcon(application_icon())
 
     # If the user did not specify -style / --style via command line, apply desktop style
     has_cli_style = any(arg in sys.argv for arg in ("-style", "--style"))

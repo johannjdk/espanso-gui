@@ -18,7 +18,8 @@ rm -rf "$build_dir"
 mkdir -p "$staging_dir/DEBIAN" "$staging_dir/usr/bin" \
     "$staging_dir/usr/lib/python3/dist-packages" \
     "$staging_dir/usr/share/applications" \
-    "$staging_dir/usr/share/icons/hicolor/160x160/apps" "$output_dir"
+    "$staging_dir/usr/share/icons/hicolor/256x256/apps" \
+    "$staging_dir/usr/share/pixmaps" "$output_dir"
 
 cp -a "$project_root/espanso_gui" "$staging_dir/usr/lib/python3/dist-packages/"
 find "$staging_dir" -type d -name __pycache__ -prune -exec rm -rf {} +
@@ -30,7 +31,9 @@ sed "s/@VERSION@/$version/" "$project_root/packaging/debian/control" > "$staging
 install -Dm644 "$project_root/assets/io.github.johannjdk.EspansoGuiQt.desktop" \
     "$staging_dir/usr/share/applications/io.github.johannjdk.EspansoGuiQt.desktop"
 install -Dm644 "$project_root/assets/espanso-gui-qt.png" \
-    "$staging_dir/usr/share/icons/hicolor/160x160/apps/io.github.johannjdk.EspansoGuiQt.png"
+    "$staging_dir/usr/share/icons/hicolor/256x256/apps/io.github.johannjdk.EspansoGuiQt.png"
+install -Dm644 "$project_root/assets/espanso-gui-qt.png" \
+    "$staging_dir/usr/share/pixmaps/io.github.johannjdk.EspansoGuiQt.png"
 
 cat > "$staging_dir/usr/bin/$package_name" <<'EOF'
 #!/usr/bin/python3
