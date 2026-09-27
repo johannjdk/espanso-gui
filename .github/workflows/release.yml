@@ -92,7 +92,7 @@ jobs:
           python-version: "3.11"
 
       - name: Build disk image
-        run: scripts/build-dmg.sh
+        run: bash scripts/build-dmg.sh
 
       - uses: actions/upload-artifact@v4
         with:
