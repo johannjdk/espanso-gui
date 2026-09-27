@@ -15,6 +15,18 @@
     />
 
     <style>
+      :root {
+        --page: #111315;
+        --panel: #191c1f;
+        --panel-raised: #202428;
+        --line: #30363c;
+        --muted: #a9b0b7;
+        --accent: #74c4d5;
+        --accent-deep: #276979;
+      }
+
+      html { scroll-behavior: smooth; }
+
       body {
         font-family:
           system-ui,
@@ -26,10 +38,110 @@
           "Liberation Sans",
           Arial,
           sans-serif;
+        background: var(--page);
+        color: #f1f3f4;
       }
+
+      .site-nav {
+        background: rgba(17, 19, 21, 0.94);
+        backdrop-filter: blur(12px);
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .text-primary { color: var(--accent) !important; }
+
+      .hero {
+        background: linear-gradient(112deg, #15191b 0%, #15191b 52%, #132126 100%);
+      }
+
+      .hero h1 { letter-spacing: -0.045em; }
+
+      .hero-copy { max-width: 35rem; }
+
+      .availability {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .section-intro { max-width: 38rem; }
+
+      .download-card {
+        border-color: var(--line) !important;
+        border-radius: 0.65rem;
+        background: var(--panel);
+        box-shadow: none !important;
+      }
+
+      .download-card .card-header { background: transparent; }
+
+      .package-choice {
+        border-color: var(--line) !important;
+        border-radius: 0.45rem !important;
+        background: #15181b !important;
+      }
+
+      .badge { font-weight: 600; }
+
+      .btn-primary {
+        --bs-btn-bg: #3b94a7;
+        --bs-btn-border-color: #3b94a7;
+        --bs-btn-hover-bg: #4baabd;
+        --bs-btn-hover-border-color: #4baabd;
+        --bs-btn-active-bg: #317d8d;
+        --bs-btn-active-border-color: #317d8d;
+      }
+
+      .btn-outline-primary {
+        --bs-btn-color: #8cdae8;
+        --bs-btn-border-color: #4a8997;
+        --bs-btn-hover-bg: #276979;
+        --bs-btn-hover-border-color: #276979;
+      }
+
+      .terminal-card {
+        border: 1px solid var(--line);
+        border-radius: 0.4rem;
+        background: #171a1d;
+        overflow: hidden;
+      }
+
+      .install-heading {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 1.5rem;
+      }
+
+      .install-item + .install-item {
+        border-top: 1px solid var(--line);
+        margin-top: 2rem;
+        padding-top: 2rem;
+      }
+
+      .install-item h5 i {
+        color: var(--muted) !important;
+      }
+
+      .quick-install {
+        border-left: 3px solid var(--accent);
+        background: #171a1d;
+      }
+
+      .quick-install .flex-grow-1 { min-width: 0; }
 
       .code-container {
         position: relative;
+      }
+
+      .code-container pre {
+        padding-right: 4rem !important;
+        scrollbar-color: #4a8997 transparent;
+        scrollbar-width: thin;
       }
 
       .copy-btn {
@@ -37,11 +149,17 @@
         top: 0.5rem;
         right: 0.5rem;
       }
+
+      .footer-link:hover { color: #f1f3f4 !important; }
+
+      @media (max-width: 991.98px) {
+        .hero { background: #15191b; }
+      }
     </style>
   </head>
   <body>
     <nav
-      class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top"
+      class="navbar navbar-expand-lg site-nav border-bottom sticky-top"
     >
       <div class="container">
         <a
@@ -85,12 +203,12 @@
       </div>
     </nav>
 
-    <header class="py-5 bg-body-tertiary border-bottom">
-      <div class="container py-3">
+    <header class="hero py-5 border-bottom">
+      <div class="container py-lg-4">
         <div class="row align-items-center gy-4">
           <div class="col-lg-6">
-            <h1 class="display-5 fw-bold mb-3">Espanso GUI</h1>
-            <p class="lead text-body-secondary mb-4">
+            <h1 class="display-4 fw-bold mb-3">Text expansion, kept simple.</h1>
+            <p class="lead text-body-secondary mb-4 hero-copy">
               A native desktop editor for Espanso match files. Espanso GUI makes
               it easier to create, review, and maintain text-expansion rules
               without editing YAML by hand, while keeping your existing Espanso
@@ -114,12 +232,12 @@
                 <span>Source Code</span>
               </a>
             </div>
-            <div class="small text-body-secondary">
-              <i class="bi bi-info-circle me-1"></i> Currently available for
-              Linux (Debian, Ubuntu, Arch)
+            <div class="availability d-flex align-items-center gap-2">
+              <i class="bi bi-check-circle-fill text-success"></i>
+              <span>Available for Linux and macOS. Windows support is planned.</span>
             </div>
           </div>
-          <div class="col-lg-6 text-center">
+          <div class="col-lg-6">
             <img
               src="images/demo.png"
               alt="Espanso GUI Screenshot"
@@ -132,19 +250,20 @@
 
     <section
       id="downloads"
-      class="py-5 bg-body-tertiary border-top border-bottom"
+      class="py-5 border-top border-bottom"
     >
       <div class="container py-3">
-        <div class="text-center mb-5">
-          <h2 class="fw-bold mb-2">Downloads</h2>
-          <p class="text-body-secondary">
+        <div class="section-intro mb-5">
+          <p class="eyebrow mb-2">Downloads</p>
+          <h2 class="fw-bold mb-2">Pick your package.</h2>
+          <p class="text-body-secondary mb-0">
             Choose the appropriate package for your operating system.
           </p>
         </div>
 
         <div class="row g-4 justify-content-center">
           <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border download-card">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -158,7 +277,7 @@
                   Pre-built binary packages for common Linux distributions:
                 </p>
 
-                <div class="p-3 border rounded bg-body">
+                <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
@@ -184,7 +303,7 @@
                   </a>
                 </div>
 
-                <div class="p-3 border rounded bg-body">
+                <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
@@ -214,7 +333,7 @@
           </div>
 
           <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border download-card">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -228,7 +347,7 @@
                   Native disk images for Apple silicon and Intel Macs.
                 </p>
 
-                <div class="p-3 border rounded bg-body">
+                <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
@@ -254,7 +373,7 @@
                   </a>
                 </div>
 
-                <div class="p-3 border rounded bg-body">
+                <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
@@ -284,7 +403,7 @@
           </div>
 
           <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border shadow-sm opacity-75">
+            <div class="card h-100 border download-card is-unavailable opacity-75">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -314,21 +433,44 @@
       <div class="container py-3">
         <div class="row justify-content-center">
           <div class="col-lg-8">
-            <div class="mb-4 text-center">
+            <div class="install-heading mb-4">
               <h2 class="fw-bold mb-2">Installation via Terminal</h2>
-              <p class="text-body-secondary">
+              <p class="text-body-secondary mb-0">
                 Instructions for installing or running directly from source
                 code.
               </p>
             </div>
 
-            <div class="mb-4">
+            <div class="quick-install p-3 p-sm-4 mb-4 rounded-end">
+              <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-lightning-charge fs-4 text-primary"></i>
+                <div class="flex-grow-1">
+                  <h5 class="fw-bold mb-1">Quick install for Linux</h5>
+                  <p class="small text-body-secondary mb-3">
+                    Detects Debian, Ubuntu, Arch Linux, and compatible distributions.
+                  </p>
+                  <div class="terminal-card code-container">
+                    <pre
+                      class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
+                    ><code>curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh</code></pre>
+                    <button
+                      class="btn btn-outline-light btn-sm copy-btn"
+                      onclick="copyCode('curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh', this)"
+                    >
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="install-item">
               <h5 class="fw-bold mb-2">
-                <i class="bi bi-terminal me-2 text-primary"></i>Debian / Ubuntu
+                <i class="bi bi-terminal me-2"></i>Debian / Ubuntu
               </h5>
-              <div class="code-container">
+              <div class="terminal-card code-container">
                 <pre
-                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
                 ><code>sudo dpkg -i espanso-gui-qt-all.deb
 sudo apt-get install -f</code></pre>
                 <button
@@ -345,13 +487,13 @@ sudo apt-get install -f</code></pre>
               </div>
             </div>
 
-            <div class="mb-4">
+            <div class="install-item">
               <h5 class="fw-bold mb-2">
-                <i class="bi bi-terminal me-2 text-primary"></i>Arch Linux
+                <i class="bi bi-terminal me-2"></i>Arch Linux
               </h5>
-              <div class="code-container">
+              <div class="terminal-card code-container">
                 <pre
-                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
                 ><code>sudo pacman -U espanso-gui-qt-any.pkg.tar.zst</code></pre>
                 <button
                   class="btn btn-outline-light btn-sm copy-btn"
@@ -367,17 +509,17 @@ sudo apt-get install -f</code></pre>
               </div>
             </div>
 
-            <div class="mb-4">
+            <div class="install-item">
               <h5 class="fw-bold mb-2">
-                <i class="bi bi-code-slash me-2 text-primary"></i>Run from
+                <i class="bi bi-code-slash me-2"></i>Run from
                 Source
               </h5>
               <p class="small text-body-secondary mb-2">
                 Requires Python 3.10+ and PySide6
               </p>
-              <div class="code-container">
+              <div class="terminal-card code-container">
                 <pre
-                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
                 ><code>git clone https://github.com/johannjdk/espanso-gui-qt.git
 cd espanso-gui-qt
 python3 -m venv .venv
@@ -403,7 +545,7 @@ python3 -m espanso_gui_qt</code></pre>
     </section>
 
     <!-- Footer -->
-    <footer class="py-4 bg-body-tertiary border-top mt-5">
+    <footer class="py-4 border-top mt-5">
       <div class="container text-center text-body-secondary small">
         <div
           class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"
@@ -414,7 +556,7 @@ python3 -m espanso_gui_qt</code></pre>
           <div class="d-flex gap-3">
             <a
               href="https://github.com/johannjdk/espanso-gui-qt"
-              class="text-body-secondary text-decoration-none"
+              class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
             >
@@ -422,7 +564,7 @@ python3 -m espanso_gui_qt</code></pre>
             </a>
             <a
               href="https://github.com/johannjdk/espanso-gui-qt/releases"
-              class="text-body-secondary text-decoration-none"
+              class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
             >
@@ -430,7 +572,7 @@ python3 -m espanso_gui_qt</code></pre>
             </a>
             <a
               href="https://github.com/johannjdk/espanso-gui-qt/blob/main/LICENSE"
-              class="text-body-secondary text-decoration-none"
+              class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
             >
