@@ -1,5 +1,5 @@
 pkgname=espanso-gui-qt
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='Qt editor for Espanso configuration files'
 arch=('any')
