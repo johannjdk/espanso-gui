@@ -42,6 +42,16 @@ page and install it with pacman:
 sudo pacman -U ./espanso-gui-qt-any.pkg.tar.zst
 ```
 
+### macOS
+
+Download the DMG that matches your Mac from the [Releases](https://github.com/johannjdk/espanso-gui-qt/releases)
+page:
+
+- Apple silicon (M1 and newer): `espanso-gui-qt-macos-arm64.dmg`
+- Intel Mac: `espanso-gui-qt-macos-x64.dmg`
+
+Open the DMG and drag **Espanso GUI** to the Applications folder.
+
 ### Run from source
 
 Requirements: Python 3.10 or newer, PySide6, and PyYAML.
