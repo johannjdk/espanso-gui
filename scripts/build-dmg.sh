@@ -59,7 +59,17 @@ python3 -m PyInstaller \
 
 app_bundle="$build_dir/dist/Espanso GUI.app"
 plist="$app_bundle/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $version" "$plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $version" "$plist"
+set_plist_version() {
+    local key="$1"
+
+    if /usr/libexec/PlistBuddy -c "Print :$key" "$plist" >/dev/null 2>&1; then
+        /usr/libexec/PlistBuddy -c "Set :$key $version" "$plist"
+    else
+        /usr/libexec/PlistBuddy -c "Add :$key string $version" "$plist"
+    fi
+}
+
+set_plist_version "CFBundleShortVersionString"
+set_plist_version "CFBundleVersion"
 hdiutil create -volname "Espanso GUI" -srcfolder "$app_bundle" -ov -format UDZO "$artifact"
 echo "Built $artifact"
