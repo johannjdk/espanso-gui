@@ -324,8 +324,9 @@ class MainWindow(QMainWindow):
         self._build_menu()
 
     def _load_window_icon(self) -> None:
+        resource_root = Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent))
         candidates = [
-            Path(__file__).parent.parent / "assets" / "espanso-gui-qt.png",
+            resource_root / "assets" / "espanso-gui-qt.png",
             Path("/usr/share/icons/hicolor/160x160/apps/espanso-gui-qt.png"),
         ]
         for icon_path in candidates:
