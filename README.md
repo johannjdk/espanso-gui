@@ -61,6 +61,17 @@ page:
 
 Open the DMG and drag **Espanso GUI** to the Applications folder.
 
+### Build a portable Windows release
+
+On a Windows x64 machine with Python 3.10 or newer, run this from PowerShell:
+
+```powershell
+.\scripts\build-windows.ps1
+```
+
+The script creates `dist/espanso-gui-qt-<version>-windows-x64.zip`. Extract it
+and run `Espanso GUI.exe` from the contained folder.
+
 ### Run from source
 
 Requirements: Python 3.10 or newer, PySide6, and PyYAML.

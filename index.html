@@ -234,7 +234,7 @@
             </div>
             <div class="availability d-flex align-items-center gap-2">
               <i class="bi bi-check-circle-fill text-success"></i>
-              <span>Available for Linux and macOS. Windows support is planned.</span>
+              <span>Available for Linux, macOS, and Windows.</span>
             </div>
           </div>
           <div class="col-lg-6">
@@ -403,25 +403,45 @@
           </div>
 
           <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border download-card is-unavailable opacity-75">
+            <div class="card h-100 border download-card">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-windows fs-4 text-body-secondary"></i>
+                  <i class="bi bi-windows fs-4 text-primary"></i>
                   <h5 class="card-title mb-0 fw-bold">Windows</h5>
                 </div>
               </div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <p class="card-text text-body-secondary small">
-                  Native Windows support is currently not available.
+              <div class="card-body d-flex flex-column gap-3">
+                <p class="card-text text-body-secondary small mb-1">
+                  Portable archive for 64-bit Windows systems. Extract it and
+                  run Espanso GUI.exe.
                 </p>
-                <button
-                  class="btn btn-secondary btn-sm w-100 disabled"
-                  disabled
-                >
-                  Not Available
-                </button>
+                <div class="p-3 border package-choice">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
+                      ><i class="bi bi-pc-display me-1 text-primary"></i> Windows
+                      x64</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="windows-x64-tag"
+                      >.zip</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-windows-x64"
+                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download Windows (.zip)</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -628,10 +648,12 @@ python3 -m espanso_gui_qt</code></pre>
             const archTag = document.getElementById("arch-tag");
             const macosArmTag = document.getElementById("macos-arm64-tag");
             const macosX64Tag = document.getElementById("macos-x64-tag");
+            const windowsX64Tag = document.getElementById("windows-x64-tag");
             if (debTag) debTag.textContent = release.tag_name;
             if (archTag) archTag.textContent = release.tag_name;
             if (macosArmTag) macosArmTag.textContent = release.tag_name;
             if (macosX64Tag) macosX64Tag.textContent = release.tag_name;
+            if (windowsX64Tag) windowsX64Tag.textContent = release.tag_name;
           }
 
           if (release.assets && release.assets.length > 0) {
@@ -652,6 +674,10 @@ python3 -m espanso_gui_qt</code></pre>
               if (name === "espanso-gui-qt-macos-x64.dmg") {
                 const macosX64Btn = document.getElementById("btn-download-macos-x64");
                 if (macosX64Btn) macosX64Btn.href = asset.browser_download_url;
+              }
+              if (name.endsWith("-windows-x64.zip")) {
+                const windowsX64Btn = document.getElementById("btn-download-windows-x64");
+                if (windowsX64Btn) windowsX64Btn.href = asset.browser_download_url;
               }
             });
           }
