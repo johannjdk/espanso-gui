@@ -214,25 +214,71 @@
           </div>
 
           <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border shadow-sm opacity-75">
+            <div class="card h-100 border shadow-sm">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-apple fs-4 text-body-secondary"></i>
+                  <i class="bi bi-apple fs-4 text-primary"></i>
                   <h5 class="card-title mb-0 fw-bold">macOS</h5>
                 </div>
               </div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <p class="card-text text-body-secondary small">
-                  Native macOS support is currently not available.
+              <div class="card-body d-flex flex-column gap-3">
+                <p class="card-text text-body-secondary small mb-1">
+                  Native disk images for Apple silicon and Intel Macs.
                 </p>
-                <button
-                  class="btn btn-secondary btn-sm w-100 disabled"
-                  disabled
-                >
-                  Not Available
-                </button>
+
+                <div class="p-3 border rounded bg-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
+                      ><i class="bi bi-apple me-1 text-primary"></i> Apple
+                      silicon</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="macos-arm64-tag"
+                      >arm64</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-macos-arm64"
+                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download macOS (Apple silicon)</span>
+                  </a>
+                </div>
+
+                <div class="p-3 border rounded bg-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
+                      ><i class="bi bi-cpu me-1 text-primary"></i> Intel
+                      Mac</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="macos-x64-tag"
+                      >x64</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-macos-x64"
+                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download macOS (Intel)</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -438,8 +484,12 @@ python3 -m espanso_gui_qt</code></pre>
           if (release.tag_name) {
             const debTag = document.getElementById("deb-tag");
             const archTag = document.getElementById("arch-tag");
+            const macosArmTag = document.getElementById("macos-arm64-tag");
+            const macosX64Tag = document.getElementById("macos-x64-tag");
             if (debTag) debTag.textContent = release.tag_name;
             if (archTag) archTag.textContent = release.tag_name;
+            if (macosArmTag) macosArmTag.textContent = release.tag_name;
+            if (macosX64Tag) macosX64Tag.textContent = release.tag_name;
           }
 
           if (release.assets && release.assets.length > 0) {
@@ -452,6 +502,14 @@ python3 -m espanso_gui_qt</code></pre>
               if (name.endsWith(".pkg.tar.zst") || name.includes("arch")) {
                 const archBtn = document.getElementById("btn-download-arch");
                 if (archBtn) archBtn.href = asset.browser_download_url;
+              }
+              if (name === "espanso-gui-qt-macos-arm64.dmg") {
+                const macosArmBtn = document.getElementById("btn-download-macos-arm64");
+                if (macosArmBtn) macosArmBtn.href = asset.browser_download_url;
+              }
+              if (name === "espanso-gui-qt-macos-x64.dmg") {
+                const macosX64Btn = document.getElementById("btn-download-macos-x64");
+                if (macosX64Btn) macosX64Btn.href = asset.browser_download_url;
               }
             });
           }
