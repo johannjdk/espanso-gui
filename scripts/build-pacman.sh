@@ -7,6 +7,7 @@ version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$project_root/pyproject.toml")"
 build_dir="$project_root/build/arch"
 source_dir="$build_dir/${package_name}-${version}"
 output_dir="$project_root/dist"
+artifact="$output_dir/${package_name}-any.pkg.tar.zst"
 
 command -v makepkg >/dev/null || {
     echo "makepkg is required to build an Arch Linux package." >&2
@@ -24,11 +25,15 @@ cp "$project_root/PKGBUILD" "$build_dir/"
 
 (
     cd "$build_dir"
-    # This is a pure Python package: runtime dependencies are declared in the
-    # PKGBUILD and are resolved by pacman when the finished package is installed.
     makepkg --cleanbuild --nodeps --noconfirm
 )
 
-find "$build_dir" -maxdepth 1 -type f -name "${package_name}-${version}-*.pkg.tar.*" \
-    -exec cp -f {} "$output_dir/" \;
-echo "Built package(s) in $output_dir"
+package_file="$(find "$build_dir" -maxdepth 1 -type f \
+    -name "${package_name}-${version}-*.pkg.tar.zst" -print -quit)"
+if [[ -z "$package_file" ]]; then
+    echo "Arch package was not created." >&2
+    exit 1
+fi
+
+cp -f "$package_file" "$artifact"
+echo "Built $artifact"

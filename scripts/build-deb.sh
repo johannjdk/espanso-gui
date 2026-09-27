@@ -7,7 +7,7 @@ version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$project_root/pyproject.toml")"
 build_dir="$project_root/build/debian"
 staging_dir="$build_dir/$package_name"
 output_dir="$project_root/dist"
-artifact="$output_dir/${package_name}_${version}_all.deb"
+artifact="$output_dir/${package_name}-all.deb"
 
 command -v dpkg-deb >/dev/null || {
     echo "dpkg-deb is required to build a Debian package." >&2
