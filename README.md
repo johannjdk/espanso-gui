@@ -30,7 +30,7 @@ Download the `.deb` file from the project's [Releases](https://github.com/johann
 page, then install it locally:
 
 ```bash
-sudo apt install ./espanso-gui-qt_VERSION_all.deb
+sudo apt install ./espanso-gui-qt-all.deb
 ```
 
 ### Arch Linux
@@ -39,7 +39,7 @@ Download the `.pkg.tar.*` file from the [Releases](https://github.com/johannjdk/
 page and install it with pacman:
 
 ```bash
-sudo pacman -U ./espanso-gui-qt-VERSION-any.pkg.tar.zst
+sudo pacman -U ./espanso-gui-qt-any.pkg.tar.zst
 ```
 
 ### Run from source

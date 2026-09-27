@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espanso GUI - Graphical User Interface for Espanso</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          "Noto Sans",
+          "Liberation Sans",
+          Arial,
+          sans-serif;
+      }
+
+      .code-container {
+        position: relative;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav
+      class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top"
+    >
+      <div class="container">
+        <a
+          class="navbar-brand fw-bold d-flex align-items-center gap-2"
+          href="#"
+        >
+          <span>Espanso GUI</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="#downloads">Downloads</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#installation">Installation</a>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            <a
+              href="https://github.com/johannjdk/espanso-gui-qt"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+            >
+              <i class="bi bi-github"></i>
+              <span>GitHub Repository</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <header class="py-5 bg-body-tertiary border-bottom">
+      <div class="container py-3">
+        <div class="row align-items-center gy-4">
+          <div class="col-lg-6">
+            <h1 class="display-5 fw-bold mb-3">Espanso GUI</h1>
+            <p class="lead text-body-secondary mb-4">
+              A native desktop editor for Espanso match files. Espanso GUI makes
+              it easier to create, review, and maintain text-expansion rules
+              without editing YAML by hand, while keeping your existing Espanso
+              configuration in control.
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <a
+                href="#downloads"
+                class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2"
+              >
+                <i class="bi bi-download"></i>
+                <span>Go to Downloads</span>
+              </a>
+              <a
+                href="https://github.com/johannjdk/espanso-gui-qt"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2"
+              >
+                <i class="bi bi-github"></i>
+                <span>Source Code</span>
+              </a>
+            </div>
+            <div class="small text-body-secondary">
+              <i class="bi bi-info-circle me-1"></i> Currently available for
+              Linux (Debian, Ubuntu, Arch)
+            </div>
+          </div>
+          <div class="col-lg-6 text-center">
+            <img
+              src="https://i.ibb.co/zT9rmh3V/image.png"
+              alt="Espanso GUI Screenshot"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section
+      id="downloads"
+      class="py-5 bg-body-tertiary border-top border-bottom"
+    >
+      <div class="container py-3">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold mb-2">Downloads</h2>
+          <p class="text-body-secondary">
+            Choose the appropriate package for your operating system.
+          </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border shadow-sm">
+              <div
+                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-ubuntu fs-4 text-primary"></i>
+                  <h5 class="card-title mb-0 fw-bold">Linux</h5>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column gap-3">
+                <p class="card-text text-body-secondary small mb-1">
+                  Pre-built binary packages for common Linux distributions:
+                </p>
+
+                <div class="p-3 border rounded bg-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
+                      ><i class="bi bi-box-seam me-1 text-primary"></i> Debian /
+                      Ubuntu</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="deb-tag"
+                      >.deb</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-deb"
+                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download Debian/Ubuntu (.deb)</span>
+                  </a>
+                </div>
+
+                <div class="p-3 border rounded bg-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
+                      ><i class="bi bi-cpu me-1 text-primary"></i> Arch
+                      Linux</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="arch-tag"
+                      >.pkg.tar.zst</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-arch"
+                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download Arch (.pkg.tar.zst)</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border shadow-sm opacity-75">
+              <div
+                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-apple fs-4 text-body-secondary"></i>
+                  <h5 class="card-title mb-0 fw-bold">macOS</h5>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <p class="card-text text-body-secondary small">
+                  Native macOS support is currently not available.
+                </p>
+                <button
+                  class="btn btn-secondary btn-sm w-100 disabled"
+                  disabled
+                >
+                  Not Available
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border shadow-sm opacity-75">
+              <div
+                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-windows fs-4 text-body-secondary"></i>
+                  <h5 class="card-title mb-0 fw-bold">Windows</h5>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <p class="card-text text-body-secondary small">
+                  Native Windows support is currently not available.
+                </p>
+                <button
+                  class="btn btn-secondary btn-sm w-100 disabled"
+                  disabled
+                >
+                  Not Available
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="installation" class="py-5">
+      <div class="container py-3">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="mb-4 text-center">
+              <h2 class="fw-bold mb-2">Installation via Terminal</h2>
+              <p class="text-body-secondary">
+                Instructions for installing or running directly from source
+                code.
+              </p>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold mb-2">
+                <i class="bi bi-terminal me-2 text-primary"></i>Debian / Ubuntu
+              </h5>
+              <div class="code-container">
+                <pre
+                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                ><code>sudo dpkg -i espanso-gui-qt-all.deb
+sudo apt-get install -f</code></pre>
+                <button
+                  class="btn btn-outline-light btn-sm copy-btn"
+                  onclick="
+                    copyCode(
+                      'sudo dpkg -i espanso-gui-qt-all.deb\nsudo apt-get install -f',
+                      this,
+                    )
+                  "
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold mb-2">
+                <i class="bi bi-terminal me-2 text-primary"></i>Arch Linux
+              </h5>
+              <div class="code-container">
+                <pre
+                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                ><code>sudo pacman -U espanso-gui-qt-any.pkg.tar.zst</code></pre>
+                <button
+                  class="btn btn-outline-light btn-sm copy-btn"
+                  onclick="
+                    copyCode(
+                      'sudo pacman -U espanso-gui-qt-any.pkg.tar.zst',
+                      this,
+                    )
+                  "
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold mb-2">
+                <i class="bi bi-code-slash me-2 text-primary"></i>Run from
+                Source
+              </h5>
+              <p class="small text-body-secondary mb-2">
+                Requires Python 3.10+ and PySide6
+              </p>
+              <div class="code-container">
+                <pre
+                  class="bg-dark text-light p-3 rounded border font-monospace mb-0 overflow-x-auto"
+                ><code>git clone https://github.com/johannjdk/espanso-gui-qt.git
+cd espanso-gui-qt
+python3 -m venv .venv
+source .venv/bin/activate
+pip install .
+python3 -m espanso_gui_qt</code></pre>
+                <button
+                  class="btn btn-outline-light btn-sm copy-btn"
+                  onclick="
+                    copyCode(
+                      'git clone https://github.com/johannjdk/espanso-gui-qt.git\ncd espanso-gui-qt\npython3 -m venv .venv\nsource .venv/bin/activate\npip install .\npython3 -m espanso_gui_qt',
+                      this,
+                    )
+                  "
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-body-tertiary border-top mt-5">
+      <div class="container text-center text-body-secondary small">
+        <div
+          class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"
+        >
+          <div>
+            &copy; <span id="year"></span> Espanso GUI. Open Source Software.
+          </div>
+          <div class="d-flex gap-3">
+            <a
+              href="https://github.com/johannjdk/espanso-gui-qt"
+              class="text-body-secondary text-decoration-none"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="bi bi-github me-1"></i> GitHub Repository
+            </a>
+            <a
+              href="https://github.com/johannjdk/espanso-gui-qt/releases"
+              class="text-body-secondary text-decoration-none"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="bi bi-tag-fill me-1"></i> Releases
+            </a>
+            <a
+              href="https://github.com/johannjdk/espanso-gui-qt/blob/main/LICENSE"
+              class="text-body-secondary text-decoration-none"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="bi bi-file-text me-1"></i> License
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        fetchLatestRelease();
+      });
+
+      function copyCode(text, buttonElement) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+        }
+
+        const icon = buttonElement.querySelector("i");
+        if (icon) {
+          icon.className = "bi bi-check2 text-success";
+          setTimeout(() => {
+            icon.className = "bi bi-clipboard";
+          }, 2000);
+        }
+      }
+
+      async function fetchLatestRelease() {
+        const repoOwner = "johannjdk";
+        const repoName = "espanso-gui-qt";
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`;
+
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) return;
+          const release = await response.json();
+
+          if (release.tag_name) {
+            const debTag = document.getElementById("deb-tag");
+            const archTag = document.getElementById("arch-tag");
+            if (debTag) debTag.textContent = release.tag_name;
+            if (archTag) archTag.textContent = release.tag_name;
+          }
+
+          if (release.assets && release.assets.length > 0) {
+            release.assets.forEach((asset) => {
+              const name = asset.name.toLowerCase();
+              if (name.endsWith(".deb")) {
+                const debBtn = document.getElementById("btn-download-deb");
+                if (debBtn) debBtn.href = asset.browser_download_url;
+              }
+              if (name.endsWith(".pkg.tar.zst") || name.includes("arch")) {
+                const archBtn = document.getElementById("btn-download-arch");
+                if (archBtn) archBtn.href = asset.browser_download_url;
+              }
+            });
+          }
+        } catch (err) {
+          console.log("Release fetching fallback:", err);
+        }
+      }
+    </script>
+  </body>
+</html>

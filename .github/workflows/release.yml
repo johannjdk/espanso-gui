@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: debian-package
-          path: dist/*.deb
+          path: dist/espanso-gui-qt-all.deb
           if-no-files-found: error
 
   arch:
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: arch-package
-          path: dist/*.pkg.tar.*
+          path: dist/espanso-gui-qt-any.pkg.tar.zst
           if-no-files-found: error
 
   publish:
