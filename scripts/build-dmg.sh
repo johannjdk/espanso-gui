@@ -71,5 +71,11 @@ set_plist_version() {
 
 set_plist_version "CFBundleShortVersionString"
 set_plist_version "CFBundleVersion"
+
+# PyInstaller signs the bundle while building it. Updating Info.plist above
+# changes signed bundle contents, so sign it again before creating the DMG.
+codesign --force --deep --sign - "$app_bundle"
+codesign --verify --deep --strict --verbose=2 "$app_bundle"
+
 hdiutil create -volname "Espanso GUI" -srcfolder "$app_bundle" -ov -format UDZO "$artifact"
 echo "Built $artifact"
