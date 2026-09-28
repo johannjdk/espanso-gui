@@ -6,7 +6,7 @@ if ($env:OS -ne "Windows_NT") {
 }
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$packageName = "espanso-gui-qt"
+$packageName = "espanso-gui"
 $version = ([regex]::Match(
     (Get-Content (Join-Path $projectRoot "pyproject.toml") -Raw),
     '(?m)^version = "([^"]+)"\r?$'
@@ -30,7 +30,7 @@ $distDir = Join-Path $projectRoot "dist"
 $workDir = Join-Path $buildDir "work"
 $specDir = Join-Path $buildDir "spec"
 $pyInstallerDist = Join-Path $buildDir "dist"
-$iconFile = Join-Path $buildDir "espanso-gui-qt.ico"
+$iconFile = Join-Path $buildDir "espanso-gui.ico"
 $appDir = Join-Path $pyInstallerDist "Espanso GUI"
 $archive = Join-Path $distDir "$packageName-$version-windows-x64.zip"
 
@@ -53,7 +53,7 @@ Write-Host "==> Installing build dependencies" -ForegroundColor Cyan
 & $pythonCommand @pythonPrefix -m pip install --upgrade pip
 & $pythonCommand @pythonPrefix -m pip install $projectRoot pyinstaller Pillow
 & $pythonCommand @pythonPrefix -c $iconConverter `
-    (Join-Path $projectRoot "assets\espanso-gui-qt.png") $iconFile
+    (Join-Path $projectRoot "assets\espanso-gui.png") $iconFile
 
 Write-Host "==> Building Espanso GUI for Windows" -ForegroundColor Cyan
 & $pythonCommand @pythonPrefix -m PyInstaller `

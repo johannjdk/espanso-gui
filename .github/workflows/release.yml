@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: debian-package
-          path: dist/espanso-gui-qt-all.deb
+          path: dist/espanso-gui-all.deb
           if-no-files-found: error
 
   arch:
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: arch-package
-          path: dist/espanso-gui-qt-any.pkg.tar.zst
+          path: dist/espanso-gui-any.pkg.tar.zst
           if-no-files-found: error
 
   macos:
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg-${{ matrix.arch }}
-          path: dist/espanso-gui-qt-macos-${{ matrix.arch }}.dmg
+          path: dist/espanso-gui-macos-${{ matrix.arch }}.dmg
           if-no-files-found: error
 
   windows:
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-archive-x64
-          path: dist/espanso-gui-qt-*-windows-x64.zip
+          path: dist/espanso-gui-*-windows-x64.zip
           if-no-files-found: error
 
   publish:

@@ -191,7 +191,7 @@
           </ul>
           <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
             <a
-              href="https://github.com/johannjdk/espanso-gui-qt"
+              href="https://github.com/johannjdk/espanso-gui"
               target="_blank"
               rel="noopener"
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
@@ -224,7 +224,7 @@
                 <span>Go to Downloads</span>
               </a>
               <a
-                href="https://github.com/johannjdk/espanso-gui-qt"
+                href="https://github.com/johannjdk/espanso-gui"
                 target="_blank"
                 rel="noopener"
                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2"
@@ -294,7 +294,7 @@
                   </div>
                   <a
                     id="btn-download-deb"
-                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
                     class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
@@ -320,7 +320,7 @@
                   </div>
                   <a
                     id="btn-download-arch"
-                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
@@ -364,7 +364,7 @@
                   </div>
                   <a
                     id="btn-download-macos-arm64"
-                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
                     class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
@@ -390,7 +390,7 @@
                   </div>
                   <a
                     id="btn-download-macos-x64"
-                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
@@ -434,7 +434,7 @@
                   </div>
                   <a
                     id="btn-download-windows-x64"
-                    href="https://github.com/johannjdk/espanso-gui-qt/releases"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
                     class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
@@ -473,10 +473,10 @@
                   <div class="terminal-card code-container">
                     <pre
                       class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                    ><code>curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh</code></pre>
+                    ><code>curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh</code></pre>
                     <button
                       class="btn btn-outline-light btn-sm copy-btn"
-                      onclick="copyCode('curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh', this)"
+                      onclick="copyCode('curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh', this)"
                     >
                       <i class="bi bi-clipboard"></i>
                     </button>
@@ -492,13 +492,13 @@
               <div class="terminal-card code-container">
                 <pre
                   class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>sudo dpkg -i espanso-gui-qt-all.deb
+                ><code>sudo dpkg -i espanso-gui-all.deb
 sudo apt-get install -f</code></pre>
                 <button
                   class="btn btn-outline-light btn-sm copy-btn"
                   onclick="
                     copyCode(
-                      'sudo dpkg -i espanso-gui-qt-all.deb\nsudo apt-get install -f',
+                      'sudo dpkg -i espanso-gui-all.deb\nsudo apt-get install -f',
                       this,
                     )
                   "
@@ -515,12 +515,12 @@ sudo apt-get install -f</code></pre>
               <div class="terminal-card code-container">
                 <pre
                   class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>sudo pacman -U espanso-gui-qt-any.pkg.tar.zst</code></pre>
+                ><code>sudo pacman -U espanso-gui-any.pkg.tar.zst</code></pre>
                 <button
                   class="btn btn-outline-light btn-sm copy-btn"
                   onclick="
                     copyCode(
-                      'sudo pacman -U espanso-gui-qt-any.pkg.tar.zst',
+                      'sudo pacman -U espanso-gui-any.pkg.tar.zst',
                       this,
                     )
                   "
@@ -541,17 +541,17 @@ sudo apt-get install -f</code></pre>
               <div class="terminal-card code-container">
                 <pre
                   class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>git clone https://github.com/johannjdk/espanso-gui-qt.git
-cd espanso-gui-qt
+                ><code>git clone https://github.com/johannjdk/espanso-gui.git
+cd espanso-gui
 python3 -m venv .venv
 source .venv/bin/activate
 pip install .
-python3 -m espanso_gui_qt</code></pre>
+python3 -m espanso_gui</code></pre>
                 <button
                   class="btn btn-outline-light btn-sm copy-btn"
                   onclick="
                     copyCode(
-                      'git clone https://github.com/johannjdk/espanso-gui-qt.git\ncd espanso-gui-qt\npython3 -m venv .venv\nsource .venv/bin/activate\npip install .\npython3 -m espanso_gui_qt',
+                      'git clone https://github.com/johannjdk/espanso-gui.git\ncd espanso-gui\npython3 -m venv .venv\nsource .venv/bin/activate\npip install .\npython3 -m espanso_gui',
                       this,
                     )
                   "
@@ -576,7 +576,7 @@ python3 -m espanso_gui_qt</code></pre>
           </div>
           <div class="d-flex gap-3">
             <a
-              href="https://github.com/johannjdk/espanso-gui-qt"
+              href="https://github.com/johannjdk/espanso-gui"
               class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
@@ -584,7 +584,7 @@ python3 -m espanso_gui_qt</code></pre>
               <i class="bi bi-github me-1"></i> GitHub Repository
             </a>
             <a
-              href="https://github.com/johannjdk/espanso-gui-qt/releases"
+              href="https://github.com/johannjdk/espanso-gui/releases"
               class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
@@ -592,7 +592,7 @@ python3 -m espanso_gui_qt</code></pre>
               <i class="bi bi-tag-fill me-1"></i> Releases
             </a>
             <a
-              href="https://github.com/johannjdk/espanso-gui-qt/blob/main/LICENSE"
+              href="https://github.com/johannjdk/espanso-gui/blob/main/LICENSE"
               class="footer-link text-body-secondary text-decoration-none"
               target="_blank"
               rel="noopener"
@@ -636,7 +636,7 @@ python3 -m espanso_gui_qt</code></pre>
 
       async function fetchLatestRelease() {
         const repoOwner = "johannjdk";
-        const repoName = "espanso-gui-qt";
+        const repoName = "espanso-gui";
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`;
 
         try {
@@ -668,11 +668,11 @@ python3 -m espanso_gui_qt</code></pre>
                 const archBtn = document.getElementById("btn-download-arch");
                 if (archBtn) archBtn.href = asset.browser_download_url;
               }
-              if (name === "espanso-gui-qt-macos-arm64.dmg") {
+              if (name === "espanso-gui-macos-arm64.dmg") {
                 const macosArmBtn = document.getElementById("btn-download-macos-arm64");
                 if (macosArmBtn) macosArmBtn.href = asset.browser_download_url;
               }
-              if (name === "espanso-gui-qt-macos-x64.dmg") {
+              if (name === "espanso-gui-macos-x64.dmg") {
                 const macosX64Btn = document.getElementById("btn-download-macos-x64");
                 if (macosX64Btn) macosX64Btn.href = asset.browser_download_url;
               }

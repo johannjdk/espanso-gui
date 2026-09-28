@@ -11,8 +11,8 @@ from .. import __version__
 
 
 APP_NAME = "Espanso GUI"
-APP_ID = "io.github.johannjdk.EspansoGuiQt"
-PROJECT_URL = "https://github.com/johannjdk/espanso-gui-qt"
+APP_ID = "io.github.johannjdk.EspansoGui"
+PROJECT_URL = "https://github.com/johannjdk/espanso-gui"
 ESPANSO_URL = "https://espanso.org/"
 
 

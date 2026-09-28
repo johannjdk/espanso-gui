@@ -31,7 +31,7 @@ def application_icon() -> QIcon:
     """Return the packaged application icon when one is available."""
     resource_root = Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent))
     candidates = [
-        resource_root / "assets" / "espanso-gui-qt.png",
+        resource_root / "assets" / "espanso-gui.png",
         Path(f"/usr/share/icons/hicolor/256x256/apps/{APP_ID}.png"),
         Path(f"/usr/share/pixmaps/{APP_ID}.png"),
         # Compatibility with packages built before the standard-size path.

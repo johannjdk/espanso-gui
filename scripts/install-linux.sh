@@ -2,7 +2,7 @@
 # Install the latest Espanso GUI release on supported Linux distributions.
 set -eu
 
-repo="johannjdk/espanso-gui-qt"
+repo="johannjdk/espanso-gui"
 release_url="https://github.com/${repo}/releases/latest/download"
 
 if [ -t 1 ]; then
@@ -70,9 +70,9 @@ case "$package_type" in
   deb)
     command -v dpkg >/dev/null 2>&1 || die "dpkg is required for Debian-based installations."
     command -v apt-get >/dev/null 2>&1 || die "apt-get is required for Debian-based installations."
-    package="$tmp_dir/espanso-gui-qt-all.deb"
+    package="$tmp_dir/espanso-gui-all.deb"
     info "Downloading the latest Debian package…"
-    download "$package" "$release_url/espanso-gui-qt-all.deb"
+    download "$package" "$release_url/espanso-gui-all.deb"
     info "Installing Espanso GUI…"
     if ! run_as_root dpkg -i "$package"; then
       info "Installing required dependencies…"
@@ -82,9 +82,9 @@ case "$package_type" in
     ;;
   arch)
     command -v pacman >/dev/null 2>&1 || die "pacman is required for Arch-based installations."
-    package="$tmp_dir/espanso-gui-qt-any.pkg.tar.zst"
+    package="$tmp_dir/espanso-gui-any.pkg.tar.zst"
     info "Downloading the latest Arch package…"
-    download "$package" "$release_url/espanso-gui-qt-any.pkg.tar.zst"
+    download "$package" "$release_url/espanso-gui-any.pkg.tar.zst"
     info "Installing Espanso GUI…"
     run_as_root pacman -U --needed --noconfirm "$package"
     ;;
