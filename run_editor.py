@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launcher for Espanso GUI Qt."""
+"""Launcher for Espanso GUI."""
 
 from espanso_gui.app import main
 

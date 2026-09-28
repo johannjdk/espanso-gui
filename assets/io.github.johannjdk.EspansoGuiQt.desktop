@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Espanso GUI Qt
+Name=Espanso GUI
 GenericName=Espanso configuration editor
 Comment=Edit Espanso matches, forms, and variables
 Exec=espanso-gui-qt %U
