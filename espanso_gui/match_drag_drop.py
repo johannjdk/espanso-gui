@@ -39,7 +39,7 @@ class MatchTableWidget(QTableWidget):
 class MatchFileTreeWidget(QTreeWidget):
     """A file tree that accepts match drops on configuration files."""
 
-    def __init__(self, move_match: Callable[[int, Path], None]) -> None:
+    def __init__(self, move_match: Callable[[Path, int], None]) -> None:
         super().__init__()
         self._move_match = move_match
         self.setAcceptDrops(True)
@@ -72,5 +72,5 @@ class MatchFileTreeWidget(QTreeWidget):
         if not isinstance(path, Path):
             event.ignore()
             return
-        self._move_match(match_index, path)
+        self._move_match(path, match_index)
         event.acceptProposedAction()
