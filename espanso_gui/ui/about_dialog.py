@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from . import __version__
+from .. import __version__
 
 
 APP_NAME = "Espanso GUI"

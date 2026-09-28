@@ -20,11 +20,11 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from .about import APP_ID, APP_NAME, show_about_dialog
 from .config_service import ConfigService
-from .match_drag_drop import MatchFileTreeWidget, MatchTableWidget
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
-from .move_match_dialog import choose_match_destination
+from .ui.about_dialog import APP_ID, APP_NAME, show_about_dialog
+from .ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
+from .ui.move_match_dialog import choose_match_destination
 
 
 def application_icon() -> QIcon:
