@@ -899,12 +899,12 @@ class MainWindow(QMainWindow):
         self.content_stack.setCurrentIndex(1 if is_form else 0)
         self.details_tabs.setCurrentIndex(0)
         if not self._loading and 0 <= self.selected_match < len(self.matches):
-            match = self.matches[self.selected_match]
-            match.mode = "form" if is_form else "replace"
-            if is_form and not self.form_layout_edit.toPlainText().strip() and self.replace_edit.toPlainText().strip():
-                self.form_layout_edit.setPlainText(self.replace_edit.toPlainText())
-            elif not is_form and not self.replace_edit.toPlainText().strip() and self.form_layout_edit.toPlainText().strip():
-                self.replace_edit.setPlainText(self.form_layout_edit.toPlainText())
+            # A new mode starts empty; hidden editors must not restore old text.
+            self._loading = True
+            self.replace_edit.clear()
+            self.form_layout_edit.clear()
+            self._loading = False
+            self.persist_current_match()
             self.dirty = True
             self.refresh_match_table(keep_selection=True)
 
@@ -931,14 +931,15 @@ class MainWindow(QMainWindow):
         self._loading = True
         self.trigger_edit.setText(match.trigger)
         self.word_check.setChecked(match.word)
+        # Refresh hidden content too, so it cannot leak between matches.
+        self.replace_edit.setPlainText(match.replace)
+        self.form_layout_edit.setPlainText(match.form)
         if match.is_form:
             self.radio_form.setChecked(True)
             self.content_stack.setCurrentIndex(1)
-            self.form_layout_edit.setPlainText(match.form)
         else:
             self.radio_replace.setChecked(True)
             self.content_stack.setCurrentIndex(0)
-            self.replace_edit.setPlainText(match.replace)
         self._loading = False
 
         self.refresh_form_fields_table()
