@@ -6,8 +6,16 @@ from collections.abc import Callable
 from pathlib import Path
 
 from PySide6.QtCore import QMimeData, Qt
-from PySide6.QtGui import QDrag, QDragEnterEvent, QDragMoveEvent, QDropEvent
-from PySide6.QtWidgets import QTableWidget, QTreeWidget
+from PySide6.QtGui import (
+    QBrush,
+    QDrag,
+    QDragEnterEvent,
+    QDragLeaveEvent,
+    QDragMoveEvent,
+    QDropEvent,
+    QPalette,
+)
+from PySide6.QtWidgets import QTableWidget, QTreeWidget, QTreeWidgetItem
 
 
 MATCH_INDEX_MIME_TYPE = "application/x-espanso-match-index"
@@ -42,6 +50,7 @@ class MatchFileTreeWidget(QTreeWidget):
     def __init__(self, move_match: Callable[[Path, int], None]) -> None:
         super().__init__()
         self._move_match = move_match
+        self._drop_target: QTreeWidgetItem | None = None
         self.setAcceptDrops(True)
         self.viewport().setAcceptDrops(True)
         self.setDropIndicatorShown(True)
@@ -56,13 +65,20 @@ class MatchFileTreeWidget(QTreeWidget):
         item = self.itemAt(event.position().toPoint())
         path = item.data(0, Qt.ItemDataRole.UserRole) if item else None
         if event.mimeData().hasFormat(MATCH_INDEX_MIME_TYPE) and isinstance(path, Path):
+            self._set_drop_target(item)
             event.acceptProposedAction()
         else:
+            self._clear_drop_target()
             event.ignore()
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent) -> None:
+        self._clear_drop_target()
+        event.accept()
 
     def dropEvent(self, event: QDropEvent) -> None:
         item = self.itemAt(event.position().toPoint())
         path = item.data(0, Qt.ItemDataRole.UserRole) if item else None
+        self._clear_drop_target()
         payload = event.mimeData().data(MATCH_INDEX_MIME_TYPE)
         try:
             match_index = int(bytes(payload).decode())
@@ -74,3 +90,18 @@ class MatchFileTreeWidget(QTreeWidget):
             return
         self._move_match(path, match_index)
         event.acceptProposedAction()
+
+    def _set_drop_target(self, item: QTreeWidgetItem) -> None:
+        if item is self._drop_target:
+            return
+        self._clear_drop_target()
+        item.setBackground(0, self.palette().brush(QPalette.ColorRole.Highlight))
+        item.setForeground(0, self.palette().brush(QPalette.ColorRole.HighlightedText))
+        self._drop_target = item
+
+    def _clear_drop_target(self) -> None:
+        if self._drop_target is None:
+            return
+        self._drop_target.setBackground(0, QBrush())
+        self._drop_target.setForeground(0, QBrush())
+        self._drop_target = None
