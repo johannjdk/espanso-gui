@@ -52,8 +52,6 @@ class EspansoVariable:
         if self.params:
             data["params"] = self.params
         return data
-
-
 @dataclass
 class EspansoFormField:
     name: str = ""
