@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QInputDialog, QLabel, QMessageBox, QPlainTextEdit, QTreeWidgetItem, QVBoxLayout
 
 from ..config_service import ConfigService
+from ..ui.about_dialog import APP_NAME
 from .profile_dialog import EspansoConfigDialog
 
 
