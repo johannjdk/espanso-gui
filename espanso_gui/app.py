@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 from .about import APP_ID, APP_NAME, show_about_dialog
 from .config_service import ConfigService
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
+from .move_match_dialog import choose_match_destination
 
 
 def application_icon() -> QIcon:
@@ -399,12 +400,15 @@ class MainWindow(QMainWindow):
         match_buttons = QHBoxLayout()
         self.add_match_btn = QPushButton("New")
         self.duplicate_match_btn = QPushButton("Duplicate")
+        self.move_match_btn = QPushButton("Move…")
         self.delete_match_btn = QPushButton("Delete")
         self.add_match_btn.clicked.connect(self.new_match)
         self.duplicate_match_btn.clicked.connect(self.duplicate_match)
+        self.move_match_btn.clicked.connect(self.move_match)
         self.delete_match_btn.clicked.connect(self.delete_match)
         match_buttons.addWidget(self.add_match_btn)
         match_buttons.addWidget(self.duplicate_match_btn)
+        match_buttons.addWidget(self.move_match_btn)
         match_buttons.addWidget(self.delete_match_btn)
         match_layout.addLayout(match_buttons)
 
@@ -896,6 +900,48 @@ class MainWindow(QMainWindow):
         self.dirty = True
         self.refresh_match_table()
         self._select_match(self.selected_match + 1)
+
+    def move_match(self) -> None:
+        """Move the selected match to another Espanso match configuration file."""
+        if self.current_file is None or not (0 <= self.selected_match < len(self.matches)):
+            return
+
+        source_path = self.current_file
+        destinations = [
+            path for path in sorted(self.config_path.glob("*.yml"), key=lambda path: path.name.lower())
+            if path != source_path
+        ]
+        if not destinations:
+            QMessageBox.information(
+                self,
+                "Move match",
+                "Create another configuration file before moving a match.",
+            )
+            return
+        destination_path = choose_match_destination(self, destinations)
+        if destination_path is None:
+            return
+
+        self.persist_current_match()
+        moved_match = self.matches[self.selected_match]
+        source_index = self.selected_match
+        removed_from_source = False
+        try:
+            destination_matches, destination_extra = ConfigService.parse_yaml_document(destination_path)
+            destination_matches.append(moved_match)
+            ConfigService.save_yaml(destination_path, destination_matches, destination_extra)
+            del self.matches[source_index]
+            removed_from_source = True
+            ConfigService.save_yaml(source_path, self.matches, self.document_extra)
+        except (OSError, ValueError, __import__("yaml").YAMLError) as error:
+            if removed_from_source:
+                self.matches.insert(source_index, moved_match)
+            QMessageBox.critical(self, "Move failed", f"Could not move the match:\n{error}")
+            return
+
+        self.load_files(selected_path=source_path)
+        self.load_file(source_path)
+        self.statusBar().showMessage(f"Moved match to {destination_path.name}", 4000)
 
     def delete_match(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)):
