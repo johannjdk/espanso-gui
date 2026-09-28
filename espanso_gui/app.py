@@ -463,7 +463,7 @@ class MainWindow(QMainWindow):
         self.trigger_edit.textChanged.connect(self._on_match_field_changed)
         primary_trigger_row.addWidget(self.trigger_edit)
         self.add_trigger_button = QPushButton("Add trigger")
-        self.add_trigger_button.clicked.connect(self.add_optional_trigger)
+        self.add_trigger_button.clicked.connect(lambda: self.add_optional_trigger())
         primary_trigger_row.addWidget(self.add_trigger_button)
         trigger_layout.addLayout(primary_trigger_row)
         self.optional_trigger_layout = QVBoxLayout()
