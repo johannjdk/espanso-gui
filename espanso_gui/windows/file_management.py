@@ -71,6 +71,7 @@ class FileManagementMixin:
         self.refresh_match_table()
         if self.matches:
             self._select_match(0)
+            self.on_match_selected()
         else:
             self.clear_match_form()
             self.match_editor_box.setEnabled(False)

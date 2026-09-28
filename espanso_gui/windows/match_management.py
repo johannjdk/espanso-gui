@@ -6,7 +6,15 @@ import copy
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QMessageBox, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ..config_service import ConfigService
 from ..models import EspansoMatch
