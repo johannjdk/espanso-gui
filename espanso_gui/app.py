@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from .about import APP_ID, APP_NAME, show_about_dialog
 from .config_service import ConfigService
+from .match_drag_drop import MatchFileTreeWidget, MatchTableWidget
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
 from .move_match_dialog import choose_match_destination
 
@@ -388,7 +389,7 @@ class MainWindow(QMainWindow):
         buttons.addWidget(new_button)
         buttons.addWidget(delete_button)
         layout.addLayout(buttons)
-        self.file_tree = QTreeWidget()
+        self.file_tree = MatchFileTreeWidget(self.move_match_to)
         self.file_tree.setHeaderHidden(True)
         self.file_tree.itemSelectionChanged.connect(self.on_file_selected)
         self.file_tree.setMinimumHeight(130)
@@ -419,7 +420,8 @@ class MainWindow(QMainWindow):
         self.match_filter.textChanged.connect(lambda: self.refresh_match_table(keep_selection=True))
         match_layout.addWidget(self.match_filter)
 
-        self.match_table = QTableWidget(0, 2)
+        self.match_table = MatchTableWidget()
+        self.match_table.setToolTip("Drag a match onto another configuration file to move it.")
         self.match_table.setHorizontalHeaderLabels(["Trigger", "Type"])
         self.match_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.match_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -922,9 +924,20 @@ class MainWindow(QMainWindow):
         if destination_path is None:
             return
 
+        self.move_match_to(destination_path, self.selected_match)
+
+    def move_match_to(self, destination_path: Path, source_index: int) -> None:
+        """Persist and move a match selected through the dialog or a drag operation."""
+        if (
+            self.current_file is None
+            or destination_path == self.current_file
+            or not (0 <= source_index < len(self.matches))
+        ):
+            return
+
+        source_path = self.current_file
         self.persist_current_match()
-        moved_match = self.matches[self.selected_match]
-        source_index = self.selected_match
+        moved_match = self.matches[source_index]
         removed_from_source = False
         try:
             destination_matches, destination_extra = ConfigService.parse_yaml_document(destination_path)
