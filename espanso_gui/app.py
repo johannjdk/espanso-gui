@@ -657,7 +657,7 @@ class MainWindow(QMainWindow):
         if not self._loading and 0 <= self.selected_match < len(self.matches):
             self.dirty = True
 
-    def load_files(self) -> None:
+    def load_files(self, selected_path: Path | None = None) -> None:
         self.file_tree.blockSignals(True)
         self.file_tree.clear()
         root = QTreeWidgetItem(["Configs"])
@@ -668,6 +668,8 @@ class MainWindow(QMainWindow):
                 item = QTreeWidgetItem([path.name])
                 item.setData(0, Qt.ItemDataRole.UserRole, path)
                 root.addChild(item)
+                if path == selected_path:
+                    self.file_tree.setCurrentItem(item)
         root.setExpanded(True)
         self.file_tree.blockSignals(False)
 
@@ -798,9 +800,11 @@ class MainWindow(QMainWindow):
         buttons.rejected.connect(dialog.reject)
 
         def save_expert_yaml() -> None:
+            path = self.current_file
             try:
-                ConfigService.save_raw_yaml(self.current_file, editor.toPlainText())
-                self.load_file(self.current_file)
+                ConfigService.save_raw_yaml(path, editor.toPlainText())
+                self.load_files(selected_path=path)
+                self.load_file(path)
             except (OSError, ValueError, __import__("yaml").YAMLError) as error:
                 QMessageBox.critical(dialog, "Invalid YAML", str(error))
                 return
