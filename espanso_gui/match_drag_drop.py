@@ -16,8 +16,8 @@ MATCH_INDEX_MIME_TYPE = "application/x-espanso-match-index"
 class MatchTableWidget(QTableWidget):
     """A match table that exports the source match index through drag-and-drop."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, rows: int = 0, columns: int = 0) -> None:
+        super().__init__(rows, columns)
         self.setDragEnabled(True)
 
     def startDrag(self, supported_actions: Qt.DropAction) -> None:

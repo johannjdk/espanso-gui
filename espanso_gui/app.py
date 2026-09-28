@@ -420,7 +420,7 @@ class MainWindow(QMainWindow):
         self.match_filter.textChanged.connect(lambda: self.refresh_match_table(keep_selection=True))
         match_layout.addWidget(self.match_filter)
 
-        self.match_table = MatchTableWidget()
+        self.match_table = MatchTableWidget(0, 2)
         self.match_table.setToolTip("Drag a match onto another configuration file to move it.")
         self.match_table.setHorizontalHeaderLabels(["Trigger", "Type"])
         self.match_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
