@@ -20,12 +20,9 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+from .about import APP_ID, APP_NAME, show_about_dialog
 from .config_service import ConfigService
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
-
-
-APP_NAME = "Espanso GUI"
-APP_ID = "io.github.johannjdk.EspansoGuiQt"
 
 
 def application_icon() -> QIcon:
@@ -370,6 +367,11 @@ class MainWindow(QMainWindow):
         duplicate.setShortcut("Ctrl+D")
         duplicate.triggered.connect(self.duplicate_match)
         edit_menu.addAction(duplicate)
+
+        help_menu = self.menuBar().addMenu("Help")
+        about = QAction("About Espanso GUI", self)
+        about.triggered.connect(lambda: show_about_dialog(self, self.config_path))
+        help_menu.addAction(about)
 
     def _build_file_panel(self) -> QWidget:
         panel = QWidget()
