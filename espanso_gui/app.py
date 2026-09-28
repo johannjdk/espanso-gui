@@ -984,6 +984,10 @@ class MainWindow(QMainWindow):
     def refresh_match_table(self, keep_selection: bool = False) -> None:
         self._loading = True
         prev_row = self.selected_match if keep_selection else -1
+        if not keep_selection:
+            # Qt otherwise retains a selected row at the same position when a
+            # different file is loaded, so no selection event is emitted.
+            self.match_table.clearSelection()
         query = self.match_filter.text().strip().casefold()
         visible_matches = [
             (index, match) for index, match in enumerate(self.matches)
