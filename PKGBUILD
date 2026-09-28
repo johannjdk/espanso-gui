@@ -1,5 +1,5 @@
 pkgname=espanso-gui-qt
-pkgver=1.1.0
+pkgver=1.1.1
 pkgrel=1
 pkgdesc='Desktop editor for Espanso configuration files'
 arch=('any')
