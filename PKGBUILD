@@ -1,9 +1,9 @@
-pkgname=espanso-gui-qt
+pkgname=espanso-gui
 pkgver=1.1.1
 pkgrel=1
 pkgdesc='Desktop editor for Espanso configuration files'
 arch=('any')
-url='https://github.com/johannjdk/espanso-gui-qt'
+url='https://github.com/johannjdk/espanso-gui'
 license=('custom')
 depends=('python' 'pyside6' 'python-yaml')
 source=("${pkgname}-${pkgver}.tar.gz")
@@ -13,12 +13,12 @@ package() {
     local source_dir="${srcdir}/${pkgname}-${pkgver}"
 
     install -Dm755 "${source_dir}/scripts/launcher.py" "${pkgdir}/usr/bin/${pkgname}"
-    install -Dm644 "${source_dir}/assets/io.github.johannjdk.EspansoGuiQt.desktop" \
-        "${pkgdir}/usr/share/applications/io.github.johannjdk.EspansoGuiQt.desktop"
-    install -Dm644 "${source_dir}/assets/espanso-gui-qt.png" \
-        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/io.github.johannjdk.EspansoGuiQt.png"
-    install -Dm644 "${source_dir}/assets/espanso-gui-qt.png" \
-        "${pkgdir}/usr/share/pixmaps/io.github.johannjdk.EspansoGuiQt.png"
+    install -Dm644 "${source_dir}/assets/io.github.johannjdk.EspansoGui.desktop" \
+        "${pkgdir}/usr/share/applications/io.github.johannjdk.EspansoGui.desktop"
+    install -Dm644 "${source_dir}/assets/espanso-gui.png" \
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/io.github.johannjdk.EspansoGui.png"
+    install -Dm644 "${source_dir}/assets/espanso-gui.png" \
+        "${pkgdir}/usr/share/pixmaps/io.github.johannjdk.EspansoGui.png"
     local site_packages
     site_packages="$(/usr/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
     mkdir -p "${pkgdir}${site_packages}"

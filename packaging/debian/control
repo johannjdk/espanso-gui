@@ -1,8 +1,8 @@
-Package: espanso-gui-qt
+Package: espanso-gui
 Version: @VERSION@
 Architecture: all
 Maintainer: Johann Judek <johannjudek@users.noreply.github.com>
-Homepage: https://github.com/johannjdk/espanso-gui-qt
+Homepage: https://github.com/johannjdk/espanso-gui
 Depends: python3, python3-pyside6.qtwidgets | python3-pyside6, python3-yaml
 Section: utils
 Priority: optional

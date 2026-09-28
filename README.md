@@ -30,34 +30,34 @@ The installer detects Debian/Ubuntu or Arch Linux, downloads the newest release,
 and installs the appropriate package:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui-qt/main/scripts/install-linux.sh | sh
+curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh
 ```
 
 ### Debian and Ubuntu
 
-Download the `.deb` file from the project's [Releases](https://github.com/johannjdk/espanso-gui-qt/releases)
+Download the `.deb` file from the project's [Releases](https://github.com/johannjdk/espanso-gui/releases)
 page, then install it locally:
 
 ```bash
-sudo apt install ./espanso-gui-qt-all.deb
+sudo apt install ./espanso-gui-all.deb
 ```
 
 ### Arch Linux
 
-Download the `.pkg.tar.*` file from the [Releases](https://github.com/johannjdk/espanso-gui-qt/releases)
+Download the `.pkg.tar.*` file from the [Releases](https://github.com/johannjdk/espanso-gui/releases)
 page and install it with pacman:
 
 ```bash
-sudo pacman -U ./espanso-gui-qt-any.pkg.tar.zst
+sudo pacman -U ./espanso-gui-any.pkg.tar.zst
 ```
 
 ### macOS
 
-Download the DMG that matches your Mac from the [Releases](https://github.com/johannjdk/espanso-gui-qt/releases)
+Download the DMG that matches your Mac from the [Releases](https://github.com/johannjdk/espanso-gui/releases)
 page:
 
-- Apple silicon (M1 and newer): `espanso-gui-qt-macos-arm64.dmg`
-- Intel Mac: `espanso-gui-qt-macos-x64.dmg`
+- Apple silicon (M1 and newer): `espanso-gui-macos-arm64.dmg`
+- Intel Mac: `espanso-gui-macos-x64.dmg`
 
 Open the DMG and drag **Espanso GUI** to the Applications folder.
 
@@ -69,7 +69,7 @@ On a Windows x64 machine with Python 3.10 or newer, run this from PowerShell:
 .\scripts\build-windows.ps1
 ```
 
-The script creates `dist/espanso-gui-qt-<version>-windows-x64.zip`. Extract it
+The script creates `dist/espanso-gui-<version>-windows-x64.zip`. Extract it
 and run `Espanso GUI.exe` from the contained folder.
 
 ### Run from source
@@ -77,12 +77,12 @@ and run `Espanso GUI.exe` from the contained folder.
 Requirements: Python 3.10 or newer, PySide6, and PyYAML.
 
 ```bash
-git clone https://github.com/johannjdk/espanso-gui-qt.git
-cd espanso-gui-qt
+git clone https://github.com/johannjdk/espanso-gui.git
+cd espanso-gui
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-espanso-gui-qt
+espanso-gui
 ```
 
 ## How it works
@@ -109,6 +109,6 @@ Run this command from the directory containing both the package and
 ## Contributing and support
 
 Bug reports and feature requests are welcome in the
-[issue tracker](https://github.com/johannjdk/espanso-gui-qt/issues). For a code
+[issue tracker](https://github.com/johannjdk/espanso-gui/issues). For a code
 change, please open a pull request with a concise description and reproduction
 or testing notes where relevant.
