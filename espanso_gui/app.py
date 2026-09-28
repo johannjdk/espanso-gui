@@ -452,9 +452,25 @@ class MainWindow(QMainWindow):
 
         basics_box = QGroupBox("Basic settings")
         top_form = QFormLayout(basics_box)
+
+        trigger_widget = QWidget()
+        trigger_layout = QVBoxLayout(trigger_widget)
+        trigger_layout.setContentsMargins(0, 0, 0, 0)
+        trigger_layout.setSpacing(4)
+        primary_trigger_row = QHBoxLayout()
         self.trigger_edit = QLineEdit()
+        self.trigger_edit.setPlaceholderText("e.g. :hello")
         self.trigger_edit.textChanged.connect(self._on_match_field_changed)
-        top_form.addRow("Trigger:", self.trigger_edit)
+        primary_trigger_row.addWidget(self.trigger_edit)
+        self.add_trigger_button = QPushButton("Add trigger")
+        self.add_trigger_button.clicked.connect(self.add_optional_trigger)
+        primary_trigger_row.addWidget(self.add_trigger_button)
+        trigger_layout.addLayout(primary_trigger_row)
+        self.optional_trigger_layout = QVBoxLayout()
+        self.optional_trigger_layout.setContentsMargins(0, 0, 0, 0)
+        self.optional_trigger_edits: list[tuple[QLineEdit, QWidget]] = []
+        trigger_layout.addLayout(self.optional_trigger_layout)
+        top_form.addRow("Trigger:", trigger_widget)
 
         mode_widget = QWidget()
         mode_layout = QHBoxLayout(mode_widget)
@@ -806,7 +822,9 @@ class MainWindow(QMainWindow):
         if self._loading or not (0 <= self.selected_match < len(self.matches)):
             return
         match = self.matches[self.selected_match]
-        match.trigger = self.trigger_edit.text().strip()
+        trigger_values = [self.trigger_edit.text().strip()]
+        trigger_values.extend(edit.text().strip() for edit, _ in self.optional_trigger_edits)
+        match.set_trigger_values(trigger_values, preserve_multiple=bool(match.triggers))
         match.word = self.word_check.isChecked()
         if self.radio_form.isChecked():
             match.mode = "form"
@@ -816,6 +834,35 @@ class MainWindow(QMainWindow):
             match.mode = "replace"
             match.replace = self.replace_edit.toPlainText()
             match.form = ""
+
+    def add_optional_trigger(self, text: str = "") -> None:
+        """Add an editable alias for the currently selected match."""
+        row_widget = QWidget()
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(0, 0, 0, 0)
+        trigger_edit = QLineEdit(text)
+        trigger_edit.setPlaceholderText("Additional trigger")
+        trigger_edit.textChanged.connect(self._on_match_field_changed)
+        remove_button = QPushButton("Remove")
+        remove_button.clicked.connect(lambda: self.remove_optional_trigger(row_widget))
+        row.addWidget(trigger_edit)
+        row.addWidget(remove_button)
+        self.optional_trigger_edits.append((trigger_edit, row_widget))
+        self.optional_trigger_layout.addWidget(row_widget)
+
+    def remove_optional_trigger(self, row_widget: QWidget) -> None:
+        self.optional_trigger_edits = [
+            entry for entry in self.optional_trigger_edits if entry[1] is not row_widget
+        ]
+        self.optional_trigger_layout.removeWidget(row_widget)
+        row_widget.deleteLater()
+        self._on_match_field_changed()
+
+    def clear_optional_triggers(self) -> None:
+        for _, row_widget in self.optional_trigger_edits:
+            self.optional_trigger_layout.removeWidget(row_widget)
+            row_widget.deleteLater()
+        self.optional_trigger_edits.clear()
 
     def new_match(self) -> None:
         self.persist_current_match()
@@ -835,7 +882,10 @@ class MainWindow(QMainWindow):
         self.persist_current_match()
         original = self.matches[self.selected_match]
         duplicate = copy.deepcopy(original)
-        duplicate.trigger = f"{original.trigger}_copy"
+        if original.triggers:
+            duplicate.triggers = [f"{trigger}_copy" for trigger in original.triggers]
+        else:
+            duplicate.trigger = f"{original.trigger}_copy"
         self.matches.insert(self.selected_match + 1, duplicate)
         self.dirty = True
         self.refresh_match_table()
@@ -872,13 +922,13 @@ class MainWindow(QMainWindow):
         query = self.match_filter.text().strip().casefold()
         visible_matches = [
             (index, match) for index, match in enumerate(self.matches)
-            if not query or query in f"{match.trigger} {'Form' if match.is_form else 'Replace'} {match.preview}".casefold()
+            if not query or query in f"{match.trigger_text} {'Form' if match.is_form else 'Replace'} {match.preview}".casefold()
         ]
         self.match_table.setSortingEnabled(False)
         self.match_table.setRowCount(len(visible_matches))
         for row, (index, match) in enumerate(visible_matches):
             type_str = "Form" if match.is_form else "Replace"
-            for column, value in enumerate((match.trigger, type_str)):
+            for column, value in enumerate((match.trigger_text, type_str)):
                 item = QTableWidgetItem(value)
                 item.setData(Qt.ItemDataRole.UserRole, index)
                 self.match_table.setItem(row, column, item)
@@ -929,7 +979,13 @@ class MainWindow(QMainWindow):
         match = self.matches[self.selected_match]
 
         self._loading = True
-        self.trigger_edit.setText(match.trigger)
+        self.clear_optional_triggers()
+        if match.triggers:
+            self.trigger_edit.setText(match.triggers[0] if match.triggers else "")
+            for trigger in match.triggers[1:]:
+                self.add_optional_trigger(trigger)
+        else:
+            self.trigger_edit.setText(match.trigger)
         self.word_check.setChecked(match.word)
         # Refresh hidden content too, so it cannot leak between matches.
         self.replace_edit.setPlainText(match.replace)
@@ -950,6 +1006,7 @@ class MainWindow(QMainWindow):
     def clear_match_form(self) -> None:
         self._loading = True
         self.trigger_edit.clear()
+        self.clear_optional_triggers()
         self.replace_edit.clear()
         self.form_layout_edit.clear()
         self.radio_replace.setChecked(True)

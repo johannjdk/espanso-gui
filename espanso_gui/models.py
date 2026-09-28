@@ -106,6 +106,7 @@ class EspansoFormField:
 @dataclass
 class EspansoMatch:
     trigger: str = ""
+    triggers: list[str] = field(default_factory=list)
     replace: str = ""
     form: str = ""
     form_fields: dict[str, EspansoFormField] = field(default_factory=dict)
@@ -117,6 +118,23 @@ class EspansoMatch:
     @property
     def is_form(self) -> bool:
         return self.mode == "form" or bool(self.form)
+
+    @property
+    def trigger_text(self) -> str:
+        """Return triggers as compact text for the match table and search."""
+        return ", ".join(self.triggers) if self.triggers else self.trigger
+
+    def set_trigger_values(
+        self, values: list[str], *, preserve_multiple: bool = False
+    ) -> None:
+        """Store one trigger in ``trigger`` and several in Espanso's ``triggers`` field."""
+        triggers = [trigger.strip() for trigger in values if trigger.strip()]
+        if len(triggers) == 1 and not preserve_multiple:
+            self.trigger = triggers[0]
+            self.triggers = []
+        else:
+            self.trigger = ""
+            self.triggers = triggers
 
     @property
     def preview(self) -> str:
@@ -151,9 +169,15 @@ class EspansoMatch:
             for k, v in raw_fields.items():
                 form_fields[str(k)] = EspansoFormField.from_yaml(str(k), v)
 
-        known = {"trigger", "replace", "form", "form_fields", "vars", "word"}
+        raw_trigger = data.get("trigger", "")
+        raw_triggers = data.get("triggers", [])
+        # Treat the list form under ``trigger`` as a legacy editor value so it
+        # is normalized to Espanso's documented ``triggers`` key when saved.
+        triggers = raw_triggers if isinstance(raw_triggers, list) else raw_trigger if isinstance(raw_trigger, list) else []
+        known = {"trigger", "triggers", "replace", "form", "form_fields", "vars", "word"}
         return cls(
-            trigger=str(data.get("trigger", "")),
+            trigger="" if isinstance(raw_trigger, list) or raw_trigger is None else str(raw_trigger),
+            triggers=[str(item) for item in triggers if item is not None],
             replace=replace,
             form=form,
             form_fields=form_fields,
@@ -165,7 +189,12 @@ class EspansoMatch:
 
     def to_yaml(self) -> dict[str, Any]:
         data: dict[str, Any] = dict(self.extra)
-        data["trigger"] = self.trigger
+        data.pop("trigger", None)
+        data.pop("triggers", None)
+        if self.triggers:
+            data["triggers"] = self.triggers
+        else:
+            data["trigger"] = self.trigger
         data.pop("replace", None)
         data.pop("form", None)
         data.pop("form_fields", None)
