@@ -1,51 +1,44 @@
 # Espanso GUI
 
-A native desktop editor for [Espanso](https://espanso.org/) match files. Espanso
-GUI makes it easier to create, review, and maintain text-expansion rules without
-editing YAML by hand, while keeping your existing Espanso configuration in
-control.
+Espanso GUI is a desktop editor for [Espanso](https://espanso.org/) match files. It provides a graphical way to maintain text-expansion rules while working with the same configuration files that Espanso uses.
 
-> Espanso GUI is an independent project and is not affiliated with Espanso.
+Espanso GUI is an independent project and is not affiliated with Espanso.
 
-![Espanso GUI](images/demo.png)
+![Espanso GUI showing a match file and its editor](images/demo.png)
 
-## Features
+## What it does
 
-- Browse, create, duplicate, and delete Espanso match files
-- Create and edit replacement matches, forms, form fields, and variables
+- Browse, create, rename, duplicate, move, and delete match files and matches
+- Edit replacement matches, forms, form fields, and variables
 - Work with shell, script, form, and choice variables
-- Preserve additional supported YAML fields when saving match files
-- Edit and validate the complete YAML document in Expert YAML mode
-- Edit Espanso's default and app-specific configuration profiles
-- Restart Espanso directly after saving changes
+- Search and sort matches by trigger, type, or content
+- Open the complete match-file YAML when an option is not exposed by the editor
+- Manage Espanso's `default.yml` and application-specific configuration profiles
+- Restart Espanso after saving changes
+
+The graphical editor handles the common match types. Expert YAML mode is available for advanced Espanso options and validates the document before saving.
 
 ## Installation
 
-Install [Espanso](https://espanso.org/install/) first. Espanso GUI automatically
-locates its `match` directory and edits the same files used by Espanso.
+Install [Espanso](https://espanso.org/install/) first. Espanso GUI looks for its configuration directory automatically and does not create a separate set of match files.
 
-### Quick install on Linux
+### Linux
 
-The installer detects Debian/Ubuntu or Arch Linux, downloads the newest release,
-and installs the appropriate package:
+The install script supports Debian, Ubuntu, Arch Linux, and compatible distributions. It downloads the latest release package and requires administrator access.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh
 ```
 
-### Debian and Ubuntu
+Alternatively, download a package from the [releases page](https://github.com/johannjdk/espanso-gui/releases).
 
-Download the `.deb` file from the project's [Releases](https://github.com/johannjdk/espanso-gui/releases)
-page, then install it locally:
+For Debian and Ubuntu:
 
 ```bash
 sudo apt install ./espanso-gui-all.deb
 ```
 
-### Arch Linux
-
-Download the `.pkg.tar.*` file from the [Releases](https://github.com/johannjdk/espanso-gui/releases)
-page and install it with pacman:
+For Arch Linux:
 
 ```bash
 sudo pacman -U ./espanso-gui-any.pkg.tar.zst
@@ -53,28 +46,26 @@ sudo pacman -U ./espanso-gui-any.pkg.tar.zst
 
 ### macOS
 
-Download the DMG that matches your Mac from the [Releases](https://github.com/johannjdk/espanso-gui/releases)
-page:
+Download the appropriate DMG from the [releases page](https://github.com/johannjdk/espanso-gui/releases):
 
-- Apple silicon (M1 and newer): `espanso-gui-macos-arm64.dmg`
-- Intel Mac: `espanso-gui-macos-x64.dmg`
+- Apple silicon: `espanso-gui-macos-arm64.dmg`
+- Intel: `espanso-gui-macos-x64.dmg`
 
-Open the DMG and drag **Espanso GUI** to the Applications folder.
+Open the DMG and move Espanso GUI to the Applications folder.
 
-### Build a portable Windows release
+### Windows
 
-On a Windows x64 machine with Python 3.10 or newer, run this from PowerShell:
+Windows builds are made on Windows x64. With Python 3.10 or newer installed, run the following in PowerShell from the repository root:
 
 ```powershell
 .\scripts\build-windows.ps1
 ```
 
-The script creates `dist/espanso-gui-<version>-windows-x64.zip`. Extract it
-and run `Espanso GUI.exe` from the contained folder.
+The resulting archive is written to `dist/`. Extract it and start `Espanso GUI.exe`.
 
 ### Run from source
 
-Requirements: Python 3.10 or newer, PySide6, and PyYAML.
+Python 3.10 or newer is required.
 
 ```bash
 git clone https://github.com/johannjdk/espanso-gui.git
@@ -85,30 +76,26 @@ pip install -e .
 espanso-gui
 ```
 
-## How it works
+## Using the application
 
-The application discovers Espanso's `match` directory automatically:
+The configuration directory is selected from the operating system:
 
-- Linux: `~/.config/espanso/match` or `$XDG_CONFIG_HOME/espanso/match`
-- macOS: `~/Library/Application Support/espanso/match`
-- Windows: `%APPDATA%\\espanso\\match`
+| Platform | Match directory |
+| --- | --- |
+| Linux | `$XDG_CONFIG_HOME/espanso/match` or `~/.config/espanso/match` |
+| macOS | `~/Library/Application Support/espanso/match` |
+| Windows | `%APPDATA%\\espanso\\match` |
 
-Choose a configuration file in the left panel, edit its matches, and click
-**Save**. Use **Restart Espanso** when you want Espanso to reload the changes
-immediately. Existing YAML is validated before Expert YAML changes are saved.
+Select a file in the left panel, select a match, and save when finished. Use **Restart Espanso** to reload the configuration immediately. The restart action requires the `espanso` command to be available on your system.
 
-To edit how Espanso itself behaves, choose **File → Espanso configuration…**.
-This opens the `config` directory, including `default.yml` and app-specific
-profiles. The editor supports all Espanso YAML options, including application
-filters and `includes`/`excludes` rules. Espanso does not apply app-specific
-profiles on Wayland.
+For configuration profiles, open **File → Espanso configuration…**. `default.yml` applies everywhere; other profiles use Espanso filters such as `filter_exec`, `filter_class`, `filter_title`, or `filter_os`. Espanso does not support application-specific profiles on Wayland.
 
-Run this command from the directory containing both the package and
-`SHA256SUMS`.
+## Contributing
 
-## Contributing and support
+Bug reports and feature requests belong in the [issue tracker](https://github.com/johannjdk/espanso-gui/issues). Pull requests should describe the change and include reproduction or test notes where useful.
 
-Bug reports and feature requests are welcome in the
-[issue tracker](https://github.com/johannjdk/espanso-gui/issues). For a code
-change, please open a pull request with a concise description and reproduction
-or testing notes where relevant.
+## License
+
+Espanso GUI is licensed under the [GNU General Public License v3.0](LICENSE).
+
+The application icon is derived from the Espanso project and is distributed under the same license. Espanso is a separate project; see its [license](https://github.com/espanso/espanso/blob/dev/LICENSE) for details.
