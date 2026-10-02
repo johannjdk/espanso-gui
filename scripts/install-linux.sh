@@ -82,11 +82,17 @@ case "$package_type" in
     ;;
   arch)
     command -v pacman >/dev/null 2>&1 || die "pacman is required for Arch-based installations."
-    package="$tmp_dir/espanso-gui-any.pkg.tar.zst"
+    package="$tmp_dir/espanso-gui-qt-any.pkg.tar.zst"
     info "Downloading the latest Arch package…"
-    download "$package" "$release_url/espanso-gui-any.pkg.tar.zst"
+    download "$package" "$release_url/espanso-gui-qt-any.pkg.tar.zst"
     info "Installing Espanso GUI…"
-    run_as_root pacman -U --needed --noconfirm "$package"
+    if pacman -Q espanso-gui >/dev/null 2>&1; then
+      info "The old espanso-gui package conflicts with espanso-gui-qt. Confirm its removal to continue."
+      # Read the confirmation from the terminal even when this script is piped into sh.
+      run_as_root pacman -U --needed "$package" < /dev/tty
+    else
+      run_as_root pacman -U --needed --noconfirm "$package"
+    fi
     ;;
 esac
 
