@@ -27,6 +27,13 @@ EspansoYamlDumper.add_representer(str, _str_presenter)
 
 class ConfigService:
     @staticmethod
+    def match_files(directory: Path) -> list[Path]:
+        return sorted(
+            (path for path in directory.rglob("*") if path.is_file() and path.suffix in (".yml", ".yaml")),
+            key=lambda path: path.relative_to(directory).as_posix().casefold(),
+        )
+
+    @staticmethod
     def detect_espanso_path() -> Path:
         """Return Espanso's configuration root directory."""
         if sys.platform.startswith("win"):

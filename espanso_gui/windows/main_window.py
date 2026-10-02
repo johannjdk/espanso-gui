@@ -6,12 +6,13 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QCloseEvent
-from PySide6.QtWidgets import QMainWindow, QSplitter
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QSplitter
 
 from ..config_service import ConfigService
 from ..models import EspansoMatch
 from ..runtime import application_icon
 from ..ui.about_dialog import APP_NAME, show_about_dialog
+from ..ui.search_dialog import SearchDialog
 from .editor_ui import WindowLayoutMixin
 from .file_management import FileManagementMixin
 from .match_details import MatchDetailsMixin
@@ -69,10 +70,36 @@ class MainWindow(WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, M
         duplicate.triggered.connect(self.duplicate_match)
         edit_menu.addAction(duplicate)
 
+        search_menu = self.menuBar().addMenu("Search")
+        search = QAction("Search all configurations…", self)
+        search.setShortcut("Ctrl+F")
+        search.triggered.connect(self.search_all_configurations)
+        search_menu.addAction(search)
+
         help_menu = self.menuBar().addMenu("Help")
         about = QAction("About Espanso GUI", self)
         about.triggered.connect(lambda: show_about_dialog(self, self.config_path))
         help_menu.addAction(about)
+    def search_all_configurations(self) -> None:
+        self.persist_current_match()
+        dialog = SearchDialog(self, self.config_path, self.current_file, self.matches, self.open_search_match)
+        dialog.exec()
+
+    def open_search_match(self, path: Path, index: int) -> bool:
+        if path != self.current_file:
+            if not self._ask_save_changes():
+                return False
+            self.load_file(path)
+            if self.current_file != path:
+                return False
+        self.persist_current_match()
+        self.match_filter.clear()
+        self.refresh_match_table(keep_selection=True)
+        self._select_match(index)
+        self.on_match_selected()
+        self.load_files(selected_path=path)
+        return True
+
     def _set_editor_enabled(self, enabled: bool) -> None:
         self.editor_content.setEnabled(enabled)
         self.match_sidebar.setEnabled(enabled)
