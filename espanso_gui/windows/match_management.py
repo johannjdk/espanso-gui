@@ -96,7 +96,7 @@ class MatchManagementMixin:
 
         source_path = self.current_file
         destinations = [
-            path for path in sorted(self.config_path.glob("*.yml"), key=lambda path: path.name.lower())
+            path for path in ConfigService.match_files(self.config_path)
             if path != source_path
         ]
         if not destinations:
@@ -174,7 +174,7 @@ class MatchManagementMixin:
         query = self.match_filter.text().strip().casefold()
         visible_matches = [
             (index, match) for index, match in enumerate(self.matches)
-            if not query or query in f"{match.trigger_text} {'Form' if match.is_form else 'Replace'} {match.preview}".casefold()
+            if not query or query in match.search_text
         ]
         self.match_table.setSortingEnabled(False)
         self.match_table.setRowCount(len(visible_matches))

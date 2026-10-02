@@ -135,6 +135,11 @@ class EspansoMatch:
             self.triggers = triggers
 
     @property
+    def search_text(self) -> str:
+        match_type = "Form" if self.is_form else "Replace"
+        return f"{self.trigger_text} {match_type} {self.replace} {self.form} {self.to_yaml()}".casefold()
+
+    @property
     def preview(self) -> str:
         text = self.form if self.is_form else self.replace
         preview = text.replace("\n", " ↵ ")

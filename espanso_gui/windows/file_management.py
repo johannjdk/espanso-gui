@@ -21,8 +21,8 @@ class FileManagementMixin:
         root.setData(0, Qt.ItemDataRole.UserRole, None)
         self.file_tree.addTopLevelItem(root)
         if self.config_path.is_dir():
-            for path in sorted(self.config_path.glob("*.yml"), key=lambda p: p.name.lower()):
-                item = QTreeWidgetItem([path.name])
+            for path in ConfigService.match_files(self.config_path):
+                item = QTreeWidgetItem([path.relative_to(self.config_path).as_posix()])
                 item.setData(0, Qt.ItemDataRole.UserRole, path)
                 root.addChild(item)
                 if path == selected_path:

@@ -12,6 +12,7 @@ Espanso GUI is an independent project and is not affiliated with Espanso.
 - Edit replacement matches, forms, form fields, and variables
 - Work with shell, script, form, and choice variables
 - Search and sort matches by trigger, type, or content
+- Search across all match files and open a result directly with **Ctrl+Shift+F**
 - Open the complete match-file YAML when an option is not exposed by the editor
 - Manage Espanso's `default.yml` and application-specific configuration profiles
 - Restart Espanso after saving changes
@@ -87,6 +88,8 @@ The configuration directory is selected from the operating system:
 | Windows | `%APPDATA%\\espanso\\match` |
 
 Select a file in the left panel, select a match, and save when finished. Use **Restart Espanso** to reload the configuration immediately. The restart action requires the `espanso` command to be available on your system.
+
+Use **Search all configurations…** or **Ctrl+Shift+F** to find matches across `.yml` and `.yaml` files, including subfolders. Search covers file names, triggers, full replacement text, forms, and variables, including unsaved edits in the current file. Open a result to select it in the editor. Unreadable files are listed in the search warning's tooltip.
 
 For configuration profiles, open **File → Espanso configuration…**. `default.yml` applies everywhere; other profiles use Espanso filters such as `filter_exec`, `filter_class`, `filter_title`, or `filter_os`. Espanso does not support application-specific profiles on Wayland.
 
