@@ -15,7 +15,7 @@ class WindowLayoutMixin:
         layout.setContentsMargins(8, 8, 8, 8)
         layout.addWidget(QLabel("Configuration files"))
         search_button = QPushButton("Search all configurations…")
-        search_button.setToolTip("Search all match files (Ctrl+Shift+F)")
+        search_button.setToolTip("Search all match files (Ctrl+F)")
         search_button.clicked.connect(self.search_all_configurations)
         layout.addWidget(search_button)
         buttons = QHBoxLayout()

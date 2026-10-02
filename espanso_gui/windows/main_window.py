@@ -69,10 +69,12 @@ class MainWindow(WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, M
         duplicate.setShortcut("Ctrl+D")
         duplicate.triggered.connect(self.duplicate_match)
         edit_menu.addAction(duplicate)
+
+        search_menu = self.menuBar().addMenu("Search")
         search = QAction("Search all configurations…", self)
-        search.setShortcut("Ctrl+Shift+F")
+        search.setShortcut("Ctrl+F")
         search.triggered.connect(self.search_all_configurations)
-        edit_menu.addAction(search)
+        search_menu.addAction(search)
 
         help_menu = self.menuBar().addMenu("Help")
         about = QAction("About Espanso GUI", self)
