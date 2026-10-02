@@ -65,7 +65,10 @@ class MatchManagementMixin:
             row_widget.deleteLater()
         self.optional_trigger_edits.clear()
     def new_match(self) -> None:
+        if self.current_file is None:
+            return
         self.persist_current_match()
+        self.match_filter.clear()
         self.matches.append(EspansoMatch(trigger=":new"))
         self.dirty = True
         self.refresh_match_table()
@@ -188,6 +191,7 @@ class MatchManagementMixin:
         if 0 <= prev_row < len(self.matches):
             self._select_match(prev_row)
         self._loading = False
+        self._update_menu_actions()
     def _select_match(self, match_index: int) -> None:
         for row in range(self.match_table.rowCount()):
             item = self.match_table.item(row, 0)

@@ -29,6 +29,7 @@ class FileManagementMixin:
                     self.file_tree.setCurrentItem(item)
         root.setExpanded(True)
         self.file_tree.blockSignals(False)
+        self._update_menu_actions()
     def _ask_save_changes(self) -> bool:
         if not self.dirty:
             return True

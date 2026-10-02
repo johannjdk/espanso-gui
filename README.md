@@ -97,6 +97,26 @@ Use **Search → Search all configurations…** or **Ctrl+F** to find matches ac
 
 For configuration profiles, open **File → Espanso configuration…**. `default.yml` applies everywhere; other profiles use Espanso filters such as `filter_exec`, `filter_class`, `filter_title`, or `filter_os`. Espanso does not support application-specific profiles on Wayland.
 
+### Menu actions and shortcuts
+
+**File** contains configuration creation, saving, deletion, the YAML editor, Espanso profiles, and Quit. **Edit** contains text editing and match actions. **Search** provides global search and the current-file filter. **Tools** contains Restart Espanso, and **Help** contains About.
+
+| Action | Shortcut |
+| --- | --- |
+| New configuration | `Ctrl+N` |
+| Save | `Ctrl+S` |
+| Expert YAML | `Ctrl+E` |
+| New match | `Ctrl+Shift+N` |
+| Duplicate match | `Ctrl+D` |
+| Move match | `Ctrl+Shift+M` |
+| Delete match | `Ctrl+Shift+Delete` |
+| Search all configurations | `Ctrl+F` |
+| Filter current file | `Ctrl+L` |
+| Restart Espanso | `Ctrl+Shift+R` |
+| Quit | `Ctrl+Q` |
+
+Undo, Redo, Cut, Copy, Paste, and Select all use the platform's standard text-editing shortcuts and apply to the focused text field. Undo and Redo affect text edits, not match or file creation and deletion. Actions requiring a file or match are disabled until one is selected; deletion still asks for confirmation.
+
 ## Contributing
 
 Bug reports and feature requests belong in the [issue tracker](https://github.com/johannjdk/espanso-gui/issues). Pull requests should describe the change and include reproduction or test notes where useful.

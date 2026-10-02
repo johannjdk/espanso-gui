@@ -5,21 +5,22 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QCloseEvent
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QSplitter
 
 from ..config_service import ConfigService
 from ..models import EspansoMatch
 from ..runtime import application_icon
-from ..ui.about_dialog import APP_NAME, show_about_dialog
+from ..ui.about_dialog import APP_NAME
 from ..ui.search_dialog import SearchDialog
 from .editor_ui import WindowLayoutMixin
 from .file_management import FileManagementMixin
 from .match_details import MatchDetailsMixin
 from .match_management import MatchManagementMixin
+from .menu import MenuMixin
 
 
-class MainWindow(WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, MatchDetailsMixin, QMainWindow):
+class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, MatchDetailsMixin, QMainWindow):
     """Coordinate document state, focused editor modules, and top-level actions."""
     def __init__(self) -> None:
         super().__init__()
@@ -49,37 +50,6 @@ class MainWindow(WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, M
         splitter.setSizes([360, 1040])
         self.setCentralWidget(splitter)
         self.statusBar().showMessage(f"Configuration folder: {self.config_path}")
-    def _build_menu(self) -> None:
-        menu = self.menuBar().addMenu("File")
-        save = QAction("Save", self)
-        save.setShortcut("Ctrl+S")
-        save.triggered.connect(self.save_current_file)
-        new_config = QAction("New configuration", self)
-        new_config.setShortcut("Ctrl+N")
-        new_config.triggered.connect(self.new_file)
-        expert_yaml = QAction("Expert YAML…", self)
-        expert_yaml.setShortcut("Ctrl+E")
-        expert_yaml.triggered.connect(self.open_yaml_editor)
-        espanso_config = QAction("Espanso configuration…", self)
-        espanso_config.triggered.connect(self.open_espanso_configuration)
-        menu.addActions([new_config, save, expert_yaml, espanso_config])
-
-        edit_menu = self.menuBar().addMenu("Edit")
-        duplicate = QAction("Duplicate match", self)
-        duplicate.setShortcut("Ctrl+D")
-        duplicate.triggered.connect(self.duplicate_match)
-        edit_menu.addAction(duplicate)
-
-        search_menu = self.menuBar().addMenu("Search")
-        search = QAction("Search all configurations…", self)
-        search.setShortcut("Ctrl+F")
-        search.triggered.connect(self.search_all_configurations)
-        search_menu.addAction(search)
-
-        help_menu = self.menuBar().addMenu("Help")
-        about = QAction("About Espanso GUI", self)
-        about.triggered.connect(lambda: show_about_dialog(self, self.config_path))
-        help_menu.addAction(about)
     def search_all_configurations(self) -> None:
         self.persist_current_match()
         dialog = SearchDialog(self, self.config_path, self.current_file, self.matches, self.open_search_match)
@@ -103,6 +73,7 @@ class MainWindow(WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, M
     def _set_editor_enabled(self, enabled: bool) -> None:
         self.editor_content.setEnabled(enabled)
         self.match_sidebar.setEnabled(enabled)
+        self._update_menu_actions()
         if not enabled:
             self.file_label.setText("No file selected")
             self.match_sidebar.setTitle("Matches")
