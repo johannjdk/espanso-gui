@@ -41,8 +41,12 @@ sudo apt install ./espanso-gui-all.deb
 For Arch Linux:
 
 ```bash
-sudo pacman -U ./espanso-gui-any.pkg.tar.zst
+sudo pacman -U ./espanso-gui-qt-any.pkg.tar.zst
 ```
+
+The Arch package is named `espanso-gui-qt` to distinguish it from the unrelated `espanso-gui` package in the AUR. The application menu entry and `espanso-gui` command stay the same.
+
+When upgrading from an older release of this project, install the renamed package with the command above and confirm removal of the conflicting `espanso-gui` package. Your Espanso configuration files are preserved. Future updates to this package are available from this project's releases; the unrelated AUR package is not an update source. Plain `pacman -Syu` does not fetch AUR updates, but AUR helpers can match locally installed packages by name.
 
 ### macOS
 

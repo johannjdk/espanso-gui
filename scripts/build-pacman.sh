@@ -2,7 +2,7 @@
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-package_name="espanso-gui"
+package_name="espanso-gui-qt"
 version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$project_root/pyproject.toml")"
 build_dir="$project_root/build/arch"
 source_dir="$build_dir/${package_name}-${version}"
