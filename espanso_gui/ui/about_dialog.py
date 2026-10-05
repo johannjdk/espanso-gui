@@ -16,8 +16,11 @@ PROJECT_URL = "https://github.com/johannjdk/espanso-gui"
 ESPANSO_URL = "https://espanso.org/"
 
 
-def show_about_dialog(parent: QWidget, configuration_path: Path) -> None:
+def show_about_dialog(
+    parent: QWidget, configuration_path: Path, espanso_version: str | None = None
+) -> None:
     """Show application details and links useful to users and bug reporters."""
+    ver_line = f"<p><b>Espanso version:</b> {escape(espanso_version)}</p>" if espanso_version else ""
     QMessageBox.about(
         parent,
         f"About {APP_NAME}",
@@ -25,6 +28,7 @@ def show_about_dialog(parent: QWidget, configuration_path: Path) -> None:
         <h2>{APP_NAME}</h2>
         <p>A desktop editor for Espanso match files.</p>
         <p><b>Version:</b> {escape(__version__)}</p>
+        {ver_line}
         <p><b>Configuration folder:</b><br>{escape(str(configuration_path))}</p>
         <p><a href=\"{PROJECT_URL}\">Project and issue tracker</a><br>
         <a href=\"{ESPANSO_URL}\">Espanso documentation</a></p>

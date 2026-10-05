@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..config_service import ConfigService
+from ..ui.stats_dialog import StatsDialog
 
 
 class NewProfileDialog(QDialog):
@@ -253,11 +254,21 @@ class EspansoConfigDialog(QDialog):
         self.show_notifications_cb = QCheckBox("Show desktop notifications")
         self.auto_restart_cb = QCheckBox("Auto-restart daemon on configuration changes")
         self.undo_backspace_cb = QCheckBox("Revert expansion on immediate Backspace")
-        self.stats_cb = QCheckBox("Enable usage statistics (stats)")
 
-        for cb in (self.show_icon_cb, self.show_notifications_cb, self.auto_restart_cb, self.undo_backspace_cb, self.stats_cb):
+        for cb in (self.show_icon_cb, self.show_notifications_cb, self.auto_restart_cb, self.undo_backspace_cb):
             cb.stateChanged.connect(self._mark_visual_modified)
             global_layout.addWidget(cb)
+
+        stats_row = QHBoxLayout()
+        self.stats_cb = QCheckBox("Enable usage statistics (stats)")
+        self.stats_cb.stateChanged.connect(self._mark_visual_modified)
+        self.view_stats_btn = QPushButton("View statistics…")
+        self.view_stats_btn.clicked.connect(self._open_stats_dialog)
+        self.stats_cb.toggled.connect(self.view_stats_btn.setEnabled)
+        stats_row.addWidget(self.stats_cb)
+        stats_row.addWidget(self.view_stats_btn)
+        stats_row.addStretch()
+        global_layout.addLayout(stats_row)
 
         bs_form = QFormLayout()
         self.backspace_limit_sb = QSpinBox()
@@ -616,6 +627,7 @@ class EspansoConfigDialog(QDialog):
             self.stats_cb.setChecked(stats_val)
         else:
             self.stats_cb.setChecked(False)
+        self.view_stats_btn.setEnabled(self.stats_cb.isChecked())
 
         kl = doc.get("keyboard_layout")
         if isinstance(kl, dict):
@@ -999,6 +1011,10 @@ class EspansoConfigDialog(QDialog):
         self._visual_modified = False
         self.editor.document().setModified(False)
         return True
+
+    def _open_stats_dialog(self) -> None:
+        dlg = StatsDialog(self, self.config_dir)
+        dlg.exec()
 
     def reject(self) -> None:
         if self._confirm_profile_change():
