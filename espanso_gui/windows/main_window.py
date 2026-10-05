@@ -32,9 +32,12 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.document_extra: dict[str, object] = {}
         self.selected_match = -1
         self.selected_variable = -1
+        self.selected_var_field = ""
         self.selected_form_field = ""
         self.dirty = False
         self._loading = False
+        self._loading_var = False
+        self._loading_var_field = False
         self._expanding = False
         self._playground_height = 180
         self._build_ui()

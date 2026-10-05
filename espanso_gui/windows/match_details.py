@@ -167,131 +167,217 @@ class MatchDetailsMixin:
         self.field_values_label.setEnabled(False)
         self.btn_apply_field.setEnabled(False)
         self.btn_delete_field.setEnabled(False)
+    def _current_form_variable(self) -> EspansoVariable | None:
+        if not (0 <= self.selected_match < len(self.matches)):
+            return None
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return None
+        var = match.variables[self.selected_variable]
+        if var.type != "form":
+            return None
+        return var
+
     def detect_var_fields(self) -> None:
+        var = self._current_form_variable()
+        if not var:
+            return
         layout_text = self.variable_layout_edit.toPlainText()
-        if not hasattr(self, "_current_var_fields"):
-            self._current_var_fields = {}
         detected = re.findall(r"\[\[\s*([A-Za-z0-9_]+)\s*\]\]", layout_text)
         seen: set[str] = set()
+        added = False
         for name in detected:
             if name not in seen:
                 seen.add(name)
-                if name not in self._current_var_fields:
-                    self._current_var_fields[name] = EspansoFormField(name=name, type="text")
+                if name not in var.fields:
+                    var.fields[name] = EspansoFormField(name=name, type="text")
+                    added = True
+        if added:
+            self.dirty = True
         self.refresh_var_fields_table()
 
     def refresh_var_fields_table(self) -> None:
+        self._loading_var_field = True
         self.var_fields_table.setRowCount(0)
-        fields = getattr(self, "_current_var_fields", {})
+        var = self._current_form_variable()
+        if not var:
+            self._loading_var_field = False
+            self._clear_var_field_inputs()
+            return
+
+        fields = list(var.fields.values())
         self.var_fields_table.setRowCount(len(fields))
-        for row, (name, field_obj) in enumerate(fields.items()):
-            type_desc = field_obj.type
-            if field_obj.type == "choice":
+        selected_row = -1
+        for row, fobj in enumerate(fields):
+            if fobj.type == "choice":
                 type_desc = "Choice Box"
-            elif field_obj.type == "list":
+            elif fobj.type == "list":
                 type_desc = "List Box"
-            elif field_obj.multiline:
+            elif fobj.multiline:
                 type_desc = "Text (multiline)"
             else:
                 type_desc = "Text (single-line)"
-            values_desc = ", ".join(field_obj.values) if field_obj.values else ""
-            self.var_fields_table.setItem(row, 0, QTableWidgetItem(name))
+            values_desc = ", ".join(fobj.values) if fobj.values else ""
+            self.var_fields_table.setItem(row, 0, QTableWidgetItem(fobj.name))
             self.var_fields_table.setItem(row, 1, QTableWidgetItem(type_desc))
             self.var_fields_table.setItem(row, 2, QTableWidgetItem(values_desc))
-            self.var_fields_table.setItem(row, 3, QTableWidgetItem(field_obj.default))
+            self.var_fields_table.setItem(row, 3, QTableWidgetItem(fobj.default))
+            if getattr(self, "selected_var_field", "") == fobj.name:
+                selected_row = row
+
+        if selected_row >= 0:
+            self.var_fields_table.selectRow(selected_row)
+        elif fields:
+            self.var_fields_table.selectRow(0)
+        else:
+            self._clear_var_field_inputs()
+        self._loading_var_field = False
+
+        if self.var_fields_table.currentRow() >= 0:
+            self.on_var_field_selected()
 
     def on_var_field_selected(self) -> None:
         rows = self.var_fields_table.selectionModel().selectedRows()
         if not rows:
+            self._clear_var_field_inputs()
             return
         row = rows[0].row()
         name_item = self.var_fields_table.item(row, 0)
         if not name_item:
             return
         name = name_item.text()
-        fields = getattr(self, "_current_var_fields", {})
-        field_obj = fields.get(name)
-        if not field_obj:
+        var = self._current_form_variable()
+        if not var or name not in var.fields:
             return
         self.selected_var_field = name
-        self.var_field_name_edit.setText(field_obj.name)
-        if field_obj.type == "choice":
+        fobj = var.fields[name]
+
+        self._loading_var_field = True
+        self.var_field_form_widget.setEnabled(True)
+        self.var_field_name_edit.setText(fobj.name)
+        if fobj.type == "choice":
             self.var_field_type_combo.setCurrentText("Choice Box (dropdown)")
-        elif field_obj.type == "list":
+        elif fobj.type == "list":
             self.var_field_type_combo.setCurrentText("List Box")
-        elif field_obj.multiline:
+        elif fobj.multiline:
             self.var_field_type_combo.setCurrentText("Text (multiline)")
         else:
             self.var_field_type_combo.setCurrentText("Text (single-line)")
-        self.var_field_values_edit.setText(", ".join(field_obj.values))
-        self.var_field_default_edit.setText(field_obj.default)
-        self.btn_apply_var_field.setEnabled(True)
+        self.var_field_values_edit.setText(", ".join(fobj.values))
+        self.var_field_default_edit.setText(fobj.default)
+
+        is_choice_or_list = fobj.type in ("choice", "list")
+        self.var_field_values_edit.setEnabled(is_choice_or_list)
+        self.var_field_values_label.setEnabled(is_choice_or_list)
         self.btn_delete_var_field.setEnabled(True)
+        self._loading_var_field = False
+
+    def on_var_field_name_editing_finished(self) -> None:
+        if getattr(self, "_loading_var_field", False):
+            return
+        var = self._current_form_variable()
+        if not var or not getattr(self, "selected_var_field", ""):
+            return
+        new_name = self.var_field_name_edit.text().strip()
+        old_name = self.selected_var_field
+        if not new_name or new_name == old_name:
+            self.var_field_name_edit.setText(old_name)
+            return
+        if not re.fullmatch(r"[A-Za-z0-9_]+", new_name):
+            QMessageBox.warning(self, "Invalid name", "Field names may only contain letters, numbers, and underscores.")
+            self.var_field_name_edit.setText(old_name)
+            return
+        if new_name in var.fields:
+            QMessageBox.warning(self, "Duplicate name", f"A field named '{new_name}' already exists.")
+            self.var_field_name_edit.setText(old_name)
+            return
+        rebuilt = {}
+        for k, v in var.fields.items():
+            if k == old_name:
+                v.name = new_name
+                rebuilt[new_name] = v
+            else:
+                rebuilt[k] = v
+        var.fields = rebuilt
+        self.selected_var_field = new_name
+        row = self.var_fields_table.currentRow()
+        if row >= 0:
+            item = self.var_fields_table.item(row, 0)
+            if item:
+                item.setText(new_name)
+        self.dirty = True
 
     def on_var_field_type_changed(self, text: str) -> None:
         is_choice_or_list = "Choice" in text or "List" in text
         self.var_field_values_edit.setEnabled(is_choice_or_list)
         self.var_field_values_label.setEnabled(is_choice_or_list)
+        if getattr(self, "_loading_var_field", False):
+            return
+        self._sync_current_var_field_from_inputs()
 
-    def _var_field_from_inputs(self, name: str) -> EspansoFormField:
+    def on_var_field_input_changed(self) -> None:
+        if getattr(self, "_loading_var_field", False):
+            return
+        self._sync_current_var_field_from_inputs()
+
+    def _sync_current_var_field_from_inputs(self) -> None:
+        var = self._current_form_variable()
+        if not var or not getattr(self, "selected_var_field", ""):
+            return
+        fobj = var.fields.get(self.selected_var_field)
+        if not fobj:
+            return
         type_text = self.var_field_type_combo.currentText()
-        field_type = "text"
-        multiline = False
         if "Choice" in type_text:
-            field_type = "choice"
+            fobj.type = "choice"
+            fobj.multiline = False
         elif "List" in type_text:
-            field_type = "list"
+            fobj.type = "list"
+            fobj.multiline = False
         elif "multiline" in type_text:
-            multiline = True
+            fobj.type = "text"
+            fobj.multiline = True
+        else:
+            fobj.type = "text"
+            fobj.multiline = False
 
         raw_values = self.var_field_values_edit.text().strip()
-        values = [v.strip() for v in raw_values.split(",") if v.strip()] if raw_values else []
-        default_val = self.var_field_default_edit.text().strip()
-        return EspansoFormField(
-            name=name,
-            type=field_type,
-            multiline=multiline,
-            values=values,
-            default=default_val,
-        )
+        fobj.values = [v.strip() for v in raw_values.split(",") if v.strip()] if raw_values else []
+        fobj.default = self.var_field_default_edit.text()
+
+        row = self.var_fields_table.currentRow()
+        if row >= 0:
+            if fobj.type == "choice":
+                type_desc = "Choice Box"
+            elif fobj.type == "list":
+                type_desc = "List Box"
+            elif fobj.multiline:
+                type_desc = "Text (multiline)"
+            else:
+                type_desc = "Text (single-line)"
+            self.var_fields_table.item(row, 1).setText(type_desc)
+            self.var_fields_table.item(row, 2).setText(", ".join(fobj.values) if fobj.values else "")
+            self.var_fields_table.item(row, 3).setText(fobj.default)
+        self.dirty = True
 
     def add_var_field(self) -> None:
-        name = self.var_field_name_edit.text().strip()
-        if not name:
-            QMessageBox.information(self, "Field name", "Please enter a field name.")
-            self.var_field_name_edit.setFocus()
+        var = self._current_form_variable()
+        if not var:
             return
-        if not re.fullmatch(r"[A-Za-z0-9_]+", name):
-            QMessageBox.warning(self, "Invalid name", "Field names may only contain letters, numbers, and underscores.")
-            return
-        if not hasattr(self, "_current_var_fields"):
-            self._current_var_fields = {}
-        field_obj = self._var_field_from_inputs(name)
-        self._current_var_fields[name] = field_obj
-        self.refresh_var_fields_table()
-        self.clear_var_field_form()
-
-    def update_var_field(self) -> None:
-        if not getattr(self, "selected_var_field", ""):
-            return
-        name = self.var_field_name_edit.text().strip()
-        if not name:
-            QMessageBox.information(self, "Field name", "Please enter a field name.")
-            return
-        if not re.fullmatch(r"[A-Za-z0-9_]+", name):
-            QMessageBox.warning(self, "Invalid name", "Field names may only contain letters, numbers, and underscores.")
-            return
-        if not hasattr(self, "_current_var_fields"):
-            self._current_var_fields = {}
-        if name != self.selected_var_field and self.selected_var_field in self._current_var_fields:
-            del self._current_var_fields[self.selected_var_field]
-        field_obj = self._var_field_from_inputs(name)
-        self._current_var_fields[name] = field_obj
+        num = 1
+        while f"field{num}" in var.fields:
+            num += 1
+        name = f"field{num}"
+        var.fields[name] = EspansoFormField(name=name, type="text")
         self.selected_var_field = name
+        self.dirty = True
         self.refresh_var_fields_table()
+        self.var_field_name_edit.setFocus()
+        self.var_field_name_edit.selectAll()
 
     def delete_var_field(self) -> None:
-        if not getattr(self, "selected_var_field", ""):
+        var = self._current_form_variable()
+        if not var or not getattr(self, "selected_var_field", ""):
             return
         if (
             QMessageBox.question(
@@ -304,182 +390,239 @@ class MatchDetailsMixin:
             != QMessageBox.StandardButton.Yes
         ):
             return
-        if hasattr(self, "_current_var_fields") and self.selected_var_field in self._current_var_fields:
-            del self._current_var_fields[self.selected_var_field]
+        if self.selected_var_field in var.fields:
+            del var.fields[self.selected_var_field]
+            self.selected_var_field = ""
+            self.dirty = True
             self.refresh_var_fields_table()
-            self.clear_var_field_form()
 
-    def clear_var_field_form(self) -> None:
+    def _clear_var_field_inputs(self) -> None:
         self.selected_var_field = ""
+        self.var_field_form_widget.setEnabled(False)
+        self._loading_var_field = True
         self.var_field_name_edit.clear()
         self.var_field_type_combo.setCurrentIndex(0)
         self.var_field_values_edit.clear()
         self.var_field_default_edit.clear()
         self.var_field_values_edit.setEnabled(False)
         self.var_field_values_label.setEnabled(False)
-        self.btn_apply_var_field.setEnabled(False)
         self.btn_delete_var_field.setEnabled(False)
+        self._loading_var_field = False
+
+    def clear_var_field_form(self) -> None:
+        self._clear_var_field_inputs()
+
+    def update_var_field(self) -> None:
+        self._sync_current_var_field_from_inputs()
 
     def refresh_variable_table(self) -> None:
+        self._loading_var = True
         self.variable_table.setRowCount(0)
         if not (0 <= self.selected_match < len(self.matches)):
+            self.selected_variable = -1
+            self.var_config_stack.setCurrentIndex(0)
+            self.btn_delete_variable.setEnabled(False)
+            self._loading_var = False
             return
         variables = self.matches[self.selected_match].variables
         self.variable_table.setRowCount(len(variables))
         for row, variable in enumerate(variables):
             self.variable_table.setItem(row, 0, QTableWidgetItem(variable.name))
             self.variable_table.setItem(row, 1, QTableWidgetItem(variable.type))
-            param_val = variable.parameter_value
-            display = param_val.replace("\n", " ↵ ") if "\n" in param_val else param_val
-            item = QTableWidgetItem(display)
-            tooltip = param_val
-            if variable.type == "form" and variable.fields:
-                field_lines = []
-                for fname, fobj in variable.fields.items():
-                    desc = fobj.type
-                    if fobj.type in ("choice", "list") and fobj.values:
-                        desc += f" [{', '.join(fobj.values)}]"
-                    elif fobj.multiline:
-                        desc = "multiline text"
-                    if fobj.default:
-                        desc += f" (default: {fobj.default})"
-                    field_lines.append(f"  • {fname}: {desc}")
-                tooltip = f"{param_val}\n\nFields:\n" + "\n".join(field_lines)
-            item.setToolTip(tooltip)
-            self.variable_table.setItem(row, 2, item)
+
+        if variables:
+            target_row = self.selected_variable if 0 <= self.selected_variable < len(variables) else 0
+            self.selected_variable = target_row
+            self.variable_table.selectRow(target_row)
+            self.btn_delete_variable.setEnabled(True)
+            self.var_config_stack.setCurrentIndex(1)
+            self._loading_var = False
+            self.on_variable_selected()
+        else:
+            self.selected_variable = -1
+            self.var_config_stack.setCurrentIndex(0)
+            self.btn_delete_variable.setEnabled(False)
+            self._loading_var = False
 
     def clear_variable_form(self) -> None:
         self.selected_variable = -1
+        self._loading_var = True
         self.variable_name.clear()
-        self.variable_parameter.clear()
+        self.variable_type.setCurrentIndex(0)
+        self.var_shell_edit.clear()
+        self.var_script_edit.clear()
+        self.var_date_edit.clear()
+        self.var_choice_edit.clear()
         self.variable_layout_edit.clear()
-        self.variable_type.setCurrentText("shell")
-        self.parameter_stack.setCurrentIndex(0)
-        self._current_var_fields = {}
-        self.refresh_var_fields_table()
-        self.clear_var_field_form()
-        if hasattr(self, "var_fields_box"):
-            self.var_fields_box.hide()
-        self.update_variable_button.setEnabled(False)
+        self.param_stack.setCurrentIndex(0)
+        self.var_config_stack.setCurrentIndex(0)
+        self.btn_delete_variable.setEnabled(False)
+        self._clear_var_field_inputs()
+        self.var_fields_table.setRowCount(0)
+        self._loading_var = False
 
-    def update_parameter_label(self, variable_type: str) -> None:
-        labels = {
-            "shell": "cmd:",
-            "script": "path:",
-            "date": "format:",
-            "form": "layout:",
-            "choice": "choices:",
+    def on_variable_selected(self) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        rows = self.variable_table.selectionModel().selectedRows()
+        if not rows or not (0 <= self.selected_match < len(self.matches)):
+            self.selected_variable = -1
+            self.var_config_stack.setCurrentIndex(0)
+            self.btn_delete_variable.setEnabled(False)
+            return
+        self.selected_variable = rows[0].row()
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        variable = match.variables[self.selected_variable]
+
+        self._loading_var = True
+        self.var_config_stack.setCurrentIndex(1)
+        self.btn_delete_variable.setEnabled(True)
+        self.variable_name.setText(variable.name)
+        self.variable_type.setCurrentText(variable.type)
+
+        type_to_index = {
+            "shell": 0,
+            "form": 1,
+            "script": 2,
+            "choice": 3,
+            "date": 4,
         }
-        self.parameter_label.setText(labels.get(variable_type, "param:"))
-        self.variable_parameter.setPlaceholderText(
-            "Comma-separated choices, e.g. yes, no" if variable_type == "choice" else ""
-        )
-        if variable_type == "form":
-            self.parameter_stack.setCurrentIndex(1)
-            if hasattr(self, "var_fields_box"):
-                self.var_fields_box.show()
-        else:
-            self.parameter_stack.setCurrentIndex(0)
-            if hasattr(self, "var_fields_box"):
-                self.var_fields_box.hide()
+        self.param_stack.setCurrentIndex(type_to_index.get(variable.type, 0))
+        self._load_variable_param_inputs(variable)
+        self._loading_var = False
 
-    def _variable_from_form(self, existing: EspansoVariable | None = None) -> EspansoVariable | None:
-        name = self.variable_name.text().strip()
-        if not name:
-            QMessageBox.information(self, "Variable name", "Please enter a variable name.")
-            self.variable_name.setFocus()
-            return None
-        variable = existing or EspansoVariable()
-        variable.name = name
-        variable.type = self.variable_type.currentText()
-        if variable.type == "form":
-            variable.set_parameter_value(self.variable_layout_edit.toPlainText())
-            variable.fields = {
-                k: EspansoFormField(
-                    name=v.name,
-                    type=v.type,
-                    multiline=v.multiline,
-                    values=list(v.values),
-                    default=v.default,
-                    extra=dict(v.extra),
-                )
-                for k, v in getattr(self, "_current_var_fields", {}).items()
-            }
-        else:
-            variable.set_parameter_value(self.variable_parameter.text())
-            variable.fields = {}
-        return variable
+    def _load_variable_param_inputs(self, variable: EspansoVariable) -> None:
+        val = variable.parameter_value
+        if variable.type == "shell":
+            self.var_shell_edit.setText(val)
+        elif variable.type == "form":
+            self.variable_layout_edit.setPlainText(val)
+            self.refresh_var_fields_table()
+        elif variable.type == "script":
+            self.var_script_edit.setText(val)
+        elif variable.type == "choice":
+            self.var_choice_edit.setText(val)
+        elif variable.type == "date":
+            self.var_date_edit.setText(val)
+
+    def on_variable_name_changed(self, text: str) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        var.name = text
+        item = self.variable_table.item(self.selected_variable, 0)
+        if item:
+            item.setText(text)
+        self.dirty = True
+
+    def on_variable_type_changed(self, new_type: str) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        var.type = new_type
+        item = self.variable_table.item(self.selected_variable, 1)
+        if item:
+            item.setText(new_type)
+
+        type_to_index = {
+            "shell": 0,
+            "form": 1,
+            "script": 2,
+            "choice": 3,
+            "date": 4,
+        }
+        self.param_stack.setCurrentIndex(type_to_index.get(new_type, 0))
+        self._load_variable_param_inputs(var)
+        self.dirty = True
+
+    def on_variable_parameter_changed(self) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type == "shell":
+            var.set_parameter_value(self.var_shell_edit.text())
+        elif var.type == "script":
+            var.set_parameter_value(self.var_script_edit.text())
+        elif var.type == "choice":
+            var.set_parameter_value(self.var_choice_edit.text())
+        elif var.type == "date":
+            var.set_parameter_value(self.var_date_edit.text())
+        self.dirty = True
+
+    def on_variable_layout_changed(self) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type == "form":
+            var.set_parameter_value(self.variable_layout_edit.toPlainText())
+            self.dirty = True
 
     def add_variable(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)):
             return
-        variable = self._variable_from_form()
-        if variable is None:
-            return
-        self.matches[self.selected_match].variables.append(variable)
+        match = self.matches[self.selected_match]
+        existing_names = {v.name for v in match.variables}
+        num = 1
+        while f"var{num}" in existing_names:
+            num += 1
+        new_name = f"var{num}"
+        var = EspansoVariable(name=new_name, type="shell")
+        var.set_parameter_value("")
+        match.variables.append(var)
         self.dirty = True
+        self.selected_variable = len(match.variables) - 1
         self.refresh_variable_table()
-        self.clear_variable_form()
+        self.variable_name.setFocus()
+        self.variable_name.selectAll()
 
-    def on_variable_selected(self) -> None:
-        rows = self.variable_table.selectionModel().selectedRows()
-        if not rows or not (0 <= self.selected_match < len(self.matches)):
-            return
-        self.selected_variable = rows[0].row()
-        variable = self.matches[self.selected_match].variables[self.selected_variable]
-        self.variable_name.setText(variable.name)
-        self.variable_type.setCurrentText(variable.type)
-        if variable.type == "form":
-            self.variable_layout_edit.setPlainText(variable.parameter_value)
-            self.variable_parameter.clear()
-            self._current_var_fields = {
-                k: EspansoFormField(
-                    name=v.name,
-                    type=v.type,
-                    multiline=v.multiline,
-                    values=list(v.values),
-                    default=v.default,
-                    extra=dict(v.extra),
-                )
-                for k, v in variable.fields.items()
-            }
-            self.refresh_var_fields_table()
-            self.clear_var_field_form()
-            if hasattr(self, "var_fields_box"):
-                self.var_fields_box.show()
-        else:
-            self.variable_parameter.setText(variable.parameter_value)
-            self.variable_layout_edit.clear()
-            self._current_var_fields = {}
-            self.refresh_var_fields_table()
-            self.clear_var_field_form()
-            if hasattr(self, "var_fields_box"):
-                self.var_fields_box.hide()
-        self.update_variable_button.setEnabled(True)
-    def update_variable(self) -> None:
-        if not (0 <= self.selected_match < len(self.matches) and 0 <= self.selected_variable < len(self.matches[self.selected_match].variables)):
-            return
-        variable = self._variable_from_form(self.matches[self.selected_match].variables[self.selected_variable])
-        if variable is None:
-            return
-        self.dirty = True
-        self.refresh_variable_table()
-        self.variable_table.selectRow(self.selected_variable)
     def delete_variable(self) -> None:
-        if not (0 <= self.selected_match < len(self.matches) and 0 <= self.selected_variable < len(self.matches[self.selected_match].variables)):
+        if not (0 <= self.selected_match < len(self.matches)):
             return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
         if (
             QMessageBox.question(
                 self,
                 "Delete variable",
-                "Really delete this variable?",
+                f"Really delete variable '{var.name}'?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
             )
             != QMessageBox.StandardButton.Yes
         ):
             return
-        del self.matches[self.selected_match].variables[self.selected_variable]
+        del match.variables[self.selected_variable]
         self.dirty = True
+        if self.selected_variable >= len(match.variables):
+            self.selected_variable = len(match.variables) - 1
         self.refresh_variable_table()
-        self.clear_variable_form()
+
+    def update_variable(self) -> None:
+        self.dirty = True
+
+    def update_parameter_label(self, variable_type: str) -> None:
+        pass
