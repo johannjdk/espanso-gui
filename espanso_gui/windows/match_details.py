@@ -176,22 +176,40 @@ class MatchDetailsMixin:
         for row, variable in enumerate(variables):
             self.variable_table.setItem(row, 0, QTableWidgetItem(variable.name))
             self.variable_table.setItem(row, 1, QTableWidgetItem(variable.type))
-            self.variable_table.setItem(row, 2, QTableWidgetItem(variable.parameter_value))
+            param_val = variable.parameter_value
+            if "\n" in param_val:
+                item = QTableWidgetItem(param_val.replace("\n", " ↵ "))
+                item.setToolTip(param_val)
+            else:
+                item = QTableWidgetItem(param_val)
+            self.variable_table.setItem(row, 2, item)
+
     def clear_variable_form(self) -> None:
         self.selected_variable = -1
         self.variable_name.clear()
-        self.variable_type.setCurrentText("shell")
         self.variable_parameter.clear()
+        self.variable_layout_edit.clear()
+        self.variable_type.setCurrentText("shell")
+        self.parameter_stack.setCurrentIndex(0)
         self.update_variable_button.setEnabled(False)
+
     def update_parameter_label(self, variable_type: str) -> None:
         labels = {
-            "shell": "cmd:", "script": "path:", "date": "format:", "form": "layout:",
+            "shell": "cmd:",
+            "script": "path:",
+            "date": "format:",
+            "form": "layout:",
             "choice": "choices:",
         }
         self.parameter_label.setText(labels.get(variable_type, "param:"))
         self.variable_parameter.setPlaceholderText(
             "Comma-separated choices, e.g. yes, no" if variable_type == "choice" else ""
         )
+        if variable_type == "form":
+            self.parameter_stack.setCurrentIndex(1)
+        else:
+            self.parameter_stack.setCurrentIndex(0)
+
     def _variable_from_form(self, existing: EspansoVariable | None = None) -> EspansoVariable | None:
         name = self.variable_name.text().strip()
         if not name:
@@ -201,8 +219,12 @@ class MatchDetailsMixin:
         variable = existing or EspansoVariable()
         variable.name = name
         variable.type = self.variable_type.currentText()
-        variable.set_parameter_value(self.variable_parameter.text())
+        if variable.type == "form":
+            variable.set_parameter_value(self.variable_layout_edit.toPlainText())
+        else:
+            variable.set_parameter_value(self.variable_parameter.text())
         return variable
+
     def add_variable(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)):
             return
@@ -213,6 +235,7 @@ class MatchDetailsMixin:
         self.dirty = True
         self.refresh_variable_table()
         self.clear_variable_form()
+
     def on_variable_selected(self) -> None:
         rows = self.variable_table.selectionModel().selectedRows()
         if not rows or not (0 <= self.selected_match < len(self.matches)):
@@ -221,7 +244,12 @@ class MatchDetailsMixin:
         variable = self.matches[self.selected_match].variables[self.selected_variable]
         self.variable_name.setText(variable.name)
         self.variable_type.setCurrentText(variable.type)
-        self.variable_parameter.setText(variable.parameter_value)
+        if variable.type == "form":
+            self.variable_layout_edit.setPlainText(variable.parameter_value)
+            self.variable_parameter.clear()
+        else:
+            self.variable_parameter.setText(variable.parameter_value)
+            self.variable_layout_edit.clear()
         self.update_variable_button.setEnabled(True)
     def update_variable(self) -> None:
         if not (0 <= self.selected_match < len(self.matches) and 0 <= self.selected_variable < len(self.matches[self.selected_match].variables)):

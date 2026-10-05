@@ -224,6 +224,21 @@ class PlaygroundMixin:
     def _evaluate_playground_variables(self, match: EspansoMatch, text: str) -> str:
         for var in match.variables:
             placeholder = f"{{{{{var.name}}}}}"
+            if var.type == "form":
+                pattern = rf"\{{\{{\s*{re.escape(var.name)}\.([a-zA-Z0-9_]+)\s*\}}\}}"
+                for match_field in re.finditer(pattern, text):
+                    field_name = match_field.group(1)
+                    field_obj = match.form_fields.get(field_name)
+                    replacement = (
+                        field_obj.default
+                        if field_obj and field_obj.default
+                        else (field_obj.values[0] if field_obj and field_obj.values else f"[{field_name}]")
+                    )
+                    text = text.replace(match_field.group(0), replacement)
+                if placeholder in text:
+                    text = text.replace(placeholder, str(var.params.get("layout", "")))
+                continue
+
             if placeholder not in text:
                 continue
             val = ""

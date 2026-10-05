@@ -3,9 +3,52 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QFrame, QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QRadioButton, QScrollArea, QStackedWidget, QTableWidget, QTabWidget, QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPlainTextEdit,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QSizePolicy,
+    QStackedWidget,
+    QTableWidget,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ..ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
+
+
+class ParameterStack(QStackedWidget):
+    """Stacked widget that adjusts its size hint to match the active page."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.currentChanged.connect(self._on_current_changed)
+
+    def _on_current_changed(self, index: int) -> None:
+        widget = self.widget(index)
+        if widget is not None:
+            self.setSizePolicy(widget.sizePolicy())
+            self.updateGeometry()
+
+    def sizeHint(self):
+        widget = self.currentWidget()
+        return widget.sizeHint() if widget is not None else super().sizeHint()
+
+    def minimumSizeHint(self):
+        widget = self.currentWidget()
+        return widget.minimumSizeHint() if widget is not None else super().minimumSizeHint()
 
 
 class WindowLayoutMixin:
@@ -247,17 +290,24 @@ class WindowLayoutMixin:
         variables_layout.addWidget(self.variable_table)
 
         variable_editor_box = QGroupBox("Edit variable")
+        variable_editor_box.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         variable_editor_layout = QVBoxLayout(variable_editor_box)
         variable_form = QFormLayout()
         self.variable_name = QLineEdit()
         self.variable_type = QComboBox()
         self.variable_type.addItems(["shell", "script", "date", "form", "choice"])
         self.parameter_label = QLabel("cmd:")
+        self.parameter_stack = ParameterStack()
         self.variable_parameter = QLineEdit()
+        self.variable_layout_edit = QPlainTextEdit()
+        self.variable_layout_edit.setPlaceholderText("Form layout template, e.g.:\nLine 1: [[field1]]\nLine 2: [[field2]]")
+        self.variable_layout_edit.setMinimumHeight(70)
+        self.parameter_stack.addWidget(self.variable_parameter)
+        self.parameter_stack.addWidget(self.variable_layout_edit)
         self.variable_type.currentTextChanged.connect(self.update_parameter_label)
         variable_form.addRow("Name:", self.variable_name)
         variable_form.addRow("Type:", self.variable_type)
-        variable_form.addRow(self.parameter_label, self.variable_parameter)
+        variable_form.addRow(self.parameter_label, self.parameter_stack)
         variable_editor_layout.addLayout(variable_form)
 
         variable_buttons = QHBoxLayout()
