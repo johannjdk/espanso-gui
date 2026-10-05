@@ -4,7 +4,7 @@ Espanso GUI is a desktop editor for [Espanso](https://espanso.org/) match files.
 
 Espanso GUI is an independent project and is not affiliated with Espanso.
 
-![Espanso GUI showing a match file and its editor](images/demo.png)
+![Espanso GUI main window showing match and form editing](images/screenshots/main_window.png)
 
 ## What it does
 
@@ -18,6 +18,39 @@ Espanso GUI is an independent project and is not affiliated with Espanso.
 - Restart Espanso after saving changes
 
 The graphical editor handles the common match types. Expert YAML mode is available for advanced Espanso options and validates the document before saving.
+
+## Screenshots
+
+### Main Window & Form Editor
+Match editor with configuration file tree, trigger lists, form templates, and input fields:
+
+![Main Window and Form Editor](images/screenshots/main_window.png)
+
+### Variables & Form Fields
+Master-detail variable manager for shell, script, date, choice, and form variables:
+
+![Variables and Form Fields](images/screenshots/variables.png)
+
+### Global Search (Ctrl+F)
+Fast search across all configuration files with direct match navigation:
+
+![Global Search](images/screenshots/search.png)
+
+### Configuration Profiles
+Visual settings for `default.yml`, keyboard layout overrides, and application filters:
+
+![Configuration Profiles](images/screenshots/espanso_config.png)
+
+### Expert YAML Editor
+Full YAML document editor with syntax validation before saving:
+
+![Expert YAML Editor](images/screenshots/expert_yaml.png)
+
+### Expansion Statistics
+Usage statistics, expansion counters, and Espanso version status:
+
+![Expansion Statistics](images/screenshots/statistics.png)
+
 
 ## Installation
 

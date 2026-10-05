@@ -153,6 +153,72 @@
 
       .footer-link:hover { color: #f1f3f4 !important; }
 
+      .screenshot-item {
+        background: transparent;
+        transition: transform 0.2s ease;
+      }
+
+      .screenshot-item:hover {
+        transform: translateY(-2px);
+      }
+
+      .screenshot-item img {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+
+      .github-star-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0.4rem 0.3rem 0.85rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #e6edf3;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        border-radius: 2rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .github-star-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #535b64;
+        color: #fff;
+        transform: translateY(-1px);
+      }
+
+      .github-star-btn .star-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.18rem 0.6rem;
+        background: rgba(245, 197, 24, 0.12);
+        color: #f5c518;
+        border: 1px solid rgba(245, 197, 24, 0.28);
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition: all 0.2s ease;
+      }
+
+      .github-star-btn:hover .star-badge {
+        background: rgba(245, 197, 24, 0.22);
+        border-color: rgba(245, 197, 24, 0.5);
+        color: #ffd700;
+      }
+
+      .github-star-btn .star-icon-anim {
+        transition: transform 0.25s ease;
+      }
+
+      .github-star-btn:hover .star-icon-anim {
+        transform: scale(1.2) rotate(10deg);
+      }
+
       @media (max-width: 991.98px) {
         .hero { background: #15191b; }
       }
@@ -183,6 +249,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
+              <a class="nav-link" href="#screenshots">Screenshots</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="#downloads">Downloads</a>
             </li>
             <li class="nav-item">
@@ -190,14 +259,22 @@
             </li>
           </ul>
           <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            <span class="small text-body-secondary d-none d-xl-inline">
+              Enjoying the project?
+            </span>
             <a
               href="https://github.com/johannjdk/espanso-gui"
               target="_blank"
               rel="noopener"
-              class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+              class="github-star-btn"
+              title="Star Espanso GUI on GitHub"
             >
-              <i class="bi bi-github"></i>
-              <span>GitHub Repository</span>
+              <i class="bi bi-github fs-6"></i>
+              <span>GitHub</span>
+              <span class="star-badge">
+                <i class="bi bi-star-fill star-icon-anim"></i>
+                <span>Star</span>
+              </span>
             </a>
           </div>
         </div>
@@ -238,16 +315,205 @@
               <span>Available for Linux, macOS, and Windows.</span>
             </div>
           </div>
-          <div class="col-lg-6">
-            <img
-              src="images/demo.png"
-              alt="Espanso GUI Screenshot"
-              class="img-fluid"
-            />
+          <div class="col-lg-6 text-center">
+            <a
+              href="#screenshotModal"
+              data-bs-toggle="modal"
+              data-bs-img="images/screenshots/main_window.png"
+              data-bs-title="Main Window — Match and Form Editor"
+              class="d-inline-block text-decoration-none"
+              title="Click to view full screenshot"
+            >
+              <img
+                src="images/screenshots/main_window.png"
+                alt="Espanso GUI Main Window"
+                class="img-fluid"
+              />
+            </a>
           </div>
         </div>
       </div>
     </header>
+
+    <section id="screenshots" class="py-5 border-bottom">
+      <div class="container py-3">
+        <div class="section-intro mb-5">
+          <p class="eyebrow mb-2">Screenshots</p>
+          <h2 class="fw-bold mb-2">Explore the interface.</h2>
+          <p class="text-body-secondary mb-0">
+            A native, distraction-free environment to maintain text expansions, variables, forms, and configuration profiles.
+          </p>
+        </div>
+
+        <div class="row g-4 mb-5">
+          <!-- Main Window -->
+          <div class="col-12 col-lg-6">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/main_window.png"
+                data-bs-title="Main Window &amp; Form Editor"
+                class="d-block text-decoration-none mb-3 text-center"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/main_window.png"
+                  alt="Espanso GUI Main Editor"
+                  class="img-fluid"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <h5 class="fw-bold mb-0">Match &amp; Form Editor</h5>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Manage file trees, trigger lists, multi-line templates, and interactive form fields with instant field detection.
+              </p>
+            </div>
+          </div>
+
+          <!-- Variables Editor -->
+          <div class="col-12 col-lg-6">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/variables.png"
+                data-bs-title="Variables &amp; Form Fields"
+                class="d-block text-decoration-none mb-3 text-center"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/variables.png"
+                  alt="Espanso GUI Variables Editor"
+                  class="img-fluid"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <h5 class="fw-bold mb-0">Master-Detail Variable Manager</h5>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Configure shell, script, form, choice, and date variables with a dedicated side-by-side properties layout.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Global Search -->
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/search.png"
+                data-bs-title="Global Search (Ctrl+F)"
+                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
+                style="min-height: 200px;"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/search.png"
+                  alt="Global Search Dialog"
+                  class="img-fluid"
+                  style="max-height: 200px;"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h6 class="fw-bold mb-0">Global Search</h6>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Search across all YAML files with instant jump-to-match navigation.
+              </p>
+            </div>
+          </div>
+
+          <!-- Config Profiles -->
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/espanso_config.png"
+                data-bs-title="Configuration Profiles"
+                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
+                style="min-height: 200px;"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/espanso_config.png"
+                  alt="Espanso Configuration Profiles"
+                  class="img-fluid"
+                  style="max-height: 200px;"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h6 class="fw-bold mb-0">Config Profiles</h6>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Visual settings for `default.yml`, keyboard layout overrides, and app filters.
+              </p>
+            </div>
+          </div>
+
+          <!-- Expert YAML -->
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/expert_yaml.png"
+                data-bs-title="Expert YAML Mode"
+                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
+                style="min-height: 200px;"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/expert_yaml.png"
+                  alt="Expert YAML Editor"
+                  class="img-fluid"
+                  style="max-height: 200px;"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h6 class="fw-bold mb-0">Expert YAML Mode</h6>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Direct access to complete YAML documents with automatic syntax validation before saving.
+              </p>
+            </div>
+          </div>
+
+          <!-- Statistics -->
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="screenshot-item h-100 d-flex flex-column">
+              <a
+                href="#screenshotModal"
+                data-bs-toggle="modal"
+                data-bs-img="images/screenshots/statistics.png"
+                data-bs-title="Expansion Statistics"
+                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
+                style="min-height: 200px;"
+                title="Click to expand"
+              >
+                <img
+                  src="images/screenshots/statistics.png"
+                  alt="Expansion Statistics Dialog"
+                  class="img-fluid"
+                  style="max-height: 200px;"
+                />
+              </a>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h6 class="fw-bold mb-0">Usage Statistics</h6>
+              </div>
+              <p class="text-body-secondary small mb-0">
+                Track expansion counts, most-used triggers, and monitor Espanso daemon status.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section
       id="downloads"
@@ -604,11 +870,60 @@ python3 -m espanso_gui</code></pre>
       </div>
     </footer>
 
+    <!-- Screenshot Lightbox Modal -->
+    <div
+      class="modal fade"
+      id="screenshotModal"
+      tabindex="-1"
+      aria-labelledby="modalScreenshotTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div
+          class="modal-content border-0 bg-transparent"
+        >
+          <div
+            class="modal-header border-0 py-2 justify-content-end"
+          >
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-0 text-center">
+            <img
+              id="modalScreenshotImg"
+              src=""
+              alt="Screenshot Preview"
+              class="img-fluid"
+              style="max-height: 86vh; object-fit: contain; border: none !important; box-shadow: none !important; background: transparent !important;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("year").textContent = new Date().getFullYear();
+
+        const screenshotModal = document.getElementById("screenshotModal");
+        if (screenshotModal) {
+          screenshotModal.addEventListener("show.bs.modal", (event) => {
+            const trigger = event.relatedTarget;
+            if (!trigger) return;
+            const imgSrc = trigger.getAttribute("data-bs-img");
+            const imgTitle = trigger.getAttribute("data-bs-title");
+            const modalImg = document.getElementById("modalScreenshotImg");
+            const modalTitle = document.getElementById("modalScreenshotTitle");
+            if (modalImg && imgSrc) modalImg.src = imgSrc;
+            if (modalTitle && imgTitle) modalTitle.textContent = imgTitle;
+          });
+        }
 
         fetchLatestRelease();
       });
