@@ -17,5 +17,5 @@ dependencies = [
 [project.scripts]
 espanso-gui = "espanso_gui.app:main"
 
-[tool.setuptools]
-packages = ["espanso_gui"]
+[tool.setuptools.packages.find]
+include = ["espanso_gui*"]
