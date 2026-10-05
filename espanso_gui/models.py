@@ -12,7 +12,6 @@ class EspansoVariable:
     name: str = ""
     type: str = "shell"
     params: dict[str, Any] = field(default_factory=dict)
-    fields: dict[str, EspansoFormField] = field(default_factory=dict)
 
     @property
     def parameter_key(self) -> str:
@@ -40,47 +39,19 @@ class EspansoVariable:
         else:
             self.params[self.parameter_key] = value
 
-    def detect_field_names(self) -> list[str]:
-        """Extract all unique [[field_name]] variables found in the form layout."""
-        layout = str(self.params.get("layout", ""))
-        if not layout:
-            return []
-        matches = re.findall(r"\[\[\s*([A-Za-z0-9_]+)\s*\]\]", layout)
-        seen: set[str] = set()
-        out: list[str] = []
-        for name in matches:
-            if name not in seen:
-                seen.add(name)
-                out.append(name)
-        return out
-
     @classmethod
     def from_yaml(cls, data: dict[str, Any]) -> "EspansoVariable":
-        params = dict(data.get("params") or {})
-        fields_dict: dict[str, EspansoFormField] = {}
-        raw_fields = params.get("fields")
-        if isinstance(raw_fields, dict):
-            for k, v in raw_fields.items():
-                fields_dict[str(k)] = EspansoFormField.from_yaml(str(k), v)
         return cls(
             name=str(data.get("name", "")),
             type=str(data.get("type", "shell")),
-            params=params,
-            fields=fields_dict,
+            params=dict(data.get("params") or {}),
         )
 
     def to_yaml(self) -> dict[str, Any]:
         data: dict[str, Any] = {"name": self.name, "type": self.type}
-        params = dict(self.params)
-        if self.type == "form":
-            if self.fields:
-                params["fields"] = {k: v.to_yaml() for k, v in self.fields.items()}
-            elif "fields" in params:
-                del params["fields"]
-        if params:
-            data["params"] = params
+        if self.params:
+            data["params"] = self.params
         return data
-
 @dataclass
 class EspansoFormField:
     name: str = ""
