@@ -3,9 +3,52 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QFrame, QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QRadioButton, QScrollArea, QStackedWidget, QTableWidget, QTabWidget, QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPlainTextEdit,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QSizePolicy,
+    QStackedWidget,
+    QTableWidget,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ..ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
+
+
+class ParameterStack(QStackedWidget):
+    """Stacked widget that adjusts its size hint to match the active page."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.currentChanged.connect(self._on_current_changed)
+
+    def _on_current_changed(self, index: int) -> None:
+        widget = self.widget(index)
+        if widget is not None:
+            self.setSizePolicy(widget.sizePolicy())
+            self.updateGeometry()
+
+    def sizeHint(self):
+        widget = self.currentWidget()
+        return widget.sizeHint() if widget is not None else super().sizeHint()
+
+    def minimumSizeHint(self):
+        widget = self.currentWidget()
+        return widget.minimumSizeHint() if widget is not None else super().minimumSizeHint()
 
 
 class WindowLayoutMixin:
@@ -247,18 +290,87 @@ class WindowLayoutMixin:
         variables_layout.addWidget(self.variable_table)
 
         variable_editor_box = QGroupBox("Edit variable")
+        variable_editor_box.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         variable_editor_layout = QVBoxLayout(variable_editor_box)
         variable_form = QFormLayout()
         self.variable_name = QLineEdit()
         self.variable_type = QComboBox()
         self.variable_type.addItems(["shell", "script", "date", "form", "choice"])
         self.parameter_label = QLabel("cmd:")
+        self.parameter_stack = ParameterStack()
         self.variable_parameter = QLineEdit()
+        self.variable_layout_edit = QPlainTextEdit()
+        self.variable_layout_edit.setPlaceholderText("Form layout template, e.g.:\nLine 1: [[field1]]\nLine 2: [[field2]]")
+        self.variable_layout_edit.setMinimumHeight(70)
+        self.parameter_stack.addWidget(self.variable_parameter)
+        self.parameter_stack.addWidget(self.variable_layout_edit)
         self.variable_type.currentTextChanged.connect(self.update_parameter_label)
         variable_form.addRow("Name:", self.variable_name)
         variable_form.addRow("Type:", self.variable_type)
-        variable_form.addRow(self.parameter_label, self.variable_parameter)
+        variable_form.addRow(self.parameter_label, self.parameter_stack)
         variable_editor_layout.addLayout(variable_form)
+
+        self.var_fields_box = QGroupBox("Form fields")
+        var_fields_layout = QVBoxLayout(self.var_fields_box)
+
+        vf_top = QHBoxLayout()
+        vf_top.addStretch()
+        self.btn_detect_var_fields = QPushButton("Detect fields")
+        self.btn_detect_var_fields.setToolTip("Find all [[variables]] in the layout text above")
+        self.btn_detect_var_fields.clicked.connect(self.detect_var_fields)
+        vf_top.addWidget(self.btn_detect_var_fields)
+        var_fields_layout.addLayout(vf_top)
+
+        self.var_fields_table = QTableWidget(0, 4)
+        self.var_fields_table.setHorizontalHeaderLabels(["Field Name", "Type", "Values (for Choice/List)", "Default"])
+        self.var_fields_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.var_fields_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.var_fields_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.var_fields_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.var_fields_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.var_fields_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.var_fields_table.itemSelectionChanged.connect(self.on_var_field_selected)
+        self.var_fields_table.setAlternatingRowColors(True)
+        self.var_fields_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.var_fields_table.setMinimumHeight(120)
+        var_fields_layout.addWidget(self.var_fields_table)
+
+        vf_form = QFormLayout()
+        self.var_field_name_edit = QLineEdit()
+        self.var_field_type_combo = QComboBox()
+        self.var_field_type_combo.addItems(["Text (single-line)", "Text (multiline)", "Choice Box (dropdown)", "List Box"])
+        self.var_field_type_combo.currentTextChanged.connect(self.on_var_field_type_changed)
+        self.var_field_values_edit = QLineEdit()
+        self.var_field_values_edit.setPlaceholderText("Comma-separated values, e.g. Option 1, Option 2, Option 3")
+        self.var_field_values_edit.setEnabled(False)
+        self.var_field_default_edit = QLineEdit()
+        self.var_field_default_edit.setPlaceholderText("Optional default value")
+
+        vf_form.addRow("Field Name:", self.var_field_name_edit)
+        vf_form.addRow("Field Type:", self.var_field_type_combo)
+        self.var_field_values_label = QLabel("Values:")
+        self.var_field_values_label.setEnabled(False)
+        vf_form.addRow(self.var_field_values_label, self.var_field_values_edit)
+        vf_form.addRow("Default Value:", self.var_field_default_edit)
+        var_fields_layout.addLayout(vf_form)
+
+        vf_btns = QHBoxLayout()
+        self.btn_add_var_field = QPushButton("Add field")
+        self.btn_apply_var_field = QPushButton("Apply field")
+        self.btn_delete_var_field = QPushButton("Delete field")
+        self.btn_apply_var_field.setEnabled(False)
+        self.btn_delete_var_field.setEnabled(False)
+        self.btn_add_var_field.clicked.connect(self.add_var_field)
+        self.btn_apply_var_field.clicked.connect(self.update_var_field)
+        self.btn_delete_var_field.clicked.connect(self.delete_var_field)
+        vf_btns.addWidget(self.btn_add_var_field)
+        vf_btns.addWidget(self.btn_apply_var_field)
+        vf_btns.addWidget(self.btn_delete_var_field)
+        vf_btns.addStretch()
+        var_fields_layout.addLayout(vf_btns)
+
+        self.var_fields_box.hide()
+        variable_editor_layout.addWidget(self.var_fields_box)
 
         variable_buttons = QHBoxLayout()
         add_variable = QPushButton("Add")
