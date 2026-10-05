@@ -18,9 +18,10 @@ from .file_management import FileManagementMixin
 from .match_details import MatchDetailsMixin
 from .match_management import MatchManagementMixin
 from .menu import MenuMixin
+from .playground import PlaygroundMixin
 
 
-class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, MatchDetailsMixin, QMainWindow):
+class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagementMixin, MatchDetailsMixin, PlaygroundMixin, QMainWindow):
     """Coordinate document state, focused editor modules, and top-level actions."""
     def __init__(self) -> None:
         super().__init__()
@@ -33,6 +34,8 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.selected_form_field = ""
         self.dirty = False
         self._loading = False
+        self._expanding = False
+        self._playground_height = 180
         self._build_ui()
         self.load_files()
         self._set_editor_enabled(False)
@@ -65,11 +68,26 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
     def _load_window_icon(self) -> None:
         self.setWindowIcon(application_icon())
 
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self._build_file_panel())
-        splitter.addWidget(self._build_editor_panel())
-        splitter.setSizes([360, 1040])
-        self.setCentralWidget(splitter)
+        self.horizontal_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.horizontal_splitter.addWidget(self._build_file_panel())
+        self.horizontal_splitter.addWidget(self._build_editor_panel())
+        self.horizontal_splitter.setSizes([360, 1040])
+
+        self.vertical_splitter = QSplitter(Qt.Orientation.Vertical)
+        self.vertical_splitter.addWidget(self.horizontal_splitter)
+        self.vertical_splitter.addWidget(self._build_playground_panel())
+        self.vertical_splitter.setCollapsible(0, False)
+        self.vertical_splitter.setCollapsible(1, False)
+
+        handle = self.vertical_splitter.handle(1)
+        if handle:
+            handle.setEnabled(False)
+            handle.setCursor(Qt.CursorShape.ArrowCursor)
+
+        header_height = self.playground_header.sizeHint().height() + 2
+        self.vertical_splitter.setSizes([1000, header_height])
+
+        self.setCentralWidget(self.vertical_splitter)
         self.statusBar().showMessage(f"Configuration folder: {self.config_path}")
     def search_all_configurations(self) -> None:
         self.persist_current_match()

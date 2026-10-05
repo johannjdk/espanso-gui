@@ -65,6 +65,7 @@ class MenuMixin:
         )
 
         tools_menu = self.menuBar().addMenu("Tools")
+        self._menu_action(tools_menu, "Match playground", self.toggle_playground, "Ctrl+P")
         self._menu_action(tools_menu, "Restart Espanso", self.restart_espanso, "Ctrl+Shift+R")
 
         help_menu = self.menuBar().addMenu("Help")
