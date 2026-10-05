@@ -209,6 +209,7 @@ class WindowLayoutMixin:
         self.form_fields_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.form_fields_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.form_fields_table.itemSelectionChanged.connect(self.on_form_field_selected)
+        self.form_fields_table.cellClicked.connect(self.on_form_field_cell_clicked)
         self.form_fields_table.setAlternatingRowColors(True)
         self.form_fields_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.form_fields_table.setMinimumHeight(130)
@@ -276,6 +277,7 @@ class WindowLayoutMixin:
         self.variable_table.setAlternatingRowColors(True)
         self.variable_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.variable_table.itemSelectionChanged.connect(self.on_variable_selected)
+        self.variable_table.cellClicked.connect(self.on_variable_cell_clicked)
         var_list_layout.addWidget(self.variable_table, 1)
 
         var_btn_layout = QHBoxLayout()
@@ -373,6 +375,7 @@ class WindowLayoutMixin:
         self.var_fields_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.var_fields_table.setMinimumHeight(100)
         self.var_fields_table.itemSelectionChanged.connect(self.on_var_field_selected)
+        self.var_fields_table.cellClicked.connect(self.on_var_field_cell_clicked)
         var_fields_layout.addWidget(self.var_fields_table)
 
         self.var_field_form_widget = QWidget()
