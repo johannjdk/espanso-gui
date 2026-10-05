@@ -36,6 +36,27 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self._build_ui()
         self.load_files()
         self._set_editor_enabled(False)
+
+    @property
+    def dirty(self) -> bool:
+        return self._dirty
+
+    @dirty.setter
+    def dirty(self, value: bool) -> None:
+        self._dirty = value
+        if hasattr(self, "file_label"):
+            self._update_document_labels()
+
+    def _update_document_labels(self) -> None:
+        """Show the current file and whether its in-memory edits need saving."""
+        if self.current_file is None:
+            self.file_label.setText("No file selected")
+            self.setWindowTitle(APP_NAME)
+            return
+        suffix = " — unsaved changes" if self.dirty else ""
+        marker = " *" if self.dirty else ""
+        self.file_label.setText(f"File: {self.current_file.name}{suffix}")
+        self.setWindowTitle(f"{APP_NAME} — {self.current_file.name}{marker}")
     def _build_ui(self) -> None:
         self.resize(1280, 820)
         self.setWindowTitle(APP_NAME)
@@ -75,9 +96,8 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.match_sidebar.setEnabled(enabled)
         self._update_menu_actions()
         if not enabled:
-            self.file_label.setText("No file selected")
             self.match_sidebar.setTitle("Matches")
-            self.setWindowTitle(APP_NAME)
+            self._update_document_labels()
     def _on_match_field_changed(self) -> None:
         if not self._loading and 0 <= self.selected_match < len(self.matches):
             self.dirty = True
