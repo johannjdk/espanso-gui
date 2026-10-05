@@ -38,8 +38,6 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self._loading = False
         self._loading_var = False
         self._loading_var_field = False
-        self._expanding = False
-        self._playground_height = 180
         self._build_ui()
         self.load_files()
         self._set_editor_enabled(False)
@@ -81,15 +79,8 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.vertical_splitter.addWidget(self.horizontal_splitter)
         self.vertical_splitter.addWidget(self._build_playground_panel())
         self.vertical_splitter.setCollapsible(0, False)
-        self.vertical_splitter.setCollapsible(1, False)
-
-        handle = self.vertical_splitter.handle(1)
-        if handle:
-            handle.setEnabled(False)
-            handle.setCursor(Qt.CursorShape.ArrowCursor)
-
-        header_height = self.playground_header.sizeHint().height() + 2
-        self.vertical_splitter.setSizes([1000, header_height])
+        self.vertical_splitter.setCollapsible(1, True)
+        self.vertical_splitter.setSizes([650, 140])
 
         self.setCentralWidget(self.vertical_splitter)
         self.espanso_version = ConfigService.detect_espanso_version()
