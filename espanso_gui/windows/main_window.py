@@ -78,7 +78,14 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.vertical_splitter.addWidget(self._build_playground_panel())
         self.vertical_splitter.setCollapsible(0, False)
         self.vertical_splitter.setCollapsible(1, False)
-        self.vertical_splitter.setSizes([1000, 36])
+
+        handle = self.vertical_splitter.handle(1)
+        if handle:
+            handle.setEnabled(False)
+            handle.setCursor(Qt.CursorShape.ArrowCursor)
+
+        header_height = self.playground_header.sizeHint().height() + 2
+        self.vertical_splitter.setSizes([1000, header_height])
 
         self.setCentralWidget(self.vertical_splitter)
         self.statusBar().showMessage(f"Configuration folder: {self.config_path}")

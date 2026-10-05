@@ -6,7 +6,7 @@ import datetime
 import re
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QTextCursor
+from PySide6.QtGui import QMouseEvent, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -21,41 +21,70 @@ from PySide6.QtWidgets import (
 from ..models import EspansoMatch
 
 
+class PlaygroundHeader(QFrame):
+    def __init__(self, toggle_callback) -> None:
+        super().__init__()
+        self.toggle_callback = toggle_callback
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(10, 4, 10, 4)
+        layout.setSpacing(8)
+
+        self.title_label = QLabel("Match Playground")
+        font = self.title_label.font()
+        font.setBold(True)
+        self.title_label.setFont(font)
+        layout.addWidget(self.title_label)
+
+        self.hint_label = QLabel("— test text expansion live")
+        self.hint_label.setEnabled(False)
+        layout.addWidget(self.hint_label)
+
+        layout.addStretch()
+
+        self.status_label = QLabel("")
+        layout.addWidget(self.status_label)
+
+        self.clear_btn = QPushButton("Clear")
+        self.clear_btn.setToolTip("Clear playground text")
+        self.clear_btn.hide()
+        layout.addWidget(self.clear_btn)
+
+        self.toggle_btn = QPushButton("Open")
+        self.toggle_btn.clicked.connect(self.toggle_callback)
+        layout.addWidget(self.toggle_btn)
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.position().toPoint()
+            if not self.toggle_btn.geometry().contains(pos) and not self.clear_btn.geometry().contains(pos):
+                self.toggle_callback()
+        super().mousePressEvent(event)
+
+    def set_open(self, is_open: bool) -> None:
+        self.toggle_btn.setText("Close" if is_open else "Open")
+        self.clear_btn.setVisible(is_open)
+        self.hint_label.setVisible(not is_open)
+        self.setCursor(Qt.CursorShape.ArrowCursor if is_open else Qt.CursorShape.PointingHandCursor)
+
+
 class PlaygroundMixin:
     def _build_playground_panel(self) -> QWidget:
         self.playground_panel = QFrame()
         self.playground_panel.setFrameShape(QFrame.Shape.StyledPanel)
         panel_layout = QVBoxLayout(self.playground_panel)
-        panel_layout.setContentsMargins(8, 4, 8, 4)
-        panel_layout.setSpacing(4)
+        panel_layout.setContentsMargins(0, 0, 0, 0)
+        panel_layout.setSpacing(0)
 
-        header = QHBoxLayout()
-        header.setContentsMargins(0, 0, 0, 0)
-        self.playground_toggle_btn = QPushButton("▲ Match Playground")
-        self.playground_toggle_btn.setToolTip("Open playground to test text expansion live (Ctrl+P)")
-        self.playground_toggle_btn.clicked.connect(lambda: self.toggle_playground())
-        header.addWidget(self.playground_toggle_btn)
-
-        self.playground_hint = QLabel("Type triggers live to test matches")
-        self.playground_hint.setEnabled(False)
-        header.addWidget(self.playground_hint)
-
-        header.addStretch()
-
-        self.playground_status = QLabel("")
-        header.addWidget(self.playground_status)
-
-        self.playground_clear_btn = QPushButton("Clear")
-        self.playground_clear_btn.setToolTip("Clear the playground text")
-        self.playground_clear_btn.clicked.connect(self.clear_playground)
-        self.playground_clear_btn.hide()
-        header.addWidget(self.playground_clear_btn)
-
-        panel_layout.addLayout(header)
+        self.playground_header = PlaygroundHeader(self.toggle_playground)
+        self.playground_header.clear_btn.clicked.connect(self.clear_playground)
+        self.playground_status = self.playground_header.status_label
+        panel_layout.addWidget(self.playground_header)
 
         self.playground_content = QWidget()
         content_layout = QVBoxLayout(self.playground_content)
-        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setContentsMargins(8, 0, 8, 6)
         content_layout.setSpacing(2)
 
         self.playground_edit = QPlainTextEdit()
@@ -68,6 +97,9 @@ class PlaygroundMixin:
         self.playground_content.hide()
         panel_layout.addWidget(self.playground_content)
 
+        header_height = self.playground_header.sizeHint().height() + 2
+        self.playground_panel.setMaximumHeight(header_height)
+
         return self.playground_panel
 
     def toggle_playground(self, show: bool | None = None) -> None:
@@ -75,11 +107,14 @@ class PlaygroundMixin:
             show = not self.playground_content.isVisible()
 
         self.playground_content.setVisible(show)
-        self.playground_clear_btn.setVisible(show)
-        arrow = "▼" if show else "▲"
-        self.playground_toggle_btn.setText(f"{arrow} Match Playground")
+        self.playground_header.set_open(show)
 
+        handle = self.vertical_splitter.handle(1)
         if show:
+            self.playground_panel.setMaximumHeight(16777215)
+            if handle:
+                handle.setEnabled(True)
+                handle.setCursor(Qt.CursorShape.SplitVCursor)
             height = getattr(self, "_playground_height", 180)
             self.vertical_splitter.setSizes([max(200, self.height() - height), height])
             self.playground_edit.setFocus()
@@ -87,7 +122,12 @@ class PlaygroundMixin:
             sizes = self.vertical_splitter.sizes()
             if len(sizes) > 1 and sizes[1] > 60:
                 self._playground_height = sizes[1]
-            self.vertical_splitter.setSizes([1000, 36])
+            header_height = self.playground_header.sizeHint().height() + 2
+            self.playground_panel.setMaximumHeight(header_height)
+            if handle:
+                handle.setEnabled(False)
+                handle.setCursor(Qt.CursorShape.ArrowCursor)
+            self.vertical_splitter.setSizes([1000, header_height])
 
     def clear_playground(self) -> None:
         self.playground_edit.clear()
