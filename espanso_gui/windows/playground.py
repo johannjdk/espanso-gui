@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import re
+import subprocess
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QMouseEvent, QTextCursor
@@ -222,21 +223,48 @@ class PlaygroundMixin:
             self.statusBar().showMessage(f"Playground: expanded {best_trigger}", 3000)
 
     def _evaluate_playground_variables(self, match: EspansoMatch, text: str) -> str:
+        form_vars = {v.name: v for v in match.variables if v.type == "form"}
+
         for var in match.variables:
             placeholder = f"{{{{{var.name}}}}}"
             if var.type == "form":
                 pattern = rf"\{{\{{\s*{re.escape(var.name)}\.([a-zA-Z0-9_]+)\s*\}}\}}"
                 for match_field in re.finditer(pattern, text):
                     field_name = match_field.group(1)
-                    field_obj = match.form_fields.get(field_name)
-                    replacement = (
-                        field_obj.default
-                        if field_obj and field_obj.default
-                        else (field_obj.values[0] if field_obj and field_obj.values else f"[{field_name}]")
-                    )
+                    field_obj = var.fields.get(field_name) if hasattr(var, "fields") and field_name in var.fields else match.form_fields.get(field_name)
+                    if field_obj:
+                        replacement = (
+                            field_obj.default
+                            if field_obj.default
+                            else (str(field_obj.values[0]) if field_obj.values else f"[{field_name}]")
+                        )
+                    else:
+                        replacement = f"[{field_name}]"
                     text = text.replace(match_field.group(0), replacement)
+
                 if placeholder in text:
-                    text = text.replace(placeholder, str(var.params.get("layout", "")))
+                    layout = str(var.params.get("layout", ""))
+                    if hasattr(var, "fields"):
+                        for fname, fobj in var.fields.items():
+                            fval = fobj.default if fobj.default else (str(fobj.values[0]) if fobj.values else f"[{fname}]")
+                            layout = re.sub(rf"\[\[\s*{re.escape(fname)}\s*\]\]", fval, layout)
+                    text = text.replace(placeholder, layout)
+                continue
+
+            if var.type == "shell":
+                cmd = str(var.params.get("cmd", ""))
+                for fv_name, fv in form_vars.items():
+                    if hasattr(fv, "fields"):
+                        for fname, fobj in fv.fields.items():
+                            fval = fobj.default if fobj.default else (str(fobj.values[0]) if fobj.values else f"[{fname}]")
+                            cmd = re.sub(rf"\{{\{{\s*{re.escape(fv_name)}\.{re.escape(fname)}\s*\}}\}}", fval, cmd)
+                if placeholder in text:
+                    try:
+                        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=1.5)
+                        val = res.stdout.rstrip("\r\n") if res.returncode == 0 else f"[shell error: {cmd}]"
+                    except Exception:
+                        val = f"[cmd: {cmd}]"
+                    text = text.replace(placeholder, val)
                 continue
 
             if placeholder not in text:
