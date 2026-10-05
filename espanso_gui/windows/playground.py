@@ -35,10 +35,6 @@ class PlaygroundHeader(QFrame):
         self.title_label.setFont(font)
         layout.addWidget(self.title_label)
 
-        self.hint_label = QLabel("— test text expansion live")
-        self.hint_label.setEnabled(False)
-        layout.addWidget(self.hint_label)
-
         layout.addStretch()
 
         self.status_label = QLabel("")
@@ -65,19 +61,22 @@ class PlaygroundHeader(QFrame):
     def set_open(self, is_open: bool) -> None:
         self.toggle_btn.setText("Close" if is_open else "Open")
         self.clear_btn.setVisible(is_open)
-        self.hint_label.setVisible(not is_open)
         self.setCursor(Qt.CursorShape.ArrowCursor if is_open else Qt.CursorShape.PointingHandCursor)
 
 
 class PlaygroundMixin:
     def _build_playground_panel(self) -> QWidget:
+        self._playground_open = False
+        self._playground_height = 180
+        self._expanding = False
+
         self.playground_panel = QFrame()
         self.playground_panel.setFrameShape(QFrame.Shape.StyledPanel)
         panel_layout = QVBoxLayout(self.playground_panel)
         panel_layout.setContentsMargins(0, 0, 0, 0)
         panel_layout.setSpacing(0)
 
-        self.playground_header = PlaygroundHeader(self.toggle_playground)
+        self.playground_header = PlaygroundHeader(lambda *args: self.toggle_playground())
         self.playground_header.clear_btn.clicked.connect(self.clear_playground)
         self.playground_status = self.playground_header.status_label
         panel_layout.addWidget(self.playground_header)
@@ -88,9 +87,7 @@ class PlaygroundMixin:
         content_layout.setSpacing(2)
 
         self.playground_edit = QPlainTextEdit()
-        self.playground_edit.setPlaceholderText(
-            "Type triggers here to test expansion (e.g. :hello, regex triggers, or forms)…"
-        )
+        self.playground_edit.setPlaceholderText("Test triggers here")
         self.playground_edit.textChanged.connect(self._on_playground_text_changed)
         content_layout.addWidget(self.playground_edit)
 
@@ -102,9 +99,10 @@ class PlaygroundMixin:
 
         return self.playground_panel
 
-    def toggle_playground(self, show: bool | None = None) -> None:
+    def toggle_playground(self, *args, show: bool | None = None) -> None:
         if show is None:
-            show = not self.playground_content.isVisible()
+            show = not getattr(self, "_playground_open", False)
+        self._playground_open = show
 
         self.playground_content.setVisible(show)
         self.playground_header.set_open(show)
@@ -115,8 +113,10 @@ class PlaygroundMixin:
             if handle:
                 handle.setEnabled(True)
                 handle.setCursor(Qt.CursorShape.SplitVCursor)
-            height = getattr(self, "_playground_height", 180)
-            self.vertical_splitter.setSizes([max(200, self.height() - height), height])
+            target_h = getattr(self, "_playground_height", 180)
+            total = self.vertical_splitter.height()
+            top_h = max(150, total - target_h)
+            self.vertical_splitter.setSizes([top_h, target_h])
             self.playground_edit.setFocus()
         else:
             sizes = self.vertical_splitter.sizes()
@@ -127,7 +127,8 @@ class PlaygroundMixin:
             if handle:
                 handle.setEnabled(False)
                 handle.setCursor(Qt.CursorShape.ArrowCursor)
-            self.vertical_splitter.setSizes([1000, header_height])
+            total = self.vertical_splitter.height()
+            self.vertical_splitter.setSizes([max(150, total - header_height), header_height])
 
     def clear_playground(self) -> None:
         self.playground_edit.clear()
