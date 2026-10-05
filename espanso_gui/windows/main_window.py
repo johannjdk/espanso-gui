@@ -6,13 +6,14 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QMainWindow, QMessageBox, QSplitter
+from PySide6.QtWidgets import QLabel, QMainWindow, QMessageBox, QSplitter
 
 from ..config_service import ConfigService
 from ..models import EspansoMatch
 from ..runtime import application_icon
 from ..ui.about_dialog import APP_NAME
 from ..ui.search_dialog import SearchDialog
+from ..ui.stats_dialog import StatsDialog
 from .editor_ui import WindowLayoutMixin
 from .file_management import FileManagementMixin
 from .match_details import MatchDetailsMixin
@@ -88,7 +89,17 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.vertical_splitter.setSizes([1000, header_height])
 
         self.setCentralWidget(self.vertical_splitter)
+        self.espanso_version = ConfigService.detect_espanso_version()
+        ver_text = f"Espanso: {self.espanso_version}" if self.espanso_version else "Espanso: not detected"
+        self.version_label = QLabel(ver_text)
+        self.version_label.setEnabled(False)
+        self.statusBar().addPermanentWidget(self.version_label)
         self.statusBar().showMessage(f"Configuration folder: {self.config_path}")
+
+    def open_statistics(self) -> None:
+        dialog = StatsDialog(self, getattr(self, "config_path", None))
+        dialog.exec()
+
     def search_all_configurations(self) -> None:
         self.persist_current_match()
         dialog = SearchDialog(self, self.config_path, self.current_file, self.matches, self.open_search_match)

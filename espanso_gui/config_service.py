@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -122,3 +123,62 @@ class ConfigService:
         return subprocess.run(
             ["espanso", "restart"], text=True, capture_output=True, check=False, timeout=20
         )
+
+    @staticmethod
+    def detect_espanso_version() -> str | None:
+        try:
+            res = subprocess.run(["espanso", "--version"], text=True, capture_output=True, check=False, timeout=5)
+            if res.returncode == 0:
+                m = re.search(r"(\d+\.\d+\.\d+)", res.stdout.strip())
+                return m.group(1) if m else res.stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            pass
+        return None
+
+    @staticmethod
+    def is_stats_supported() -> bool:
+        ver = ConfigService.detect_espanso_version()
+        if not ver:
+            return False
+        parts = re.findall(r"\d+", ver)
+        return tuple(int(p) for p in parts[:3]) >= (2, 4, 0)
+
+    @staticmethod
+    def is_stats_enabled(config_dir: Path | None = None) -> bool:
+        options_dir = config_dir or ConfigService.detect_options_path()
+        if options_dir.name == "match":
+            candidate = options_dir.parent / "config"
+            if candidate.is_dir():
+                options_dir = candidate
+        path = options_dir / "default.yml"
+        if not path.is_file():
+            return False
+        try:
+            with path.open("r", encoding="utf-8") as stream:
+                doc = yaml.safe_load(stream) or {}
+            stats = doc.get("stats")
+            if isinstance(stats, dict):
+                return bool(stats.get("enabled", False))
+            if isinstance(stats, bool):
+                return stats
+        except Exception:
+            pass
+        return False
+
+    @staticmethod
+    def get_stats(period: str = "all", count: int = 50, grep: str | None = None) -> dict:
+        import json
+        cmd = ["espanso", "stats", "--json", "--period", period, "--count", str(count)]
+        if grep:
+            cmd.extend(["--grep", grep])
+        res = subprocess.run(cmd, text=True, capture_output=True, check=False, timeout=10)
+        if res.returncode == 0:
+            return json.loads(res.stdout)
+        raise RuntimeError(res.stderr.strip() or f"Command failed with exit code {res.returncode}")
+
+    @staticmethod
+    def clear_stats() -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["espanso", "stats", "clear"], text=True, capture_output=True, check=False, timeout=10
+        )
+

@@ -66,10 +66,15 @@ class MenuMixin:
 
         tools_menu = self.menuBar().addMenu("Tools")
         self._menu_action(tools_menu, "Match playground", self.toggle_playground, "Ctrl+P")
+        self._menu_action(tools_menu, "Statistics…", self.open_statistics)
         self._menu_action(tools_menu, "Restart Espanso", self.restart_espanso, "Ctrl+Shift+R")
 
         help_menu = self.menuBar().addMenu("Help")
-        self._menu_action(help_menu, "About Espanso GUI", lambda: show_about_dialog(self, self.config_path))
+        self._menu_action(
+            help_menu,
+            "About Espanso GUI",
+            lambda: show_about_dialog(self, self.config_path, getattr(self, "espanso_version", None)),
+        )
         for menu in (file_menu, edit_menu, search_menu):
             menu.aboutToShow.connect(self._update_menu_actions)
         self.file_tree.itemSelectionChanged.connect(self._update_menu_actions)
