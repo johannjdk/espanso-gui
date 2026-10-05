@@ -65,9 +65,8 @@ class FileManagementMixin:
         self.current_file = path
         self.dirty = False
         self.selected_match = -1
-        self.file_label.setText(f"File: {path.name}")
         self.match_sidebar.setTitle(f"Matches — {path.name}")
-        self.setWindowTitle(f"{APP_NAME} — {path.name}")
+        self._update_document_labels()
         self._set_editor_enabled(True)
         self.refresh_match_table()
         if self.matches:
