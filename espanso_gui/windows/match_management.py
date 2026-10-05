@@ -26,9 +26,15 @@ class MatchManagementMixin:
         if self._loading or not (0 <= self.selected_match < len(self.matches)):
             return
         match = self.matches[self.selected_match]
-        trigger_values = [self.trigger_edit.text().strip()]
-        trigger_values.extend(edit.text().strip() for edit, _ in self.optional_trigger_edits)
-        match.set_trigger_values(trigger_values, preserve_multiple=bool(match.triggers))
+        if self.regex_check.isChecked():
+            match.regex = self.trigger_edit.text().strip()
+            match.trigger = ""
+            match.triggers = []
+        else:
+            match.regex = ""
+            trigger_values = [self.trigger_edit.text().strip()]
+            trigger_values.extend(edit.text().strip() for edit, _ in self.optional_trigger_edits)
+            match.set_trigger_values(trigger_values, preserve_multiple=bool(match.triggers))
         match.word = self.word_check.isChecked()
         if self.radio_form.isChecked():
             match.mode = "form"
@@ -38,6 +44,17 @@ class MatchManagementMixin:
             match.mode = "replace"
             match.replace = self.replace_edit.toPlainText()
             match.form = ""
+    def on_regex_toggled(self, checked: bool) -> None:
+        self.add_trigger_button.setEnabled(not checked)
+        for _, widget in self.optional_trigger_edits:
+            widget.setVisible(not checked)
+        self.trigger_edit.setPlaceholderText(
+            r"e.g. :greet\d or :greet\((?P<name>.*)\)" if checked else "e.g. :hello"
+        )
+        if not self._loading and 0 <= self.selected_match < len(self.matches):
+            self.persist_current_match()
+            self.dirty = True
+            self.refresh_match_table(keep_selection=True)
     def add_optional_trigger(self, text: str = "") -> None:
         """Add an editable alias for the currently selected match."""
         row_widget = QWidget()
@@ -84,7 +101,9 @@ class MatchManagementMixin:
         self.persist_current_match()
         original = self.matches[self.selected_match]
         duplicate = copy.deepcopy(original)
-        if original.triggers:
+        if original.regex:
+            duplicate.regex = f"{original.regex}_copy"
+        elif original.triggers:
             duplicate.triggers = [f"{trigger}_copy" for trigger in original.triggers]
         else:
             duplicate.trigger = f"{original.trigger}_copy"
@@ -233,12 +252,17 @@ class MatchManagementMixin:
 
         self._loading = True
         self.clear_optional_triggers()
-        if match.triggers:
-            self.trigger_edit.setText(match.triggers[0] if match.triggers else "")
-            for trigger in match.triggers[1:]:
-                self.add_optional_trigger(trigger)
+        if match.regex:
+            self.regex_check.setChecked(True)
+            self.trigger_edit.setText(match.regex)
         else:
-            self.trigger_edit.setText(match.trigger)
+            self.regex_check.setChecked(False)
+            if match.triggers:
+                self.trigger_edit.setText(match.triggers[0] if match.triggers else "")
+                for trigger in match.triggers[1:]:
+                    self.add_optional_trigger(trigger)
+            else:
+                self.trigger_edit.setText(match.trigger)
         self.word_check.setChecked(match.word)
         # Refresh hidden content too, so it cannot leak between matches.
         self.replace_edit.setPlainText(match.replace)
@@ -258,6 +282,7 @@ class MatchManagementMixin:
     def clear_match_form(self) -> None:
         self._loading = True
         self.trigger_edit.clear()
+        self.regex_check.setChecked(False)
         self.clear_optional_triggers()
         self.replace_edit.clear()
         self.form_layout_edit.clear()

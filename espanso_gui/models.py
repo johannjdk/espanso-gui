@@ -105,6 +105,7 @@ class EspansoFormField:
 class EspansoMatch:
     trigger: str = ""
     triggers: list[str] = field(default_factory=list)
+    regex: str = ""
     replace: str = ""
     form: str = ""
     form_fields: dict[str, EspansoFormField] = field(default_factory=dict)
@@ -118,14 +119,21 @@ class EspansoMatch:
         return self.mode == "form" or bool(self.form)
 
     @property
+    def is_regex(self) -> bool:
+        return bool(self.regex)
+
+    @property
     def trigger_text(self) -> str:
         """Return triggers as compact text for the match table and search."""
+        if self.regex:
+            return self.regex
         return ", ".join(self.triggers) if self.triggers else self.trigger
 
     def set_trigger_values(
         self, values: list[str], *, preserve_multiple: bool = False
     ) -> None:
         """Store one trigger in ``trigger`` and several in Espanso's ``triggers`` field."""
+        self.regex = ""
         triggers = [trigger.strip() for trigger in values if trigger.strip()]
         if len(triggers) == 1 and not preserve_multiple:
             self.trigger = triggers[0]
@@ -133,6 +141,12 @@ class EspansoMatch:
         else:
             self.trigger = ""
             self.triggers = triggers
+
+    def set_regex_value(self, value: str) -> None:
+        """Store a regular expression trigger and clear static triggers."""
+        self.regex = value.strip()
+        self.trigger = ""
+        self.triggers = []
 
     @property
     def search_text(self) -> str:
@@ -160,6 +174,19 @@ class EspansoMatch:
                 result.append(name)
         return result
 
+    def detect_named_groups(self) -> list[str]:
+        """Extract named group variables found in the regex trigger."""
+        if not self.regex:
+            return []
+        matches = re.findall(r"\(\?P<([A-Za-z0-9_]+)>", self.regex)
+        seen = set()
+        result = []
+        for name in matches:
+            if name not in seen:
+                seen.add(name)
+                result.append(name)
+        return result
+
     @classmethod
     def from_yaml(cls, data: dict[str, Any]) -> "EspansoMatch":
         has_form = "form" in data or "form_fields" in data
@@ -174,13 +201,15 @@ class EspansoMatch:
 
         raw_trigger = data.get("trigger", "")
         raw_triggers = data.get("triggers", [])
+        raw_regex = data.get("regex", "")
         # Treat the list form under ``trigger`` as a legacy editor value so it
         # is normalized to Espanso's documented ``triggers`` key when saved.
         triggers = raw_triggers if isinstance(raw_triggers, list) else raw_trigger if isinstance(raw_trigger, list) else []
-        known = {"trigger", "triggers", "replace", "form", "form_fields", "vars", "word"}
+        known = {"trigger", "triggers", "regex", "replace", "form", "form_fields", "vars", "word"}
         return cls(
             trigger="" if isinstance(raw_trigger, list) or raw_trigger is None else str(raw_trigger),
             triggers=[str(item) for item in triggers if item is not None],
+            regex="" if raw_regex is None else str(raw_regex),
             replace=replace,
             form=form,
             form_fields=form_fields,
@@ -194,7 +223,10 @@ class EspansoMatch:
         data: dict[str, Any] = dict(self.extra)
         data.pop("trigger", None)
         data.pop("triggers", None)
-        if self.triggers:
+        data.pop("regex", None)
+        if self.regex:
+            data["regex"] = self.regex
+        elif self.triggers:
             data["triggers"] = self.triggers
         else:
             data["trigger"] = self.trigger
