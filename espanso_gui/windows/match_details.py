@@ -78,6 +78,11 @@ class MatchDetailsMixin:
         self.field_default_edit.setText(field_obj.default)
         self.btn_apply_field.setEnabled(True)
         self.btn_delete_field.setEnabled(True)
+
+    def on_form_field_cell_clicked(self, row: int, column: int) -> None:
+        self.form_fields_table.selectRow(row)
+        self.on_form_field_selected()
+
     def on_form_field_type_changed(self, text: str) -> None:
         is_choice_or_list = "Choice" in text or "List" in text
         self.field_values_edit.setEnabled(is_choice_or_list)
@@ -159,6 +164,8 @@ class MatchDetailsMixin:
             self.clear_form_field_form()
     def clear_form_field_form(self) -> None:
         self.selected_form_field = ""
+        self.form_fields_table.clearSelection()
+        self.form_fields_table.setCurrentItem(None)
         self.field_name_edit.clear()
         self.field_type_combo.setCurrentIndex(0)
         self.field_values_edit.clear()
@@ -271,6 +278,12 @@ class MatchDetailsMixin:
         self.var_field_values_label.setEnabled(is_choice_or_list)
         self.btn_delete_var_field.setEnabled(True)
         self._loading_var_field = False
+
+    def on_var_field_cell_clicked(self, row: int, column: int) -> None:
+        if getattr(self, "_loading_var_field", False):
+            return
+        self.var_fields_table.selectRow(row)
+        self.on_var_field_selected()
 
     def on_var_field_name_editing_finished(self) -> None:
         if getattr(self, "_loading_var_field", False):
@@ -398,6 +411,8 @@ class MatchDetailsMixin:
 
     def _clear_var_field_inputs(self) -> None:
         self.selected_var_field = ""
+        self.var_fields_table.clearSelection()
+        self.var_fields_table.setCurrentItem(None)
         self.var_field_form_widget.setEnabled(False)
         self._loading_var_field = True
         self.var_field_name_edit.clear()
@@ -419,10 +434,7 @@ class MatchDetailsMixin:
         self._loading_var = True
         self.variable_table.setRowCount(0)
         if not (0 <= self.selected_match < len(self.matches)):
-            self.selected_variable = -1
-            self.var_config_stack.setCurrentIndex(0)
-            self.btn_delete_variable.setEnabled(False)
-            self._loading_var = False
+            self.clear_variable_form()
             return
         variables = self.matches[self.selected_match].variables
         self.variable_table.setRowCount(len(variables))
@@ -439,14 +451,13 @@ class MatchDetailsMixin:
             self._loading_var = False
             self.on_variable_selected()
         else:
-            self.selected_variable = -1
-            self.var_config_stack.setCurrentIndex(0)
-            self.btn_delete_variable.setEnabled(False)
-            self._loading_var = False
+            self.clear_variable_form()
 
     def clear_variable_form(self) -> None:
         self.selected_variable = -1
         self._loading_var = True
+        self.variable_table.clearSelection()
+        self.variable_table.setCurrentItem(None)
         self.variable_name.clear()
         self.variable_type.setCurrentIndex(0)
         self.var_shell_edit.clear()
@@ -460,6 +471,13 @@ class MatchDetailsMixin:
         self._clear_var_field_inputs()
         self.var_fields_table.setRowCount(0)
         self._loading_var = False
+
+    def on_variable_cell_clicked(self, row: int, column: int) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        self.selected_variable = row
+        self.variable_table.selectRow(row)
+        self.on_variable_selected()
 
     def on_variable_selected(self) -> None:
         if getattr(self, "_loading_var", False):

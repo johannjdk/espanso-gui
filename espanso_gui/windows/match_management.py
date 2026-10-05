@@ -278,7 +278,6 @@ class MatchManagementMixin:
         self.refresh_form_fields_table()
         self.clear_form_field_form()
         self.refresh_variable_table()
-        self.clear_variable_form()
     def clear_match_form(self) -> None:
         self._loading = True
         self.trigger_edit.clear()
