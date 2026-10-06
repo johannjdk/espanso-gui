@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox, QInputDialog, QLabel, Q
 
 from ..config_service import ConfigService
 from ..ui.about_dialog import APP_NAME
+from ..ui.gui_config_dialog import EspansoGuiConfigDialog
 from .profile_dialog import EspansoConfigDialog
 
 
@@ -172,3 +173,17 @@ class FileManagementMixin:
             return
         dialog = EspansoConfigDialog(self)
         dialog.exec()
+
+    def open_espanso_gui_configuration(self) -> None:
+        if not self._ask_save_changes():
+            return
+        dialog = EspansoGuiConfigDialog(self)
+        if dialog.exec():
+            self.config_path = ConfigService.detect_config_path()
+            self.current_file = None
+            self.matches = []
+            self.document_extra = {}
+            self.dirty = False
+            self._set_editor_enabled(False)
+            self.load_files()
+            self.statusBar().showMessage(f"Configuration folder: {self.config_path}")
