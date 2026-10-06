@@ -32,6 +32,7 @@ class MenuMixin:
         file_menu.addSeparator()
         self.yaml_action = self._menu_action(file_menu, "Expert YAML…", self.open_yaml_editor, "Ctrl+E")
         self._menu_action(file_menu, "Espanso configuration…", self.open_espanso_configuration)
+        self._menu_action(file_menu, "Espanso GUI Configuration", self.open_espanso_gui_configuration)
         file_menu.addSeparator()
         self._menu_action(file_menu, "Quit", self.close, "Ctrl+Q")
 

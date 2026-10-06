@@ -10,6 +10,8 @@ from pathlib import Path
 
 import yaml
 
+from PySide6.QtCore import QSettings
+
 from .models import EspansoMatch
 
 
@@ -35,8 +37,20 @@ class ConfigService:
         )
 
     @staticmethod
-    def detect_espanso_path() -> Path:
-        """Return Espanso's configuration root directory."""
+    def get_custom_espanso_path() -> Path | None:
+        val = QSettings("EspansoGUI", "EspansoGUI").value("espanso_path")
+        return Path(val) if val else None
+
+    @staticmethod
+    def set_custom_espanso_path(path: Path | None) -> None:
+        settings = QSettings("EspansoGUI", "EspansoGUI")
+        if path:
+            settings.setValue("espanso_path", str(path))
+        else:
+            settings.remove("espanso_path")
+
+    @staticmethod
+    def default_espanso_path() -> Path:
         if sys.platform.startswith("win"):
             base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
             return base / "espanso"
@@ -46,14 +60,30 @@ class ConfigService:
         return base / "espanso"
 
     @staticmethod
+    def detect_espanso_path() -> Path:
+        """Return Espanso's configuration root directory."""
+        custom = ConfigService.get_custom_espanso_path()
+        if custom and custom.is_dir():
+            return custom
+        return ConfigService.default_espanso_path()
+
+    @staticmethod
     def detect_config_path() -> Path:
         """Return Espanso's match-file directory."""
-        return ConfigService.detect_espanso_path() / "match"
+        espanso_dir = ConfigService.detect_espanso_path()
+        if espanso_dir.name == "match":
+            return espanso_dir
+        if espanso_dir.is_dir() and not (espanso_dir / "match").is_dir() and any(espanso_dir.glob("*.yml")):
+            return espanso_dir
+        return espanso_dir / "match"
 
     @staticmethod
     def detect_options_path() -> Path:
         """Return the directory containing Espanso configuration profiles."""
-        return ConfigService.detect_espanso_path() / "config"
+        espanso_dir = ConfigService.detect_espanso_path()
+        if espanso_dir.name == "match":
+            return espanso_dir.parent / "config"
+        return espanso_dir / "config"
 
     @staticmethod
     def parse_yaml(path: Path) -> list[EspansoMatch]:
