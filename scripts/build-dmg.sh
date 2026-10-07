@@ -20,7 +20,7 @@ case "$(uname -m)" in
         ;;
 esac
 
-artifact="$output_dir/${package_name}-macos-${package_arch}.dmg"
+artifact="$output_dir/${package_name}-${version}-macos-${package_arch}.dmg"
 iconset="$build_dir/EspansoGUI.iconset"
 icon="$build_dir/EspansoGUI.icns"
 
