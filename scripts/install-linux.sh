@@ -31,7 +31,8 @@ distribution="${ID:-} ${ID_LIKE:-}"
 case " $distribution " in
   *" debian "*|*" ubuntu "*) package_type="deb" ;;
   *" arch "*|*" manjaro "*|*" endeavouros "*) package_type="arch" ;;
-  *) die "Unsupported distribution: ${PRETTY_NAME:-unknown}. Use Debian, Ubuntu, Arch, or a compatible distribution." ;;
+  *" fedora "*|*" rhel "*|*" centos "*|*" rocky "*|*" almalinux "*) package_type="rpm" ;;
+  *) die "Unsupported distribution: ${PRETTY_NAME:-unknown}. Use Debian, Ubuntu, Arch, Fedora, or a compatible distribution." ;;
 esac
 
 if command -v sudo >/dev/null 2>&1; then
@@ -92,6 +93,18 @@ case "$package_type" in
       run_as_root pacman -U --needed "$package" < /dev/tty
     else
       run_as_root pacman -U --needed --noconfirm "$package"
+    fi
+    ;;
+  rpm)
+    command -v rpm >/dev/null 2>&1 || die "rpm is required for RPM-based installations."
+    package="$tmp_dir/espanso-gui-noarch.rpm"
+    info "Downloading the latest RPM package…"
+    download "$package" "$release_url/espanso-gui-noarch.rpm"
+    info "Installing Espanso GUI…"
+    if command -v dnf >/dev/null 2>&1; then
+      run_as_root dnf install -y "$package"
+    else
+      run_as_root yum install -y "$package"
     fi
     ;;
 esac

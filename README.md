@@ -58,7 +58,7 @@ Install [Espanso](https://espanso.org/install/) first. Espanso GUI looks for its
 
 ### Linux
 
-The install script supports Debian, Ubuntu, Arch Linux, and compatible distributions. It downloads the latest release package and requires administrator access.
+The install script supports Debian, Ubuntu, Arch Linux, Fedora, and compatible distributions. It downloads the latest release package and requires administrator access.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh
@@ -70,6 +70,12 @@ For Debian and Ubuntu:
 
 ```bash
 sudo apt install ./espanso-gui-all.deb
+```
+
+For Fedora:
+
+```bash
+sudo dnf install ./espanso-gui-noarch.rpm
 ```
 
 For Arch Linux:

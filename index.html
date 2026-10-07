@@ -575,6 +575,32 @@
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
                     <span class="fw-bold"
+                      ><i class="bi bi-box-seam me-1 text-primary"></i> Fedora /
+                      RHEL</span
+                    >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="rpm-tag"
+                      >.rpm</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-rpm"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download Fedora (.rpm)</span>
+                  </a>
+                </div>
+
+                <div class="p-3 border package-choice">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold"
                       ><i class="bi bi-cpu me-1 text-primary"></i> Arch
                       Linux</span
                     >
@@ -961,11 +987,13 @@ python3 -m espanso_gui</code></pre>
 
           if (release.tag_name) {
             const debTag = document.getElementById("deb-tag");
+            const rpmTag = document.getElementById("rpm-tag");
             const archTag = document.getElementById("arch-tag");
             const macosArmTag = document.getElementById("macos-arm64-tag");
             const macosX64Tag = document.getElementById("macos-x64-tag");
             const windowsX64Tag = document.getElementById("windows-x64-tag");
             if (debTag) debTag.textContent = release.tag_name;
+            if (rpmTag) rpmTag.textContent = release.tag_name;
             if (archTag) archTag.textContent = release.tag_name;
             if (macosArmTag) macosArmTag.textContent = release.tag_name;
             if (macosX64Tag) macosX64Tag.textContent = release.tag_name;
@@ -978,6 +1006,10 @@ python3 -m espanso_gui</code></pre>
               if (name.endsWith(".deb")) {
                 const debBtn = document.getElementById("btn-download-deb");
                 if (debBtn) debBtn.href = asset.browser_download_url;
+              }
+              if (name.endsWith(".rpm")) {
+                const rpmBtn = document.getElementById("btn-download-rpm");
+                if (rpmBtn) rpmBtn.href = asset.browser_download_url;
               }
               if (name.endsWith(".pkg.tar.zst") || name.includes("arch")) {
                 const archBtn = document.getElementById("btn-download-arch");
