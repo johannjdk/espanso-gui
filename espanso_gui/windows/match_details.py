@@ -183,6 +183,8 @@ class MatchDetailsMixin:
         var = match.variables[self.selected_variable]
         if var.type != "form":
             return None
+        if not hasattr(var, "fields") or var.fields is None:
+            var.fields = {}
         return var
 
     def detect_var_fields(self) -> None:
