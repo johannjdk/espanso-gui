@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -24,7 +25,7 @@ class EspansoGuiConfigDialog(QDialog):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Espanso GUI Configuration")
-        self.resize(500, 120)
+        self.resize(500, 150)
 
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(".espanso directory:"))
@@ -37,6 +38,10 @@ class EspansoGuiConfigDialog(QDialog):
         row.addWidget(self.path_edit)
         row.addWidget(browse_btn)
         layout.addLayout(row)
+
+        self.check_updates_cb = QCheckBox("Check for updates on startup")
+        self.check_updates_cb.setChecked(ConfigService.get_check_updates())
+        layout.addWidget(self.check_updates_cb)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok
@@ -55,6 +60,8 @@ class EspansoGuiConfigDialog(QDialog):
 
     def _restore_defaults(self) -> None:
         self.path_edit.setText(str(ConfigService.default_espanso_path()))
+        self.check_updates_cb.setChecked(True)
+        ConfigService.set_ignored_update_version("")
 
     def _save(self) -> None:
         path_str = self.path_edit.text().strip()
@@ -68,4 +75,5 @@ class EspansoGuiConfigDialog(QDialog):
             ConfigService.set_custom_espanso_path(None)
         else:
             ConfigService.set_custom_espanso_path(path)
+        ConfigService.set_check_updates(self.check_updates_cb.isChecked())
         self.accept()

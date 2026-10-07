@@ -4,16 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QLabel, QMainWindow, QMessageBox, QSplitter
 
+from .. import __version__
 from ..config_service import ConfigService
 from ..models import EspansoMatch
 from ..runtime import application_icon
 from ..ui.about_dialog import APP_NAME
 from ..ui.search_dialog import SearchDialog
 from ..ui.stats_dialog import StatsDialog
+from ..updater import check_for_updates
 from .editor_ui import WindowLayoutMixin
 from .file_management import FileManagementMixin
 from .match_details import MatchDetailsMixin
@@ -38,9 +40,11 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self._loading = False
         self._loading_var = False
         self._loading_var_field = False
+        self._update_thread = None
         self._build_ui()
         self.load_files()
         self._set_editor_enabled(False)
+        QTimer.singleShot(1000, lambda: self.check_for_updates(manual=False))
 
     @property
     def dirty(self) -> bool:
@@ -148,7 +152,12 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         else:
             detail = result.stderr.strip() or result.stdout.strip() or f"Exit code {result.returncode}"
             QMessageBox.warning(self, "Restart failed", detail)
+    def check_for_updates(self, *, manual: bool = False) -> None:
+        self._update_thread = check_for_updates(self, __version__, manual=manual)
+
     def closeEvent(self, event: QCloseEvent) -> None:
+        if getattr(self, "_update_thread", None) and self._update_thread.isRunning():
+            self._update_thread.wait(500)
         if self._ask_save_changes():
             event.accept()
         else:

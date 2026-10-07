@@ -50,6 +50,29 @@ class ConfigService:
             settings.remove("espanso_path")
 
     @staticmethod
+    def get_check_updates() -> bool:
+        val = QSettings("EspansoGUI", "EspansoGUI").value("check_updates", True)
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, (int, float)):
+            return bool(val)
+        if isinstance(val, str):
+            return val.lower() not in ("false", "0", "no")
+        return True
+
+    @staticmethod
+    def set_check_updates(enabled: bool) -> None:
+        QSettings("EspansoGUI", "EspansoGUI").setValue("check_updates", bool(enabled))
+
+    @staticmethod
+    def get_ignored_update_version() -> str:
+        return str(QSettings("EspansoGUI", "EspansoGUI").value("ignored_update_version", ""))
+
+    @staticmethod
+    def set_ignored_update_version(version: str) -> None:
+        QSettings("EspansoGUI", "EspansoGUI").setValue("ignored_update_version", version)
+
+    @staticmethod
     def default_espanso_path() -> Path:
         if sys.platform.startswith("win"):
             base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))

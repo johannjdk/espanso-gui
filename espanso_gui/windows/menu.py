@@ -73,6 +73,11 @@ class MenuMixin:
         help_menu = self.menuBar().addMenu("Help")
         self._menu_action(
             help_menu,
+            "Check for updates…",
+            lambda: self.check_for_updates(manual=True),
+        )
+        self._menu_action(
+            help_menu,
             "About Espanso GUI",
             lambda: show_about_dialog(self, self.config_path, getattr(self, "espanso_version", None)),
         )
