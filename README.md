@@ -69,19 +69,19 @@ Alternatively, download a package from the [releases page](https://github.com/jo
 For Debian and Ubuntu:
 
 ```bash
-sudo apt install ./espanso-gui-all.deb
+sudo apt install ./espanso-gui-*-linux-debian-ubuntu.deb
 ```
 
 For Fedora:
 
 ```bash
-sudo dnf install ./espanso-gui-noarch.rpm
+sudo dnf install ./espanso-gui-*-linux-fedora-rhel.noarch.rpm
 ```
 
 For Arch Linux:
 
 ```bash
-sudo pacman -U ./espanso-gui-qt-any.pkg.tar.zst
+sudo pacman -U ./espanso-gui-qt-*-linux-arch.pkg.tar.zst
 ```
 
 The Arch package is named `espanso-gui-qt` to distinguish it from the unrelated `espanso-gui` package in the AUR. The application menu entry and `espanso-gui` command stay the same.
@@ -92,8 +92,8 @@ When upgrading from an older release of this project, install the renamed packag
 
 Download the appropriate DMG from the [releases page](https://github.com/johannjdk/espanso-gui/releases):
 
-- Apple silicon: `espanso-gui-macos-arm64.dmg`
-- Intel: `espanso-gui-macos-x64.dmg`
+- Apple silicon: `espanso-gui-*-macos-arm64.dmg`
+- Intel: `espanso-gui-*-macos-x64.dmg`
 
 Open the DMG and move Espanso GUI to the Applications folder.
 

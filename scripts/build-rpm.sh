@@ -31,11 +31,7 @@ if [[ -z "$rpm_file" ]]; then
     exit 1
 fi
 
-artifact="$output_dir/$(basename "$rpm_file")"
-generic_artifact="$output_dir/${package_name}-noarch.rpm"
-
+artifact="$output_dir/${package_name}-${version}-linux-fedora-rhel.noarch.rpm"
 cp -f "$rpm_file" "$artifact"
-cp -f "$rpm_file" "$generic_artifact"
 
 echo "Built $artifact"
-echo "Created $generic_artifact"

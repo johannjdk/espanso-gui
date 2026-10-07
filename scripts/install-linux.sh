@@ -67,13 +67,25 @@ download() {
 }
 
 info "Detected ${PRETTY_NAME:-$ID}"
+
+info "Determining the latest release…"
+release_tag=""
+if command -v curl >/dev/null 2>&1; then
+  release_tag="$(curl -fsSI "https://github.com/${repo}/releases/latest" 2>/dev/null | tr -d '\r' | awk -F'/' '/[Ll]ocation:/ {print $NF}')"
+elif command -v wget >/dev/null 2>&1; then
+  release_tag="$(wget --spider --max-redirect=0 "https://github.com/${repo}/releases/latest" 2>&1 | tr -d '\r' | awk -F'/' '/[Ll]ocation:/ {print $NF}')"
+fi
+[ -n "$release_tag" ] || die "Could not determine the latest release from GitHub."
+version="${release_tag#v}"
+release_url="https://github.com/${repo}/releases/download/${release_tag}"
+
 case "$package_type" in
   deb)
     command -v dpkg >/dev/null 2>&1 || die "dpkg is required for Debian-based installations."
     command -v apt-get >/dev/null 2>&1 || die "apt-get is required for Debian-based installations."
-    package="$tmp_dir/espanso-gui-all.deb"
-    info "Downloading the latest Debian package…"
-    download "$package" "$release_url/espanso-gui-all.deb"
+    package="$tmp_dir/espanso-gui-${version}-linux-debian-ubuntu.deb"
+    info "Downloading the latest Debian/Ubuntu package (${release_tag})…"
+    download "$package" "$release_url/espanso-gui-${version}-linux-debian-ubuntu.deb"
     info "Installing Espanso GUI…"
     if ! run_as_root dpkg -i "$package"; then
       info "Installing required dependencies…"
@@ -83,9 +95,9 @@ case "$package_type" in
     ;;
   arch)
     command -v pacman >/dev/null 2>&1 || die "pacman is required for Arch-based installations."
-    package="$tmp_dir/espanso-gui-qt-any.pkg.tar.zst"
-    info "Downloading the latest Arch package…"
-    download "$package" "$release_url/espanso-gui-qt-any.pkg.tar.zst"
+    package="$tmp_dir/espanso-gui-qt-${version}-linux-arch.pkg.tar.zst"
+    info "Downloading the latest Arch Linux package (${release_tag})…"
+    download "$package" "$release_url/espanso-gui-qt-${version}-linux-arch.pkg.tar.zst"
     info "Installing Espanso GUI…"
     if pacman -Q espanso-gui >/dev/null 2>&1; then
       info "The old espanso-gui package conflicts with espanso-gui-qt. Confirm its removal to continue."
@@ -97,9 +109,9 @@ case "$package_type" in
     ;;
   rpm)
     command -v rpm >/dev/null 2>&1 || die "rpm is required for RPM-based installations."
-    package="$tmp_dir/espanso-gui-noarch.rpm"
-    info "Downloading the latest RPM package…"
-    download "$package" "$release_url/espanso-gui-noarch.rpm"
+    package="$tmp_dir/espanso-gui-${version}-linux-fedora-rhel.noarch.rpm"
+    info "Downloading the latest Fedora/RPM package (${release_tag})…"
+    download "$package" "$release_url/espanso-gui-${version}-linux-fedora-rhel.noarch.rpm"
     info "Installing Espanso GUI…"
     if command -v dnf >/dev/null 2>&1; then
       run_as_root dnf install -y "$package"

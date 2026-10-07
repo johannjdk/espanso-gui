@@ -1015,15 +1015,15 @@ python3 -m espanso_gui</code></pre>
                 const archBtn = document.getElementById("btn-download-arch");
                 if (archBtn) archBtn.href = asset.browser_download_url;
               }
-              if (name === "espanso-gui-macos-arm64.dmg") {
+              if (name.includes("macos") && (name.includes("arm64") || name.includes("apple"))) {
                 const macosArmBtn = document.getElementById("btn-download-macos-arm64");
                 if (macosArmBtn) macosArmBtn.href = asset.browser_download_url;
               }
-              if (name === "espanso-gui-macos-x64.dmg") {
+              if (name.includes("macos") && (name.includes("x64") || name.includes("intel"))) {
                 const macosX64Btn = document.getElementById("btn-download-macos-x64");
                 if (macosX64Btn) macosX64Btn.href = asset.browser_download_url;
               }
-              if (name.endsWith("-windows-x64.zip")) {
+              if (name.includes("windows") && name.endsWith(".zip")) {
                 const windowsX64Btn = document.getElementById("btn-download-windows-x64");
                 if (windowsX64Btn) windowsX64Btn.href = asset.browser_download_url;
               }

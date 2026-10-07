@@ -7,7 +7,7 @@ version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$project_root/pyproject.toml")"
 build_dir="$project_root/build/arch"
 source_dir="$build_dir/${package_name}-${version}"
 output_dir="$project_root/dist"
-artifact="$output_dir/${package_name}-any.pkg.tar.zst"
+artifact="$output_dir/${package_name}-${version}-linux-arch.pkg.tar.zst"
 
 command -v makepkg >/dev/null || {
     echo "makepkg is required to build an Arch Linux package." >&2
