@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Ensure the tag matches pyproject.toml
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
           project_version="$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"
@@ -73,6 +75,32 @@ jobs:
           path: dist/espanso-gui-qt-any.pkg.tar.zst
           if-no-files-found: error
 
+  fedora:
+    name: Build Fedora RPM package
+    needs: verify-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build package in Fedora
+        shell: bash
+        run: |
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            fedora:latest \
+            bash -c '
+              set -euo pipefail
+              dnf install -y -q rpm-build python3-devel
+              bash scripts/build-rpm.sh
+            '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fedora-package
+          path: dist/espanso-gui-*.rpm
+          if-no-files-found: error
+
   macos:
     name: Build macOS DMG (${{ matrix.arch }})
     needs: verify-version
@@ -123,7 +151,7 @@ jobs:
 
   publish:
     name: Publish GitHub release
-    needs: [debian, arch, macos, windows]
+    needs: [debian, arch, fedora, macos, windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
