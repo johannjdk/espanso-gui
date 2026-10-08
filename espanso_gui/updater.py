@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+import os
+import ssl
 import urllib.request
 
 from PySide6.QtCore import QObject, QThread, QUrl, Signal
@@ -14,6 +16,31 @@ from .config_service import ConfigService
 
 GITHUB_RELEASES_API = "https://api.github.com/repos/johannjdk/espanso-gui/releases/latest"
 GITHUB_RELEASES_WEB = "https://github.com/johannjdk/espanso-gui/releases"
+
+
+def get_ssl_context() -> ssl.SSLContext:
+    """Create an SSL context with certificates from certifi or known system locations."""
+    try:
+        import certifi
+
+        cafile = certifi.where()
+        if os.path.isfile(cafile):
+            return ssl.create_default_context(cafile=cafile)
+    except Exception:
+        pass
+
+    for cafile in (
+        "/etc/ssl/cert.pem",                   # macOS default
+        "/etc/pki/tls/certs/ca-bundle.crt",   # Fedora/RHEL
+        "/etc/ssl/certs/ca-certificates.crt", # Debian/Ubuntu
+    ):
+        if os.path.isfile(cafile):
+            try:
+                return ssl.create_default_context(cafile=cafile)
+            except Exception:
+                pass
+
+    return ssl.create_default_context()
 
 
 def parse_version(version: str) -> tuple[int, ...]:
@@ -43,7 +70,8 @@ class UpdateCheckThread(QThread):
                     "Accept": "application/vnd.github.v3+json",
                 },
             )
-            with urllib.request.urlopen(req, timeout=4) as response:
+            ssl_context = get_ssl_context()
+            with urllib.request.urlopen(req, timeout=4, context=ssl_context) as response:
                 data = json.loads(response.read().decode("utf-8"))
 
             tag = str(data.get("tag_name", "")).strip()
