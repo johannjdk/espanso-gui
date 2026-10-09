@@ -549,9 +549,64 @@
                     class="d-flex justify-content-between align-items-center mb-2"
                   >
                     <span class="fw-bold"
-                      ><i class="bi bi-box-seam me-1 text-primary"></i> Debian /
-                      Ubuntu</span
+                      ><i class="bi bi-play-circle me-1 text-primary"></i> Universal Linux</span
                     >
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="appimage-tag"
+                      >.AppImage</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-appimage"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download AppImage</span>
+                  </a>
+                </div>
+
+                <div class="p-3 border package-choice">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <div>
+                      <span class="fw-bold"
+                        ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu / Pop!_OS</span
+                      >
+                      <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standalone (bundled dependencies)</small>
+                    </div>
+                    <span
+                      class="badge bg-body-secondary text-body-secondary"
+                      id="deb-standalone-tag"
+                      >.deb</span
+                    >
+                  </div>
+                  <a
+                    id="btn-download-deb-standalone"
+                    href="https://github.com/johannjdk/espanso-gui/releases"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  >
+                    <i class="bi bi-download"></i>
+                    <span>Download Standalone (.deb)</span>
+                  </a>
+                </div>
+
+                <div class="p-3 border package-choice">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <div>
+                      <span class="fw-bold"
+                        ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu</span
+                      >
+                      <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standard (requires python3-pyside6)</small>
+                    </div>
                     <span
                       class="badge bg-body-secondary text-body-secondary"
                       id="deb-tag"
@@ -563,10 +618,10 @@
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
-                    <span>Download Debian/Ubuntu (.deb)</span>
+                    <span>Download Standard (.deb)</span>
                   </a>
                 </div>
 
@@ -986,12 +1041,16 @@ python3 -m espanso_gui</code></pre>
           const release = await response.json();
 
           if (release.tag_name) {
+            const appimageTag = document.getElementById("appimage-tag");
+            const debStandaloneTag = document.getElementById("deb-standalone-tag");
             const debTag = document.getElementById("deb-tag");
             const rpmTag = document.getElementById("rpm-tag");
             const archTag = document.getElementById("arch-tag");
             const macosArmTag = document.getElementById("macos-arm64-tag");
             const macosX64Tag = document.getElementById("macos-x64-tag");
             const windowsX64Tag = document.getElementById("windows-x64-tag");
+            if (appimageTag) appimageTag.textContent = release.tag_name;
+            if (debStandaloneTag) debStandaloneTag.textContent = release.tag_name;
             if (debTag) debTag.textContent = release.tag_name;
             if (rpmTag) rpmTag.textContent = release.tag_name;
             if (archTag) archTag.textContent = release.tag_name;
@@ -1003,7 +1062,14 @@ python3 -m espanso_gui</code></pre>
           if (release.assets && release.assets.length > 0) {
             release.assets.forEach((asset) => {
               const name = asset.name.toLowerCase();
-              if (name.endsWith(".deb")) {
+              if (name.endsWith(".appimage")) {
+                const appimageBtn = document.getElementById("btn-download-appimage");
+                if (appimageBtn) appimageBtn.href = asset.browser_download_url;
+              }
+              if (name.includes("standalone") && name.endsWith(".deb")) {
+                const debStandaloneBtn = document.getElementById("btn-download-deb-standalone");
+                if (debStandaloneBtn) debStandaloneBtn.href = asset.browser_download_url;
+              } else if (name.endsWith(".deb")) {
                 const debBtn = document.getElementById("btn-download-deb");
                 if (debBtn) debBtn.href = asset.browser_download_url;
               }
