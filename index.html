@@ -87,6 +87,33 @@
         background: #15181b !important;
       }
 
+      .package-toggle-btn {
+        border-color: var(--line) !important;
+        color: var(--muted) !important;
+        background: #171b1e !important;
+        border-radius: 0.45rem !important;
+        transition: all 0.2s ease;
+      }
+
+      .package-toggle-btn:hover {
+        color: #f1f3f4 !important;
+        border-color: var(--accent) !important;
+        background: #1c2226 !important;
+      }
+
+      .package-toggle-btn .toggle-icon {
+        transition: transform 0.25s ease;
+      }
+
+      .package-toggle-btn[aria-expanded="true"] .toggle-icon {
+        transform: rotate(180deg);
+      }
+
+      .download-card.detected-os {
+        border-color: rgba(116, 196, 213, 0.5) !important;
+        box-shadow: 0 0 24px rgba(116, 196, 213, 0.08);
+      }
+
       .badge { font-weight: 600; }
 
       .btn-primary {
@@ -292,13 +319,22 @@
               without editing YAML by hand, while keeping your existing Espanso
               configuration in control.
             </p>
-            <div class="d-flex flex-wrap gap-2 mb-3">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+              <a
+                id="hero-download-btn"
+                href="#downloads"
+                class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2 shadow-sm"
+              >
+                <i id="hero-download-icon" class="bi bi-download"></i>
+                <span id="hero-download-text">Download Espanso GUI</span>
+              </a>
               <a
                 href="#downloads"
-                class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2"
+                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2"
+                title="View all download options"
               >
-                <i class="bi bi-download"></i>
-                <span>Go to Downloads</span>
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>All Platforms</span>
               </a>
               <a
                 href="https://github.com/johannjdk/espanso-gui"
@@ -310,9 +346,9 @@
                 <span>Source Code</span>
               </a>
             </div>
-            <div class="availability d-flex align-items-center gap-2">
+            <div class="availability d-flex align-items-center gap-2 text-body-secondary small">
               <i class="bi bi-check-circle-fill text-success"></i>
-              <span>Available for Linux, macOS, and Windows.</span>
+              <span id="hero-detected-note">Available for Linux, macOS, and Windows.</span>
             </div>
           </div>
           <div class="col-lg-6 text-center">
@@ -529,8 +565,8 @@
         </div>
 
         <div class="row g-4 justify-content-center">
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border download-card">
+          <div class="col-12 col-md-6 col-lg-4" id="downloads-linux">
+            <div class="card h-100 border download-card" id="card-linux">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -538,12 +574,14 @@
                   <i class="bi bi-ubuntu fs-4 text-primary"></i>
                   <h5 class="card-title mb-0 fw-bold">Linux</h5>
                 </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-linux-badge">Your OS</span>
               </div>
               <div class="card-body d-flex flex-column gap-3">
                 <p class="card-text text-body-secondary small mb-1">
                   Pre-built binary packages for common Linux distributions:
                 </p>
 
+                <!-- Universal Linux (AppImage) -->
                 <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
@@ -569,6 +607,7 @@
                   </a>
                 </div>
 
+                <!-- Debian / Ubuntu / Pop!_OS Standalone -->
                 <div class="p-3 border package-choice">
                   <div
                     class="d-flex justify-content-between align-items-center mb-2"
@@ -597,91 +636,116 @@
                   </a>
                 </div>
 
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <div>
-                      <span class="fw-bold"
-                        ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu</span
+                <!-- Toggle for more Linux formats -->
+                <button
+                  class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-between package-toggle-btn py-2 px-3"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#linux-packages-more"
+                  aria-expanded="false"
+                  aria-controls="linux-packages-more"
+                  id="linux-more-toggle-btn"
+                >
+                  <span class="d-flex align-items-center gap-2">
+                    <i class="bi bi-collection"></i>
+                    <span id="linux-toggle-text">More Linux packages (RPM, Arch, Standard DEB)</span>
+                  </span>
+                  <i class="bi bi-chevron-down toggle-icon"></i>
+                </button>
+
+                <!-- Collapsed extra Linux packages -->
+                <div class="collapse" id="linux-packages-more">
+                  <div class="d-flex flex-column gap-3 pt-3">
+                    <!-- Debian / Ubuntu Standard -->
+                    <div class="p-3 border package-choice">
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-2"
                       >
-                      <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standard (requires python3-pyside6)</small>
+                        <div>
+                          <span class="fw-bold"
+                            ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu</span
+                          >
+                          <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standard (requires python3-pyside6)</small>
+                        </div>
+                        <span
+                          class="badge bg-body-secondary text-body-secondary"
+                          id="deb-tag"
+                          >.deb</span
+                        >
+                      </div>
+                      <a
+                        id="btn-download-deb"
+                        href="https://github.com/johannjdk/espanso-gui/releases"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                      >
+                        <i class="bi bi-download"></i>
+                        <span>Download Standard (.deb)</span>
+                      </a>
                     </div>
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="deb-tag"
-                      >.deb</span
-                    >
-                  </div>
-                  <a
-                    id="btn-download-deb"
-                    href="https://github.com/johannjdk/espanso-gui/releases"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
-                  >
-                    <i class="bi bi-download"></i>
-                    <span>Download Standard (.deb)</span>
-                  </a>
-                </div>
 
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-box-seam me-1 text-primary"></i> Fedora /
-                      RHEL</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="rpm-tag"
-                      >.rpm</span
-                    >
-                  </div>
-                  <a
-                    id="btn-download-rpm"
-                    href="https://github.com/johannjdk/espanso-gui/releases"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
-                  >
-                    <i class="bi bi-download"></i>
-                    <span>Download Fedora (.rpm)</span>
-                  </a>
-                </div>
+                    <!-- Fedora / RHEL -->
+                    <div class="p-3 border package-choice">
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-2"
+                      >
+                        <span class="fw-bold"
+                          ><i class="bi bi-box-seam me-1 text-primary"></i> Fedora /
+                          RHEL</span
+                        >
+                        <span
+                          class="badge bg-body-secondary text-body-secondary"
+                          id="rpm-tag"
+                          >.rpm</span
+                        >
+                      </div>
+                      <a
+                        id="btn-download-rpm"
+                        href="https://github.com/johannjdk/espanso-gui/releases"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                      >
+                        <i class="bi bi-download"></i>
+                        <span>Download Fedora (.rpm)</span>
+                      </a>
+                    </div>
 
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-cpu me-1 text-primary"></i> Arch
-                      Linux</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="arch-tag"
-                      >.pkg.tar.zst</span
-                    >
+                    <!-- Arch Linux -->
+                    <div class="p-3 border package-choice">
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-2"
+                      >
+                        <span class="fw-bold"
+                          ><i class="bi bi-cpu me-1 text-primary"></i> Arch
+                          Linux</span
+                        >
+                        <span
+                          class="badge bg-body-secondary text-body-secondary"
+                          id="arch-tag"
+                          >.pkg.tar.zst</span
+                        >
+                      </div>
+                      <a
+                        id="btn-download-arch"
+                        href="https://github.com/johannjdk/espanso-gui/releases"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                      >
+                        <i class="bi bi-download"></i>
+                        <span>Download Arch (.pkg.tar.zst)</span>
+                      </a>
+                    </div>
                   </div>
-                  <a
-                    id="btn-download-arch"
-                    href="https://github.com/johannjdk/espanso-gui/releases"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
-                  >
-                    <i class="bi bi-download"></i>
-                    <span>Download Arch (.pkg.tar.zst)</span>
-                  </a>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border download-card">
+          <div class="col-12 col-md-6 col-lg-4" id="downloads-macos">
+            <div class="card h-100 border download-card" id="card-macos">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -689,6 +753,7 @@
                   <i class="bi bi-apple fs-4 text-primary"></i>
                   <h5 class="card-title mb-0 fw-bold">macOS</h5>
                 </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-macos-badge">Your OS</span>
               </div>
               <div class="card-body d-flex flex-column gap-3">
                 <p class="card-text text-body-secondary small mb-1">
@@ -750,8 +815,8 @@
             </div>
           </div>
 
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 border download-card">
+          <div class="col-12 col-md-6 col-lg-4" id="downloads-windows">
+            <div class="card h-100 border download-card" id="card-windows">
               <div
                 class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
               >
@@ -759,6 +824,7 @@
                   <i class="bi bi-windows fs-4 text-primary"></i>
                   <h5 class="card-title mb-0 fw-bold">Windows</h5>
                 </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-windows-badge">Your OS</span>
               </div>
               <div class="card-body d-flex flex-column gap-3">
                 <p class="card-text text-body-secondary small mb-1">
@@ -989,8 +1055,67 @@ python3 -m espanso_gui</code></pre>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+      function detectOS() {
+        const userAgent = window.navigator.userAgent || "";
+        const platform =
+          window.navigator?.userAgentData?.platform ||
+          window.navigator?.platform ||
+          "";
+
+        if (/win/i.test(platform) || /windows/i.test(userAgent)) {
+          return { name: "Windows", id: "windows", icon: "bi bi-windows" };
+        }
+        if (/mac/i.test(platform) || /macintosh|mac os x/i.test(userAgent)) {
+          return { name: "macOS", id: "macos", icon: "bi bi-apple" };
+        }
+        if (/linux|x11/i.test(platform) || /linux/i.test(userAgent)) {
+          return { name: "Linux", id: "linux", icon: "bi bi-ubuntu" };
+        }
+        return { name: "Desktop", id: "unknown", icon: "bi bi-download" };
+      }
+
+      function setupOSDetection() {
+        const os = detectOS();
+        const heroBtn = document.getElementById("hero-download-btn");
+        const heroIcon = document.getElementById("hero-download-icon");
+        const heroText = document.getElementById("hero-download-text");
+        const heroNote = document.getElementById("hero-detected-note");
+
+        if (os.id !== "unknown") {
+          if (heroText) heroText.textContent = `Download for ${os.name}`;
+          if (heroIcon) heroIcon.className = `${os.icon} me-1`;
+          if (heroBtn) heroBtn.href = `#downloads-${os.id}`;
+          if (heroNote) {
+            heroNote.innerHTML = `Detected <strong>${os.name}</strong> &bull; Also available for other platforms below.`;
+          }
+
+          const targetCard = document.getElementById(`card-${os.id}`);
+          if (targetCard) targetCard.classList.add("detected-os");
+
+          const badge = document.getElementById(`detected-${os.id}-badge`);
+          if (badge) badge.classList.remove("d-none");
+        }
+        return os;
+      }
+
+      function setupLinuxCollapseToggle() {
+        const linuxCollapse = document.getElementById("linux-packages-more");
+        const linuxToggleText = document.getElementById("linux-toggle-text");
+        if (linuxCollapse && linuxToggleText) {
+          linuxCollapse.addEventListener("show.bs.collapse", () => {
+            linuxToggleText.textContent = "Show fewer packages";
+          });
+          linuxCollapse.addEventListener("hide.bs.collapse", () => {
+            linuxToggleText.textContent = "More Linux packages (RPM, Arch, Standard DEB)";
+          });
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("year").textContent = new Date().getFullYear();
+
+        setupOSDetection();
+        setupLinuxCollapseToggle();
 
         const screenshotModal = document.getElementById("screenshotModal");
         if (screenshotModal) {
@@ -1059,10 +1184,14 @@ python3 -m espanso_gui</code></pre>
             if (windowsX64Tag) windowsX64Tag.textContent = release.tag_name;
           }
 
+          let appimageUrl = "";
+          let windowsUrl = "";
+
           if (release.assets && release.assets.length > 0) {
             release.assets.forEach((asset) => {
               const name = asset.name.toLowerCase();
               if (name.endsWith(".appimage")) {
+                appimageUrl = asset.browser_download_url;
                 const appimageBtn = document.getElementById("btn-download-appimage");
                 if (appimageBtn) appimageBtn.href = asset.browser_download_url;
               }
@@ -1090,10 +1219,24 @@ python3 -m espanso_gui</code></pre>
                 if (macosX64Btn) macosX64Btn.href = asset.browser_download_url;
               }
               if (name.includes("windows") && name.endsWith(".zip")) {
+                windowsUrl = asset.browser_download_url;
                 const windowsX64Btn = document.getElementById("btn-download-windows-x64");
                 if (windowsX64Btn) windowsX64Btn.href = asset.browser_download_url;
               }
             });
+
+            // Update hero button with direct asset URL
+            const os = detectOS();
+            const heroBtn = document.getElementById("hero-download-btn");
+            if (heroBtn) {
+              if (os.id === "windows" && windowsUrl) {
+                heroBtn.href = windowsUrl;
+              } else if (os.id === "linux" && appimageUrl) {
+                heroBtn.href = appimageUrl;
+              } else if (os.id === "macos") {
+                heroBtn.href = "#downloads-macos";
+              }
+            }
           }
         } catch (err) {
           console.log("Release fetching fallback:", err);
