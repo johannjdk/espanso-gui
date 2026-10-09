@@ -1,0 +1,14 @@
+Package: espanso-gui
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: Johann Judek <johannjudek@users.noreply.github.com>
+Homepage: https://github.com/johannjdk/espanso-gui
+Depends: libc6
+Provides: espanso-gui
+Section: utils
+Priority: optional
+Description: Qt editor for Espanso configuration files (standalone bundle)
+ Espanso GUI provides a native interface for managing Espanso matches,
+ forms, variables, and YAML configuration files.
+ This standalone package bundles all Python and Qt dependencies.
+

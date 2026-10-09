@@ -83,14 +83,39 @@ case "$package_type" in
   deb)
     command -v dpkg >/dev/null 2>&1 || die "dpkg is required for Debian-based installations."
     command -v apt-get >/dev/null 2>&1 || die "apt-get is required for Debian-based installations."
-    package="$tmp_dir/espanso-gui-${version}-linux-debian-ubuntu.deb"
-    info "Downloading the latest Debian/Ubuntu package (${release_tag})…"
-    download "$package" "$release_url/espanso-gui-${version}-linux-debian-ubuntu.deb"
-    info "Installing Espanso GUI…"
-    if ! run_as_root dpkg -i "$package"; then
-      info "Installing required dependencies…"
-      run_as_root apt-get update
-      run_as_root apt-get install -f -y
+
+    has_system_pyside=false
+    if command -v apt-cache >/dev/null 2>&1; then
+      if apt-cache show python3-pyside6.qtwidgets >/dev/null 2>&1 || apt-cache show python3-pyside6 >/dev/null 2>&1; then
+        has_system_pyside=true
+      fi
+    fi
+
+    if [ "$has_system_pyside" = true ]; then
+      package="$tmp_dir/espanso-gui-${version}-linux-debian-ubuntu.deb"
+      info "Downloading the Debian/Ubuntu package (${release_tag})…"
+      download "$package" "$release_url/espanso-gui-${version}-linux-debian-ubuntu.deb"
+      info "Installing Espanso GUI…"
+      if ! run_as_root dpkg -i "$package"; then
+        info "Installing required dependencies…"
+        run_as_root apt-get update
+        if ! run_as_root apt-get install -f -y; then
+          info "System dependencies could not be resolved. Installing standalone bundle…"
+          package="$tmp_dir/espanso-gui-${version}-linux-debian-ubuntu-standalone.deb"
+          download "$package" "$release_url/espanso-gui-${version}-linux-debian-ubuntu-standalone.deb"
+          run_as_root dpkg -i "$package"
+        fi
+      fi
+    else
+      info "Distribution does not provide python3-pyside6 package (e.g. Ubuntu 22.04/24.04, Pop!_OS)."
+      info "Downloading standalone package with bundled dependencies (${release_tag})…"
+      package="$tmp_dir/espanso-gui-${version}-linux-debian-ubuntu-standalone.deb"
+      download "$package" "$release_url/espanso-gui-${version}-linux-debian-ubuntu-standalone.deb"
+      info "Installing Espanso GUI…"
+      if ! run_as_root dpkg -i "$package"; then
+        run_as_root apt-get update
+        run_as_root apt-get install -f -y
+      fi
     fi
     ;;
   arch)

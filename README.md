@@ -66,10 +66,25 @@ curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/
 
 Alternatively, download a package from the [releases page](https://github.com/johannjdk/espanso-gui/releases).
 
-For Debian and Ubuntu:
+For Debian, Ubuntu, and Pop!_OS:
+
+- **Standalone package (recommended for Ubuntu 22.04 / 24.04, Pop!_OS, Linux Mint):** Bundles all Python and Qt dependencies, solving missing `python3-pyside6` errors:
+  ```bash
+  sudo apt install ./espanso-gui-*-linux-debian-ubuntu-standalone.deb
+  ```
+
+- **Standard package (Ubuntu 24.10+, Debian 13+):** Uses system Python and Qt packages:
+  ```bash
+  sudo apt install ./espanso-gui-*-linux-debian-ubuntu.deb
+  ```
+
+### AppImage (Universal Linux)
+
+Download `espanso-gui-*-linux-x86_64.AppImage` from the [releases page](https://github.com/johannjdk/espanso-gui/releases), make it executable, and run:
 
 ```bash
-sudo apt install ./espanso-gui-*-linux-debian-ubuntu.deb
+chmod +x ./espanso-gui-*-linux-x86_64.AppImage
+./espanso-gui-*-linux-x86_64.AppImage
 ```
 
 For Fedora:
