@@ -17,6 +17,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import QApplication, QMessageBox, QPlainTextEdit, QTextEdit, QWidget
 
 from ..config_service import ConfigService
+from .fonts import mono_font
 
 
 class YamlHighlighter(QSyntaxHighlighter):
@@ -114,9 +115,7 @@ class YamlHighlighter(QSyntaxHighlighter):
 class YamlEditor(QPlainTextEdit):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
-        font.setPointSize(10)
-        self.setFont(font)
+        self.setFont(mono_font(10))
         self.setTabStopDistance(self.fontMetrics().horizontalAdvance(" ") * 2)
         self.highlighter = YamlHighlighter(self)
 

@@ -27,7 +27,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..ui.fonts import mono_font
 from ..ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
+from ..ui.template_highlighter import TemplateHighlighter
 
 
 
@@ -174,8 +176,11 @@ class WindowLayoutMixin:
         replace_layout.setContentsMargins(0, 0, 0, 0)
         replace_layout.addWidget(QLabel("Replacement text"))
         self.replace_edit = QTextEdit()
+        self.replace_edit.setFont(mono_font(10))
+        self.replace_edit.setTabStopDistance(self.replace_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.replace_edit.setPlaceholderText("Enter replacement text…")
         self.replace_edit.textChanged.connect(self._on_match_field_changed)
+        self.replace_highlighter = TemplateHighlighter(self.replace_edit)
         replace_layout.addWidget(self.replace_edit)
         self.content_stack.addWidget(self.replace_widget)
 
@@ -185,8 +190,11 @@ class WindowLayoutMixin:
         form_layout.setContentsMargins(0, 0, 0, 0)
         form_layout.addWidget(QLabel("Layout (use [[field_name]] for input fields)"))
         self.form_layout_edit = QTextEdit()
+        self.form_layout_edit.setFont(mono_font(10))
+        self.form_layout_edit.setTabStopDistance(self.form_layout_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.form_layout_edit.setPlaceholderText("e.g. Hello [[name]], your ticket [[ticket_id]] is ready.")
         self.form_layout_edit.textChanged.connect(self._on_match_field_changed)
+        self.form_highlighter = TemplateHighlighter(self.form_layout_edit)
         form_layout.addWidget(self.form_layout_edit)
 
         fields_box = QGroupBox("Form fields")
@@ -352,10 +360,13 @@ class WindowLayoutMixin:
         form_var_layout.addLayout(layout_label_row)
 
         self.variable_layout_edit = QPlainTextEdit()
+        self.variable_layout_edit.setFont(mono_font(10))
+        self.variable_layout_edit.setTabStopDistance(self.variable_layout_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.variable_layout_edit.setPlaceholderText("Form layout template, e.g.:\nEnter name: [[name]]\nSelect role: [[role]]")
         self.variable_layout_edit.setMinimumHeight(75)
         self.variable_layout_edit.setMaximumHeight(130)
         self.variable_layout_edit.textChanged.connect(self.on_variable_layout_changed)
+        self.var_layout_highlighter = TemplateHighlighter(self.variable_layout_edit)
         form_var_layout.addWidget(self.variable_layout_edit)
 
         self.var_fields_box = QGroupBox("Form fields")

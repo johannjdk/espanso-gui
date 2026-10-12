@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 from .config_service import ConfigService
 from .models import EspansoFormField, EspansoMatch, EspansoVariable
 from .ui.about_dialog import APP_ID, APP_NAME, show_about_dialog
+from .ui.fonts import mono_font
 from .ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
 from .ui.move_match_dialog import choose_match_destination
 
