@@ -7,11 +7,14 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QInputDialog, QLabel, QMessageBox, QPlainTextEdit, QTreeWidgetItem, QVBoxLayout
+import yaml
 
 from ..config_service import ConfigService
 from ..ui.about_dialog import APP_NAME
 from ..ui.gui_config_dialog import EspansoGuiConfigDialog
+from ..ui.yaml_editor import YamlEditor
 from .profile_dialog import EspansoConfigDialog
+
 
 
 class FileManagementMixin:
@@ -139,17 +142,20 @@ class FileManagementMixin:
             return
 
         dialog = QDialog(self)
-        dialog.setWindowTitle(f"Expert YAML — {self.current_file.name}")
+        dialog.setWindowTitle(f"Expert YAML: {self.current_file.name}")
         dialog.resize(900, 650)
         layout = QVBoxLayout(dialog)
         layout.addWidget(QLabel("Edit the full Espanso YAML document. It is validated before saving."))
-        editor = QPlainTextEdit()
+        editor = YamlEditor(dialog)
         editor.setPlainText(source)
-        editor.setTabStopDistance(editor.fontMetrics().horizontalAdvance(" ") * 2)
         layout.addWidget(editor, 1)
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
         )
+        format_btn = buttons.addButton("Format YAML", QDialogButtonBox.ButtonRole.ActionRole)
+        format_btn.setShortcut("Ctrl+Shift+F")
+        format_btn.setToolTip("Format YAML (Ctrl+Shift+F)")
+        format_btn.clicked.connect(editor.format_yaml)
         buttons.rejected.connect(dialog.reject)
 
         def save_expert_yaml() -> None:
@@ -158,7 +164,7 @@ class FileManagementMixin:
                 ConfigService.save_raw_yaml(path, editor.toPlainText())
                 self.load_files(selected_path=path)
                 self.load_file(path)
-            except (OSError, ValueError, __import__("yaml").YAMLError) as error:
+            except (OSError, ValueError, yaml.YAMLError) as error:
                 QMessageBox.critical(dialog, "Invalid YAML", str(error))
                 return
             self.statusBar().showMessage(f"Saved {self.current_file.name}", 4000)

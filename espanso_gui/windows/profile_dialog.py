@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 
 from ..config_service import ConfigService
 from ..ui.stats_dialog import StatsDialog
+from ..ui.yaml_editor import YamlEditor
 
 
 class NewProfileDialog(QDialog):
@@ -504,16 +505,22 @@ class EspansoConfigDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        layout.addWidget(QLabel("Raw YAML configuration (Expert mode)"))
+        top_row = QHBoxLayout()
+        top_row.addWidget(QLabel("Raw YAML configuration (Expert mode)"))
+        top_row.addStretch()
+        format_btn = QPushButton("Format YAML")
+        format_btn.clicked.connect(self._format_yaml_editor)
+        top_row.addWidget(format_btn)
+        layout.addLayout(top_row)
 
-        self.editor = QPlainTextEdit()
-        font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
-        font.setPointSize(10)
-        self.editor.setFont(font)
-        self.editor.setTabStopDistance(self.editor.fontMetrics().horizontalAdvance(" ") * 2)
+        self.editor = YamlEditor(widget)
         layout.addWidget(self.editor, 1)
 
         return widget
+
+    def _format_yaml_editor(self) -> None:
+        if self.editor.format_yaml():
+            self._mark_visual_modified()
 
     def _load_profiles(self, selected_path: Path | None = None) -> None:
         paths: list[Path] = []
