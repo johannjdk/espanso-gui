@@ -22,16 +22,32 @@ command -v dpkg-deb >/dev/null || {
     exit 1
 }
 
+# Determine Python binary (use active venv, existing project venv, or create an isolated build venv)
+if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    python_bin="python3"
+elif [[ -d "$project_root/.venv" && -x "$project_root/.venv/bin/python" ]]; then
+    python_bin="$project_root/.venv/bin/python"
+elif [[ -d "$project_root/venv" && -x "$project_root/venv/bin/python" ]]; then
+    python_bin="$project_root/venv/bin/python"
+else
+    build_venv="$project_root/build/build-venv"
+    if [[ ! -d "$build_venv" ]]; then
+        echo "==> Creating isolated build virtualenv at $build_venv"
+        python3 -m venv "$build_venv"
+    fi
+    python_bin="$build_venv/bin/python"
+fi
+
 # Build the PyInstaller standalone bundle if it has not been created yet or rebuild requested
 if [[ ! -x "$bundle_dir/$package_name" || "${FORCE_REBUILD:-0}" == "1" ]]; then
     echo "==> Building standalone application with PyInstaller"
-    python3 -m pip install --upgrade pip
-    python3 -m pip install "$project_root" pyinstaller
+    "$python_bin" -m pip install --upgrade pip
+    "$python_bin" -m pip install "$project_root" pyinstaller
 
     rm -rf "$project_root/build/linux-standalone"
     mkdir -p "$project_root/build/linux-standalone"
 
-    python3 -m PyInstaller \
+    "$python_bin" -m PyInstaller \
         --noconfirm \
         --clean \
         --windowed \
