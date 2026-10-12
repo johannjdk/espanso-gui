@@ -16,7 +16,9 @@ from .models import EspansoMatch
 
 
 class EspansoYamlDumper(yaml.SafeDumper):
-    pass
+    def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:
+        return super().increase_indent(flow, False)
+
 
 
 def _str_presenter(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
@@ -158,6 +160,19 @@ class ConfigService:
         document = yaml.safe_load(text) or {}
         if not isinstance(document, dict):
             raise ValueError("The YAML root must be a mapping.")
+
+    @staticmethod
+    def format_yaml_text(text: str) -> str:
+        document = yaml.safe_load(text)
+        if document is None:
+            return text
+        return yaml.dump(
+            document,
+            Dumper=EspansoYamlDumper,
+            allow_unicode=True,
+            sort_keys=False,
+            default_flow_style=False,
+        )
 
     @staticmethod
     def save_raw_yaml(path: Path, text: str) -> None:
