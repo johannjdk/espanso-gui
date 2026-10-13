@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QGroupBox,
@@ -27,9 +28,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..ui.bash_highlighter import BashHighlighter
 from ..ui.fonts import mono_font
 from ..ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
 from ..ui.template_highlighter import TemplateHighlighter
+
 
 
 
@@ -228,17 +231,32 @@ class WindowLayoutMixin:
         self.field_type_combo = QComboBox()
         self.field_type_combo.addItems(["Text (single-line)", "Text (multiline)", "Choice Box (dropdown)", "List Box"])
         self.field_type_combo.currentTextChanged.connect(self.on_form_field_type_changed)
-        self.field_values_edit = QLineEdit()
-        self.field_values_edit.setPlaceholderText("Comma-separated values, e.g. Option 1, Option 2, Option 3")
-        self.field_values_edit.setEnabled(False)
+
+        self.field_choice_container = QWidget()
+        form_choice_box_layout = QVBoxLayout(self.field_choice_container)
+        form_choice_box_layout.setContentsMargins(0, 0, 0, 0)
+        form_choice_box_layout.setSpacing(4)
+        form_choice_top = QHBoxLayout()
+        form_choice_top.addWidget(QLabel("Choices:"))
+        form_choice_top.addStretch()
+        self.btn_add_form_choice = QPushButton("Add Choice")
+        self.btn_add_form_choice.clicked.connect(lambda: self.add_form_choice_option())
+        form_choice_top.addWidget(self.btn_add_form_choice)
+        form_choice_box_layout.addLayout(form_choice_top)
+
+        self.form_choice_items_layout = QVBoxLayout()
+        self.form_choice_items_layout.setContentsMargins(0, 0, 0, 0)
+        self.form_choice_items_layout.setSpacing(4)
+        form_choice_box_layout.addLayout(self.form_choice_items_layout)
+        self.form_choice_option_edits: list[tuple[QLineEdit, QWidget]] = []
+        self.field_choice_container.setVisible(False)
+
         self.field_default_edit = QLineEdit()
         self.field_default_edit.setPlaceholderText("Optional default value")
 
         ff_form.addRow("Field Name:", self.field_name_edit)
         ff_form.addRow("Field Type:", self.field_type_combo)
-        self.field_values_label = QLabel("Values:")
-        self.field_values_label.setEnabled(False)
-        ff_form.addRow(self.field_values_label, self.field_values_edit)
+        ff_form.addRow(self.field_choice_container)
         ff_form.addRow("Default Value:", self.field_default_edit)
         fields_layout.addLayout(ff_form)
 
@@ -325,7 +343,7 @@ class WindowLayoutMixin:
         self.variable_name.textChanged.connect(self.on_variable_name_changed)
 
         self.variable_type = QComboBox()
-        self.variable_type.addItems(["shell", "form", "script", "choice", "date"])
+        self.variable_type.addItems(["shell", "form", "script", "date"])
         self.variable_type.currentTextChanged.connect(self.on_variable_type_changed)
 
         var_form.addRow("Variable name:", self.variable_name)
@@ -336,12 +354,18 @@ class WindowLayoutMixin:
 
         # Page 0: shell
         shell_widget = QWidget()
-        shell_layout = QFormLayout(shell_widget)
+        shell_layout = QVBoxLayout(shell_widget)
         shell_layout.setContentsMargins(0, 0, 0, 0)
-        self.var_shell_edit = QLineEdit()
-        self.var_shell_edit.setPlaceholderText("e.g. echo Hello World")
+        shell_layout.setSpacing(4)
+        shell_layout.addWidget(QLabel("Command (cmd):"))
+        self.var_shell_edit = QPlainTextEdit()
+        self.var_shell_edit.setFont(mono_font(10))
+        self.var_shell_edit.setTabStopDistance(self.var_shell_edit.fontMetrics().horizontalAdvance(" ") * 2)
+        self.var_shell_edit.setPlaceholderText("e.g. echo 'Hello World'")
+        self.var_shell_edit.setMinimumHeight(100)
         self.var_shell_edit.textChanged.connect(self.on_variable_parameter_changed)
-        shell_layout.addRow("Command (cmd):", self.var_shell_edit)
+        self.var_shell_highlighter = BashHighlighter(self.var_shell_edit)
+        shell_layout.addWidget(self.var_shell_edit)
         self.param_stack.addWidget(shell_widget)
 
         # Page 1: form
@@ -397,19 +421,33 @@ class WindowLayoutMixin:
         self.var_field_type_combo = QComboBox()
         self.var_field_type_combo.addItems(["Text (single-line)", "Text (multiline)", "Choice Box (dropdown)", "List Box"])
         self.var_field_type_combo.currentTextChanged.connect(self.on_var_field_type_changed)
-        self.var_field_values_label = QLabel("Values:")
-        self.var_field_values_label.setEnabled(False)
-        self.var_field_values_edit = QLineEdit()
-        self.var_field_values_edit.setPlaceholderText("Comma-separated values, e.g. Option 1, Option 2, Option 3")
-        self.var_field_values_edit.setEnabled(False)
-        self.var_field_values_edit.textChanged.connect(self.on_var_field_input_changed)
+
+        self.var_field_choice_container = QWidget()
+        var_choice_box_layout = QVBoxLayout(self.var_field_choice_container)
+        var_choice_box_layout.setContentsMargins(0, 0, 0, 0)
+        var_choice_box_layout.setSpacing(4)
+        var_choice_top = QHBoxLayout()
+        var_choice_top.addWidget(QLabel("Choices:"))
+        var_choice_top.addStretch()
+        self.btn_add_var_choice = QPushButton("Add Choice")
+        self.btn_add_var_choice.clicked.connect(lambda: self.add_var_choice_option())
+        var_choice_top.addWidget(self.btn_add_var_choice)
+        var_choice_box_layout.addLayout(var_choice_top)
+
+        self.var_choice_items_layout = QVBoxLayout()
+        self.var_choice_items_layout.setContentsMargins(0, 0, 0, 0)
+        self.var_choice_items_layout.setSpacing(4)
+        var_choice_box_layout.addLayout(self.var_choice_items_layout)
+        self.var_choice_option_edits: list[tuple[QLineEdit, QWidget]] = []
+        self.var_field_choice_container.setVisible(False)
+
         self.var_field_default_edit = QLineEdit()
         self.var_field_default_edit.setPlaceholderText("Optional default value")
         self.var_field_default_edit.textChanged.connect(self.on_var_field_input_changed)
 
         vf_form.addRow("Field Name:", self.var_field_name_edit)
         vf_form.addRow("Field Type:", self.var_field_type_combo)
-        vf_form.addRow(self.var_field_values_label, self.var_field_values_edit)
+        vf_form.addRow(self.var_field_choice_container)
         vf_form.addRow("Default Value:", self.var_field_default_edit)
         var_fields_layout.addWidget(self.var_field_form_widget)
 
@@ -431,23 +469,18 @@ class WindowLayoutMixin:
         script_widget = QWidget()
         script_layout = QFormLayout(script_widget)
         script_layout.setContentsMargins(0, 0, 0, 0)
+        script_path_row = QHBoxLayout()
         self.var_script_edit = QLineEdit()
         self.var_script_edit.setPlaceholderText("e.g. /path/to/script.sh or python script.py")
         self.var_script_edit.textChanged.connect(self.on_variable_parameter_changed)
-        script_layout.addRow("Script path (path):", self.var_script_edit)
+        script_path_row.addWidget(self.var_script_edit)
+        self.btn_browse_var_script = QPushButton("Browse…")
+        self.btn_browse_var_script.clicked.connect(self.browse_var_script)
+        script_path_row.addWidget(self.btn_browse_var_script)
+        script_layout.addRow("Script path (path):", script_path_row)
         self.param_stack.addWidget(script_widget)
 
-        # Page 3: choice
-        choice_widget = QWidget()
-        choice_layout = QFormLayout(choice_widget)
-        choice_layout.setContentsMargins(0, 0, 0, 0)
-        self.var_choice_edit = QLineEdit()
-        self.var_choice_edit.setPlaceholderText("Comma-separated choices, e.g. yes, no, maybe")
-        self.var_choice_edit.textChanged.connect(self.on_variable_parameter_changed)
-        choice_layout.addRow("Choices (values):", self.var_choice_edit)
-        self.param_stack.addWidget(choice_widget)
-
-        # Page 4: date
+        # Page 3: date
         date_widget = QWidget()
         date_layout = QFormLayout(date_widget)
         date_layout.setContentsMargins(0, 0, 0, 0)

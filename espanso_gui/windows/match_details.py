@@ -2,11 +2,21 @@
 
 from __future__ import annotations
 
+import os
 import re
 
-from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QTableWidgetItem,
+    QWidget,
+)
 
 from ..models import EspansoFormField, EspansoVariable
+
 
 
 class MatchDetailsMixin:
@@ -51,6 +61,53 @@ class MatchDetailsMixin:
             self.form_fields_table.setItem(row, 1, QTableWidgetItem(type_desc))
             self.form_fields_table.setItem(row, 2, QTableWidgetItem(values_desc))
             self.form_fields_table.setItem(row, 3, QTableWidgetItem(field_obj.default))
+    def add_form_choice_option(self, text: str = "") -> None:
+        """Add an editable choice row for the currently edited match form field."""
+        row_widget = QWidget()
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(4)
+        choice_edit = QLineEdit(text)
+        choice_edit.setPlaceholderText("Choice value")
+        choice_edit.textChanged.connect(self._on_form_choice_input_changed)
+        remove_btn = QPushButton("Remove")
+        remove_btn.clicked.connect(lambda: self.remove_form_choice_option(row_widget))
+        row.addWidget(choice_edit)
+        row.addWidget(remove_btn)
+        self.form_choice_option_edits.append((choice_edit, row_widget))
+        self.form_choice_items_layout.addWidget(row_widget)
+        self._on_form_choice_input_changed()
+
+    def remove_form_choice_option(self, row_widget: QWidget) -> None:
+        self.form_choice_option_edits = [
+            entry for entry in self.form_choice_option_edits if entry[1] is not row_widget
+        ]
+        self.form_choice_items_layout.removeWidget(row_widget)
+        row_widget.deleteLater()
+        self._on_form_choice_input_changed()
+
+    def clear_form_choice_options(self) -> None:
+        for _, row_widget in self.form_choice_option_edits:
+            self.form_choice_items_layout.removeWidget(row_widget)
+            row_widget.deleteLater()
+        self.form_choice_option_edits.clear()
+
+    def _get_form_choice_values(self) -> list[str]:
+        values = []
+        for edit, _ in self.form_choice_option_edits:
+            txt = edit.text().strip()
+            if txt:
+                values.append(txt)
+        return values
+
+    def _set_form_choice_values(self, values: list[str]) -> None:
+        self.clear_form_choice_options()
+        for v in values:
+            self.add_form_choice_option(v)
+
+    def _on_form_choice_input_changed(self) -> None:
+        pass
+
     def on_form_field_selected(self) -> None:
         rows = self.form_fields_table.selectionModel().selectedRows()
         if not rows or not (0 <= self.selected_match < len(self.matches)):
@@ -74,7 +131,7 @@ class MatchDetailsMixin:
             self.field_type_combo.setCurrentText("Text (multiline)")
         else:
             self.field_type_combo.setCurrentText("Text (single-line)")
-        self.field_values_edit.setText(", ".join(field_obj.values))
+        self._set_form_choice_values(field_obj.values)
         self.field_default_edit.setText(field_obj.default)
         self.btn_apply_field.setEnabled(True)
         self.btn_delete_field.setEnabled(True)
@@ -85,8 +142,8 @@ class MatchDetailsMixin:
 
     def on_form_field_type_changed(self, text: str) -> None:
         is_choice_or_list = "Choice" in text or "List" in text
-        self.field_values_edit.setEnabled(is_choice_or_list)
-        self.field_values_label.setEnabled(is_choice_or_list)
+        self.field_choice_container.setVisible(is_choice_or_list)
+
     def _form_field_from_inputs(self, name: str) -> EspansoFormField:
         type_text = self.field_type_combo.currentText()
         field_type = "text"
@@ -98,8 +155,7 @@ class MatchDetailsMixin:
         elif "multiline" in type_text:
             multiline = True
 
-        raw_values = self.field_values_edit.text().strip()
-        values = [v.strip() for v in raw_values.split(",") if v.strip()] if raw_values else []
+        values = self._get_form_choice_values() if ("Choice" in type_text or "List" in type_text) else []
         default_val = self.field_default_edit.text().strip()
         return EspansoFormField(
             name=name,
@@ -108,6 +164,7 @@ class MatchDetailsMixin:
             values=values,
             default=default_val,
         )
+
     def add_form_field(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)):
             return
@@ -125,6 +182,7 @@ class MatchDetailsMixin:
         self.dirty = True
         self.refresh_form_fields_table()
         self.clear_form_field_form()
+
     def update_form_field(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)) or not self.selected_form_field:
             return
@@ -142,6 +200,7 @@ class MatchDetailsMixin:
         match.form_fields[name] = field_obj
         self.dirty = True
         self.refresh_form_fields_table()
+
     def delete_form_field(self) -> None:
         if not (0 <= self.selected_match < len(self.matches)) or not self.selected_form_field:
             return
@@ -162,16 +221,16 @@ class MatchDetailsMixin:
             self.dirty = True
             self.refresh_form_fields_table()
             self.clear_form_field_form()
+
     def clear_form_field_form(self) -> None:
         self.selected_form_field = ""
         self.form_fields_table.clearSelection()
         self.form_fields_table.setCurrentItem(None)
         self.field_name_edit.clear()
         self.field_type_combo.setCurrentIndex(0)
-        self.field_values_edit.clear()
+        self.clear_form_choice_options()
         self.field_default_edit.clear()
-        self.field_values_edit.setEnabled(False)
-        self.field_values_label.setEnabled(False)
+        self.field_choice_container.setVisible(False)
         self.btn_apply_field.setEnabled(False)
         self.btn_delete_field.setEnabled(False)
     def _current_form_variable(self) -> EspansoVariable | None:
@@ -245,6 +304,55 @@ class MatchDetailsMixin:
         if self.var_fields_table.currentRow() >= 0:
             self.on_var_field_selected()
 
+    def add_var_choice_option(self, text: str = "") -> None:
+        """Add an editable choice row for the currently edited variable form field."""
+        row_widget = QWidget()
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(4)
+        choice_edit = QLineEdit(text)
+        choice_edit.setPlaceholderText("Choice value")
+        choice_edit.textChanged.connect(self._on_var_choice_input_changed)
+        remove_btn = QPushButton("Remove")
+        remove_btn.clicked.connect(lambda: self.remove_var_choice_option(row_widget))
+        row.addWidget(choice_edit)
+        row.addWidget(remove_btn)
+        self.var_choice_option_edits.append((choice_edit, row_widget))
+        self.var_choice_items_layout.addWidget(row_widget)
+        self._on_var_choice_input_changed()
+
+    def remove_var_choice_option(self, row_widget: QWidget) -> None:
+        self.var_choice_option_edits = [
+            entry for entry in self.var_choice_option_edits if entry[1] is not row_widget
+        ]
+        self.var_choice_items_layout.removeWidget(row_widget)
+        row_widget.deleteLater()
+        self._on_var_choice_input_changed()
+
+    def clear_var_choice_options(self) -> None:
+        for _, row_widget in self.var_choice_option_edits:
+            self.var_choice_items_layout.removeWidget(row_widget)
+            row_widget.deleteLater()
+        self.var_choice_option_edits.clear()
+
+    def _get_var_choice_values(self) -> list[str]:
+        values = []
+        for edit, _ in self.var_choice_option_edits:
+            txt = edit.text().strip()
+            if txt:
+                values.append(txt)
+        return values
+
+    def _set_var_choice_values(self, values: list[str]) -> None:
+        self.clear_var_choice_options()
+        for v in values:
+            self.add_var_choice_option(v)
+
+    def _on_var_choice_input_changed(self) -> None:
+        if getattr(self, "_loading_var_field", False):
+            return
+        self._sync_current_var_field_from_inputs()
+
     def on_var_field_selected(self) -> None:
         rows = self.var_fields_table.selectionModel().selectedRows()
         if not rows:
@@ -272,12 +380,11 @@ class MatchDetailsMixin:
             self.var_field_type_combo.setCurrentText("Text (multiline)")
         else:
             self.var_field_type_combo.setCurrentText("Text (single-line)")
-        self.var_field_values_edit.setText(", ".join(fobj.values))
+        self._set_var_choice_values(fobj.values)
         self.var_field_default_edit.setText(fobj.default)
 
         is_choice_or_list = fobj.type in ("choice", "list")
-        self.var_field_values_edit.setEnabled(is_choice_or_list)
-        self.var_field_values_label.setEnabled(is_choice_or_list)
+        self.var_field_choice_container.setVisible(is_choice_or_list)
         self.btn_delete_var_field.setEnabled(True)
         self._loading_var_field = False
 
@@ -324,8 +431,7 @@ class MatchDetailsMixin:
 
     def on_var_field_type_changed(self, text: str) -> None:
         is_choice_or_list = "Choice" in text or "List" in text
-        self.var_field_values_edit.setEnabled(is_choice_or_list)
-        self.var_field_values_label.setEnabled(is_choice_or_list)
+        self.var_field_choice_container.setVisible(is_choice_or_list)
         if getattr(self, "_loading_var_field", False):
             return
         self._sync_current_var_field_from_inputs()
@@ -356,8 +462,7 @@ class MatchDetailsMixin:
             fobj.type = "text"
             fobj.multiline = False
 
-        raw_values = self.var_field_values_edit.text().strip()
-        fobj.values = [v.strip() for v in raw_values.split(",") if v.strip()] if raw_values else []
+        fobj.values = self._get_var_choice_values() if fobj.type in ("choice", "list") else []
         fobj.default = self.var_field_default_edit.text()
 
         row = self.var_fields_table.currentRow()
@@ -419,10 +524,9 @@ class MatchDetailsMixin:
         self._loading_var_field = True
         self.var_field_name_edit.clear()
         self.var_field_type_combo.setCurrentIndex(0)
-        self.var_field_values_edit.clear()
+        self.clear_var_choice_options()
         self.var_field_default_edit.clear()
-        self.var_field_values_edit.setEnabled(False)
-        self.var_field_values_label.setEnabled(False)
+        self.var_field_choice_container.setVisible(False)
         self.btn_delete_var_field.setEnabled(False)
         self._loading_var_field = False
 
@@ -465,7 +569,6 @@ class MatchDetailsMixin:
         self.var_shell_edit.clear()
         self.var_script_edit.clear()
         self.var_date_edit.clear()
-        self.var_choice_edit.clear()
         self.variable_layout_edit.clear()
         self.param_stack.setCurrentIndex(0)
         self.var_config_stack.setCurrentIndex(0)
@@ -473,6 +576,22 @@ class MatchDetailsMixin:
         self._clear_var_field_inputs()
         self.var_fields_table.setRowCount(0)
         self._loading_var = False
+
+    def browse_var_script(self) -> None:
+        initial_dir = ""
+        current_text = self.var_script_edit.text().strip()
+        if current_text and os.path.exists(current_text):
+            initial_dir = os.path.dirname(current_text) if os.path.isfile(current_text) else current_text
+        elif getattr(self, "current_file", None) and hasattr(self.current_file, "path"):
+            initial_dir = os.path.dirname(self.current_file.path)
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select script",
+            initial_dir,
+            "All Files (*)",
+        )
+        if file_path:
+            self.var_script_edit.setText(file_path)
 
     def on_variable_cell_clicked(self, row: int, column: int) -> None:
         if getattr(self, "_loading_var", False):
@@ -506,8 +625,7 @@ class MatchDetailsMixin:
             "shell": 0,
             "form": 1,
             "script": 2,
-            "choice": 3,
-            "date": 4,
+            "date": 3,
         }
         self.param_stack.setCurrentIndex(type_to_index.get(variable.type, 0))
         self._load_variable_param_inputs(variable)
@@ -516,14 +634,12 @@ class MatchDetailsMixin:
     def _load_variable_param_inputs(self, variable: EspansoVariable) -> None:
         val = variable.parameter_value
         if variable.type == "shell":
-            self.var_shell_edit.setText(val)
+            self.var_shell_edit.setPlainText(val)
         elif variable.type == "form":
             self.variable_layout_edit.setPlainText(val)
             self.refresh_var_fields_table()
         elif variable.type == "script":
             self.var_script_edit.setText(val)
-        elif variable.type == "choice":
-            self.var_choice_edit.setText(val)
         elif variable.type == "date":
             self.var_date_edit.setText(val)
 
@@ -560,8 +676,7 @@ class MatchDetailsMixin:
             "shell": 0,
             "form": 1,
             "script": 2,
-            "choice": 3,
-            "date": 4,
+            "date": 3,
         }
         self.param_stack.setCurrentIndex(type_to_index.get(new_type, 0))
         self._load_variable_param_inputs(var)
@@ -577,11 +692,9 @@ class MatchDetailsMixin:
             return
         var = match.variables[self.selected_variable]
         if var.type == "shell":
-            var.set_parameter_value(self.var_shell_edit.text())
+            var.set_parameter_value(self.var_shell_edit.toPlainText())
         elif var.type == "script":
             var.set_parameter_value(self.var_script_edit.text())
-        elif var.type == "choice":
-            var.set_parameter_value(self.var_choice_edit.text())
         elif var.type == "date":
             var.set_parameter_value(self.var_date_edit.text())
         self.dirty = True
