@@ -49,7 +49,17 @@ def setup_qt_environment() -> None:
     if not sys.platform.startswith("linux"):
         return
 
-    # On Linux, register system Qt6 plugin directories (e.g. /usr/lib/qt6/plugins)
+    # Set platform fallback: try wayland first, then fall back to xcb (XWayland/X11).
+    if "QT_QPA_PLATFORM" not in os.environ:
+        os.environ["QT_QPA_PLATFORM"] = "wayland;xcb"
+
+    # In standalone/frozen bundles (AppImage, PyInstaller, Standalone DEB),
+    # do NOT inject host system Qt6 plugins, as mismatching shared objects
+    # (e.g. system libwayland-client or mismatched Qt versions) cause segmentation faults.
+    if getattr(sys, "frozen", False):
+        return
+
+    # On Linux non-frozen environments, register system Qt6 plugin directories
     # so that pip wheels can load system styles (like Breeze) and platform themes.
     qt6_plugin_dirs = [
         "/usr/lib/qt6/plugins",
