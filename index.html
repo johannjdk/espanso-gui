@@ -3,8 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Espanso GUI - Graphical User Interface for Espanso</title>
+    <title>Espanso GUI — Desktop Match & Form Editor for Espanso</title>
+    <meta
+      name="description"
+      content="A fast, native desktop editor for Espanso match files. Visually create, edit, and organize text-expansion triggers, forms, and variables without editing raw YAML."
+    />
 
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap 5.3.3 & Bootstrap Icons -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,267 +27,696 @@
       rel="stylesheet"
     />
 
+    <!-- Swiper Carousel 11 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+
     <style>
       :root {
-        --page: #111315;
-        --panel: #191c1f;
-        --panel-raised: #202428;
-        --line: #30363c;
-        --muted: #a9b0b7;
-        --accent: #74c4d5;
-        --accent-deep: #276979;
+        /* Espanso Brand Color */
+        --espanso: #4bbd98;
+        --espanso-hover: #3ca985;
+        --espanso-active: #329272;
+        --espanso-soft: rgba(75, 189, 152, 0.12);
+        --espanso-border: rgba(75, 189, 152, 0.3);
+
+        /* Clean Charcoal & Dark Surfaces */
+        --canvas-bg: #111417;
+        --surface-1: #171b1f;
+        --surface-2: #1e2329;
+        --surface-3: #272d34;
+        --surface-code: #0d0f12;
+        --border-color: #2b313a;
+        --border-subtle: rgba(255, 255, 255, 0.07);
+
+        --text-primary: #f2f5f8;
+        --text-secondary: #9aa1ab;
+        --text-tertiary: #6b7280;
+
+        --kbd-bg: #1e2329;
+        --kbd-border: #353d47;
+
+        --swiper-theme-color: var(--espanso);
+        --swiper-navigation-size: 20px;
       }
 
-      html { scroll-behavior: smooth; }
+      html {
+        scroll-behavior: smooth;
+      }
 
       body {
         font-family:
+          "Inter",
           system-ui,
           -apple-system,
           "Segoe UI",
           Roboto,
-          "Helvetica Neue",
-          "Noto Sans",
-          "Liberation Sans",
-          Arial,
           sans-serif;
-        background: var(--page);
-        color: #f1f3f4;
+        background-color: var(--canvas-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
       }
 
-      .site-nav {
-        background: rgba(17, 19, 21, 0.94);
-        backdrop-filter: blur(12px);
+      code, pre, kbd {
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       }
 
-      .eyebrow {
-        color: var(--accent);
+      kbd {
+        background-color: var(--kbd-bg);
+        border: 1px solid var(--kbd-border);
+        color: var(--espanso);
         font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.11em;
-        text-transform: uppercase;
+        padding: 0.2rem 0.45rem;
+        border-radius: 0.35rem;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
       }
 
-      .text-primary { color: var(--accent) !important; }
-
-      .hero {
-        background: linear-gradient(112deg, #15191b 0%, #15191b 52%, #132126 100%);
+      /* Navbar */
+      .site-nav {
+        background-color: rgba(17, 20, 23, 0.94);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border-color);
       }
 
-      .hero h1 { letter-spacing: -0.045em; }
+      .nav-brand-logo {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+      }
 
-      .hero-copy { max-width: 35rem; }
-
-      .availability {
-        color: var(--muted);
+      .navbar-nav .nav-link {
+        color: var(--text-secondary);
         font-size: 0.9rem;
-      }
-
-      .section-intro { max-width: 38rem; }
-
-      .download-card {
-        border-color: var(--line) !important;
-        border-radius: 0.65rem;
-        background: var(--panel);
-        box-shadow: none !important;
-      }
-
-      .download-card .card-header { background: transparent; }
-
-      .package-choice {
-        border-color: var(--line) !important;
-        border-radius: 0.45rem !important;
-        background: #15181b !important;
-      }
-
-      .package-toggle-btn {
-        border-color: var(--line) !important;
-        color: var(--muted) !important;
-        background: #171b1e !important;
-        border-radius: 0.45rem !important;
-        transition: all 0.2s ease;
-      }
-
-      .package-toggle-btn:hover {
-        color: #f1f3f4 !important;
-        border-color: var(--accent) !important;
-        background: #1c2226 !important;
-      }
-
-      .package-toggle-btn .toggle-icon {
-        transition: transform 0.25s ease;
-      }
-
-      .package-toggle-btn[aria-expanded="true"] .toggle-icon {
-        transform: rotate(180deg);
-      }
-
-      .download-card.detected-os {
-        border-color: rgba(116, 196, 213, 0.5) !important;
-        box-shadow: 0 0 24px rgba(116, 196, 213, 0.08);
-      }
-
-      .badge { font-weight: 600; }
-
-      .btn-primary {
-        --bs-btn-bg: #3b94a7;
-        --bs-btn-border-color: #3b94a7;
-        --bs-btn-hover-bg: #4baabd;
-        --bs-btn-hover-border-color: #4baabd;
-        --bs-btn-active-bg: #317d8d;
-        --bs-btn-active-border-color: #317d8d;
-      }
-
-      .btn-outline-primary {
-        --bs-btn-color: #8cdae8;
-        --bs-btn-border-color: #4a8997;
-        --bs-btn-hover-bg: #276979;
-        --bs-btn-hover-border-color: #276979;
-      }
-
-      .terminal-card {
-        border: 1px solid var(--line);
+        font-weight: 500;
+        padding: 0.5rem 0.85rem;
         border-radius: 0.4rem;
-        background: #171a1d;
-        overflow: hidden;
+        transition: color 0.15s ease, background-color 0.15s ease;
       }
 
-      .install-heading {
-        border-bottom: 1px solid var(--line);
-        padding-bottom: 1.5rem;
+      .navbar-nav .nav-link:hover {
+        color: var(--text-primary);
+        background-color: rgba(255, 255, 255, 0.05);
       }
 
-      .install-item + .install-item {
-        border-top: 1px solid var(--line);
-        margin-top: 2rem;
-        padding-top: 2rem;
-      }
-
-      .install-item h5 i {
-        color: var(--muted) !important;
-      }
-
-      .quick-install {
-        border-left: 3px solid var(--accent);
-        background: #171a1d;
-      }
-
-      .quick-install .flex-grow-1 { min-width: 0; }
-
-      .code-container {
-        position: relative;
-      }
-
-      .code-container pre {
-        padding-right: 4rem !important;
-        scrollbar-color: #4a8997 transparent;
-        scrollbar-width: thin;
-      }
-
-      .copy-btn {
-        --bs-btn-bg: var(--panel-raised);
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-      }
-
-      .footer-link:hover { color: #f1f3f4 !important; }
-
-      .screenshot-item {
-        background: transparent;
-        transition: transform 0.2s ease;
-      }
-
-      .screenshot-item:hover {
-        transform: translateY(-2px);
-      }
-
-      .screenshot-item img {
-        border: none !important;
-        box-shadow: none !important;
-        background: transparent !important;
-      }
-
-      .github-star-btn {
+      .github-star-pill {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.3rem 0.4rem 0.3rem 0.85rem;
+        padding: 0.35rem 0.85rem;
         font-size: 0.8125rem;
         font-weight: 500;
-        color: #e6edf3;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid var(--line);
+        color: var(--text-primary);
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
         border-radius: 2rem;
         text-decoration: none;
         transition: all 0.2s ease;
       }
 
-      .github-star-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: #535b64;
-        color: #fff;
-        transform: translateY(-1px);
+      .github-star-pill:hover {
+        background-color: var(--surface-3);
+        border-color: #3f4753;
+        color: #ffffff;
       }
 
-      .github-star-btn .star-badge {
+      .github-star-pill .star-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.18rem 0.6rem;
-        background: rgba(245, 197, 24, 0.12);
-        color: #f5c518;
-        border: 1px solid rgba(245, 197, 24, 0.28);
+        gap: 0.3rem;
+        padding: 0.15rem 0.5rem;
+        background: var(--espanso-soft);
+        color: var(--espanso);
+        border: 1px solid var(--espanso-border);
         border-radius: 1rem;
         font-size: 0.75rem;
         font-weight: 600;
-        letter-spacing: 0.02em;
+      }
+
+      /* Hero Section */
+      .hero {
+        position: relative;
+        background: radial-gradient(circle at 85% 15%, rgba(75, 189, 152, 0.08) 0%, transparent 55%);
+        border-bottom: 1px solid var(--border-color);
+        padding-top: 3.5rem;
+        padding-bottom: 4rem;
+      }
+
+      .hero-title {
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+      }
+
+      .hero-desc {
+        color: var(--text-secondary);
+        font-size: 1.125rem;
+        max-width: 36rem;
+      }
+
+      /* Buttons */
+      .btn-espanso-primary {
+        background-color: var(--espanso);
+        border-color: var(--espanso);
+        color: #0b1411;
+        font-weight: 600;
         transition: all 0.2s ease;
       }
 
-      .github-star-btn:hover .star-badge {
-        background: rgba(245, 197, 24, 0.22);
-        border-color: rgba(245, 197, 24, 0.5);
-        color: #ffd700;
+      .btn-espanso-primary:hover {
+        background-color: var(--espanso-hover);
+        border-color: var(--espanso-hover);
+        color: #000000;
+        transform: translateY(-1px);
       }
 
-      .github-star-btn .star-icon-anim {
-        transition: transform 0.25s ease;
+      .btn-espanso-primary:active {
+        background-color: var(--espanso-active);
+        border-color: var(--espanso-active);
       }
 
-      .github-star-btn:hover .star-icon-anim {
-        transform: scale(1.2) rotate(10deg);
+      .btn-outline-theme {
+        background-color: var(--surface-2);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.2s ease;
       }
 
-      @media (max-width: 991.98px) {
-        .hero { background: #15191b; }
+      .btn-outline-theme:hover {
+        background-color: var(--surface-3);
+        border-color: #3f4753;
+        color: #ffffff;
+      }
+
+      /* Single unified section titles */
+      .section-header {
+        margin-bottom: 2.5rem;
+      }
+
+      .section-title {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        font-size: 1.75rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 0;
+      }
+
+      /* Native Screenshots - NO FAKE FRAMES OR BORDERS */
+      .app-window-presentation {
+        position: relative;
+        text-align: center;
+      }
+
+      .app-window-presentation img {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .screenshot-zoom-wrap {
+        display: inline-block;
+        position: relative;
+        cursor: zoom-in;
+        transition: transform 0.2s ease;
+      }
+
+      .screenshot-zoom-wrap:hover {
+        transform: translateY(-2px);
+      }
+
+      .zoom-indicator-badge {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background-color: rgba(17, 20, 23, 0.9);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.35rem;
+        backdrop-filter: blur(8px);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .screenshot-zoom-wrap:hover .zoom-indicator-badge {
+        opacity: 1;
+      }
+
+      /* Simple, Clean Features List (No bento boxes, no bloated cards) */
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .feature-check-icon {
+        color: var(--espanso);
+        font-size: 1.2rem;
+        line-height: 1.3;
+        flex-shrink: 0;
+      }
+
+      .feature-item-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+      }
+
+      .feature-item-desc {
+        color: var(--text-secondary);
+        font-size: 0.885rem;
+        line-height: 1.5;
+        margin-bottom: 0;
+      }
+
+      /* Swiper Carousel Section */
+      .screenshot-swiper-container {
+        position: relative;
+        padding: 0 1rem;
+      }
+
+      .screenshot-swiper {
+        padding-bottom: 3.5rem;
+      }
+
+      .swiper-slide {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.35;
+        transition: opacity 0.3s ease;
+      }
+
+      .swiper-slide-active {
+        opacity: 1;
+      }
+
+      .slide-img-box {
+        text-align: center;
+        width: 100%;
+        max-width: 1000px;
+        background: transparent;
+      }
+
+      .slide-img-box img {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        max-height: 540px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+      }
+
+      .slide-caption-bar {
+        margin-top: 1.25rem;
+        text-align: center;
+        max-width: 600px;
+      }
+
+      .slide-caption-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.35rem;
+      }
+
+      .slide-caption-desc {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 0;
+      }
+
+      .swiper-button-prev,
+      .swiper-button-next {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        color: var(--espanso) !important;
+        transition: all 0.2s ease;
+        top: 42%;
+      }
+
+      .swiper-button-prev:hover,
+      .swiper-button-next:hover {
+        background-color: var(--surface-3);
+        border-color: var(--espanso);
+      }
+
+      .swiper-pagination-bullet {
+        background: #474f5a;
+        opacity: 0.5;
+        width: 9px;
+        height: 9px;
+        transition: all 0.25s ease;
+      }
+
+      .swiper-pagination-bullet-active {
+        background: var(--espanso) !important;
+        opacity: 1;
+        width: 24px;
+        border-radius: 5px;
+      }
+
+      /* Carousel Pills */
+      .carousel-selector-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+      }
+
+      .carousel-pill-btn {
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.825rem;
+        font-weight: 500;
+        padding: 0.4rem 0.85rem;
+        border-radius: 2rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .carousel-pill-btn:hover {
+        background-color: var(--surface-3);
+        color: var(--text-primary);
+      }
+
+      .carousel-pill-btn.active {
+        background-color: var(--espanso-soft);
+        border-color: var(--espanso);
+        color: var(--espanso);
+        font-weight: 600;
+      }
+
+      /* Download Cards */
+      .download-card {
+        background-color: var(--surface-1);
+        border: 1px solid var(--border-color);
+        border-radius: 0.65rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: border-color 0.25s ease;
+      }
+
+      .download-card.detected-os {
+        border-color: var(--espanso) !important;
+        box-shadow: 0 0 0 1px var(--espanso);
+      }
+
+      .download-card-header {
+        background-color: var(--surface-2);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .download-card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        flex-grow: 1;
+      }
+
+      .package-box {
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        transition: border-color 0.15s ease;
+      }
+
+      .package-box:hover {
+        border-color: #3f4753;
+      }
+
+      .package-format-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background-color: var(--surface-3);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 0.18rem 0.5rem;
+        border-radius: 0.25rem;
+      }
+
+      .package-toggle-btn {
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 0.65rem 1rem;
+        border-radius: 0.5rem;
+        text-align: left;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+      }
+
+      .package-toggle-btn:hover {
+        background-color: var(--surface-3);
+        border-color: #3f4753;
+        color: var(--text-primary);
+      }
+
+      .package-toggle-btn[aria-expanded="true"] .toggle-arrow {
+        transform: rotate(180deg);
+      }
+
+      .toggle-arrow {
+        transition: transform 0.2s ease;
+      }
+
+      /* Installation Terminal Area */
+      .install-tabs-nav {
+        border-bottom: 1px solid var(--border-color);
+        gap: 0.5rem;
+      }
+
+      .install-tabs-nav .nav-link {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+        border-radius: 0.45rem;
+        padding: 0.5rem 0.9rem;
+        background: transparent;
+        transition: all 0.15s ease;
+      }
+
+      .install-tabs-nav .nav-link:hover {
+        color: var(--text-primary);
+        background-color: var(--surface-2);
+      }
+
+      .install-tabs-nav .nav-link.active {
+        color: var(--espanso);
+        background-color: var(--surface-2);
+        border-color: var(--border-color);
+      }
+
+      .terminal-window {
+        background-color: var(--surface-code);
+        border: 1px solid var(--border-color);
+        border-radius: 0.55rem;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .terminal-topbar {
+        background-color: var(--surface-2);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.6rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .terminal-dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      .terminal-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #353d47;
+      }
+
+      .terminal-code-body {
+        position: relative;
+        padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+      }
+
+      .terminal-code-body pre {
+        margin: 0;
+        padding-right: 3.5rem;
+        color: #e6edf3;
+        font-size: 0.875rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.35rem;
+        transition: all 0.15s ease;
+      }
+
+      .copy-btn:hover {
+        background-color: var(--surface-3);
+        border-color: var(--espanso);
+        color: var(--espanso);
+      }
+
+      /* Custom Accordion */
+      .custom-accordion .accordion-item {
+        background-color: var(--surface-1);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem !important;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+      }
+
+      .custom-accordion .accordion-button {
+        background-color: var(--surface-1);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 1.15rem 1.25rem;
+        box-shadow: none !important;
+      }
+
+      .custom-accordion .accordion-button:not(.collapsed) {
+        background-color: var(--surface-2);
+        color: var(--espanso);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .custom-accordion .accordion-button::after {
+        filter: invert(0.8);
+      }
+
+      .custom-accordion .accordion-body {
+        color: var(--text-secondary);
+        font-size: 0.925rem;
+        line-height: 1.6;
+        padding: 1.25rem;
+        background-color: var(--surface-1);
+      }
+
+      /* Footer */
+      .site-footer {
+        background-color: var(--surface-1);
+        border-top: 1px solid var(--border-color);
+        color: var(--text-tertiary);
+        font-size: 0.875rem;
+      }
+
+      .footer-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      .footer-link:hover {
+        color: var(--espanso);
+      }
+
+      /* Lightbox Modal */
+      .screenshot-modal .modal-content {
+        background: transparent;
+        border: none;
+      }
+
+      .screenshot-modal .modal-header {
+        border: none;
+        padding-bottom: 0.5rem;
+      }
+
+      .screenshot-modal img {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        max-height: 86vh;
+        width: auto;
+        object-fit: contain;
+      }
+
+      @media (max-width: 767.98px) {
+        .hero {
+          padding-top: 2rem;
+          padding-bottom: 2.5rem;
+        }
+        .hero-title {
+          font-size: 2.2rem;
+        }
+        .swiper-button-prev,
+        .swiper-button-next {
+          display: none;
+        }
       }
     </style>
   </head>
   <body>
-    <nav
-      class="navbar navbar-expand-lg site-nav border-bottom sticky-top"
-    >
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg site-nav sticky-top">
       <div class="container">
-        <a
-          class="navbar-brand fw-bold d-flex align-items-center gap-2"
-          href="#"
-        >
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+          <img src="assets/espanso-gui.png" alt="Espanso GUI logo" class="nav-brand-logo" />
           <span>Espanso GUI</span>
         </a>
         <button
-          class="navbar-toggler"
+          class="navbar-toggler border-0"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
+          data-bs-target="#navbarMain"
+          aria-controls="navbarMain"
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span class="navbar-toggler-icon"></span>
+          <i class="bi bi-list fs-3 text-light"></i>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+            <li class="nav-item">
+              <a class="nav-link" href="#features">Features</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="#screenshots">Screenshots</a>
             </li>
@@ -284,23 +726,24 @@
             <li class="nav-item">
               <a class="nav-link" href="#installation">Installation</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#faq">FAQ</a>
+            </li>
           </ul>
+
           <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
-            <span class="small text-body-secondary d-none d-xl-inline">
-              Enjoying the project?
-            </span>
             <a
               href="https://github.com/johannjdk/espanso-gui"
               target="_blank"
               rel="noopener"
-              class="github-star-btn"
-              title="Star Espanso GUI on GitHub"
+              class="github-star-pill"
+              title="View repository on GitHub"
             >
               <i class="bi bi-github fs-6"></i>
               <span>GitHub</span>
               <span class="star-badge">
-                <i class="bi bi-star-fill star-icon-anim"></i>
-                <span>Star</span>
+                <i class="bi bi-star-fill"></i>
+                <span id="star-count-label">Star</span>
               </span>
             </a>
           </div>
@@ -308,337 +751,471 @@
       </div>
     </nav>
 
-    <header class="hero py-5 border-bottom">
-      <div class="container py-lg-4">
-        <div class="row align-items-center gy-4">
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="container">
+        <div class="row align-items-center gy-5">
           <div class="col-lg-6">
-            <h1 class="display-4 fw-bold mb-3">Text expansion, kept simple.</h1>
-            <p class="lead text-body-secondary mb-4 hero-copy">
-              A native desktop editor for Espanso match files. Espanso GUI makes
-              it easier to create, review, and maintain text-expansion rules
-              without editing YAML by hand, while keeping your existing Espanso
-              configuration in control.
+            <h1 class="display-5 hero-title mb-3">
+              Text expansion management, organized visually.
+            </h1>
+
+            <p class="hero-desc mb-4">
+              Espanso GUI is a native desktop editor for your Espanso match files.
+              Create, review, and maintain text triggers, interactive form templates,
+              and shell variables directly on disk without manual YAML formatting.
             </p>
+
             <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
               <a
                 id="hero-download-btn"
                 href="#downloads"
-                class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2 shadow-sm"
+                class="btn btn-espanso-primary btn-lg d-inline-flex align-items-center gap-2 px-4 shadow-sm"
               >
                 <i id="hero-download-icon" class="bi bi-download"></i>
                 <span id="hero-download-text">Download Espanso GUI</span>
               </a>
+
               <a
                 href="#downloads"
-                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2"
-                title="View all download options"
+                class="btn btn-outline-theme btn-lg d-inline-flex align-items-center gap-2 px-3"
               >
                 <i class="bi bi-grid-3x3-gap"></i>
                 <span>All Platforms</span>
               </a>
+
               <a
                 href="https://github.com/johannjdk/espanso-gui"
                 target="_blank"
                 rel="noopener"
-                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2"
+                class="btn btn-outline-theme btn-lg d-inline-flex align-items-center gap-2 px-3"
               >
                 <i class="bi bi-github"></i>
-                <span>Source Code</span>
+                <span>Source</span>
               </a>
             </div>
-            <div class="availability d-flex align-items-center gap-2 text-body-secondary small">
-              <i class="bi bi-check-circle-fill text-success"></i>
-              <span id="hero-detected-note">Available for Linux, macOS, and Windows.</span>
+
+            <div class="d-flex align-items-center gap-2 small text-secondary">
+              <i class="bi bi-check2-circle" style="color: var(--espanso);"></i>
+              <span id="hero-detected-note">
+                Pre-built packages available for Linux, macOS, and Windows.
+              </span>
             </div>
           </div>
-          <div class="col-lg-6 text-center">
-            <a
-              href="#screenshotModal"
-              data-bs-toggle="modal"
-              data-bs-img="images/screenshots/main_window.png"
-              data-bs-title="Main Window — Match and Form Editor"
-              class="d-inline-block text-decoration-none"
-              title="Click to view full screenshot"
-            >
-              <img
-                src="images/screenshots/main_window.png"
-                alt="Espanso GUI Main Window"
-                class="img-fluid"
-              />
-            </a>
+
+          <div class="col-lg-6">
+            <div class="app-window-presentation">
+              <div
+                class="screenshot-zoom-wrap"
+                data-bs-toggle="modal"
+                data-bs-target="#screenshotModal"
+                data-bs-img="images/screenshots/main_window.png"
+                data-bs-title="Espanso GUI — Main Editor Window"
+                role="button"
+                tabindex="0"
+                title="Click to zoom screenshot"
+              >
+                <img
+                  src="images/screenshots/main_window.png"
+                  alt="Espanso GUI Main Editor Window"
+                  width="1006"
+                  height="638"
+                  class="img-fluid"
+                />
+                <div class="zoom-indicator-badge">
+                  <i class="bi bi-arrows-fullscreen me-1"></i> Click to enlarge
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
-    <section id="screenshots" class="py-5 border-bottom">
-      <div class="container py-3">
-        <div class="section-intro mb-5">
-          <p class="eyebrow mb-2">Screenshots</p>
-          <h2 class="fw-bold mb-2">Explore the interface.</h2>
-          <p class="text-body-secondary mb-0">
-            A native, distraction-free environment to maintain text expansions, variables, forms, and configuration profiles.
+    <!-- Clean, Simple Features Overview (Kein Schnickschnack) -->
+    <section id="features" class="py-5">
+      <div class="container py-lg-3">
+        <div class="section-header">
+          <h2 class="section-title">Features</h2>
+          <p class="section-subtitle">
+            Directly manages your existing Espanso match files without lock-in or proprietary storage.
           </p>
         </div>
 
-        <div class="row g-4 mb-5">
-          <!-- Main Window -->
-          <div class="col-12 col-lg-6">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/main_window.png"
-                data-bs-title="Main Window &amp; Form Editor"
-                class="d-block text-decoration-none mb-3 text-center"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/main_window.png"
-                  alt="Espanso GUI Main Editor"
-                  class="img-fluid"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <h5 class="fw-bold mb-0">Match &amp; Form Editor</h5>
-              </div>
-              <p class="text-body-secondary small mb-0">
-                Manage file trees, trigger lists, multi-line templates, and interactive form fields with instant field detection.
-              </p>
-            </div>
-          </div>
-
-          <!-- Variables Editor -->
-          <div class="col-12 col-lg-6">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/variables.png"
-                data-bs-title="Variables &amp; Form Fields"
-                class="d-block text-decoration-none mb-3 text-center"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/variables.png"
-                  alt="Espanso GUI Variables Editor"
-                  class="img-fluid"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <h5 class="fw-bold mb-0">Master-Detail Variable Manager</h5>
-              </div>
-              <p class="text-body-secondary small mb-0">
-                Configure shell, script, form, choice, and date variables with a dedicated side-by-side properties layout.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div class="row g-4">
-          <!-- Global Search -->
-          <div class="col-12 col-sm-6 col-lg-3">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/search.png"
-                data-bs-title="Global Search (Ctrl+F)"
-                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
-                style="min-height: 200px;"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/search.png"
-                  alt="Global Search Dialog"
-                  class="img-fluid"
-                  style="max-height: 200px;"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <h6 class="fw-bold mb-0">Global Search</h6>
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Match File Management</h3>
+                <p class="feature-item-desc">
+                  Browse, create, rename, duplicate, and delete match files and individual triggers across your configuration folders.
+                </p>
               </div>
-              <p class="text-body-secondary small mb-0">
-                Search across all YAML files with instant jump-to-match navigation.
-              </p>
             </div>
           </div>
 
-          <!-- Config Profiles -->
-          <div class="col-12 col-sm-6 col-lg-3">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/espanso_config.png"
-                data-bs-title="Configuration Profiles"
-                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
-                style="min-height: 200px;"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/espanso_config.png"
-                  alt="Espanso Configuration Profiles"
-                  class="img-fluid"
-                  style="max-height: 200px;"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <h6 class="fw-bold mb-0">Config Profiles</h6>
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Visual Form Editor</h3>
+                <p class="feature-item-desc">
+                  Create snippet forms with text fields, text areas, and choice dropdowns. Template tags like <kbd>{{field}}</kbd> are automatically detected.
+                </p>
               </div>
-              <p class="text-body-secondary small mb-0">
-                Visual settings for `default.yml`, keyboard layout overrides, and app filters.
-              </p>
             </div>
           </div>
 
-          <!-- Expert YAML -->
-          <div class="col-12 col-sm-6 col-lg-3">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/expert_yaml.png"
-                data-bs-title="Expert YAML Mode"
-                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
-                style="min-height: 200px;"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/expert_yaml.png"
-                  alt="Expert YAML Editor"
-                  class="img-fluid"
-                  style="max-height: 200px;"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <h6 class="fw-bold mb-0">Expert YAML Mode</h6>
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Variable Support</h3>
+                <p class="feature-item-desc">
+                  Configure shell scripts, python commands, dates, clipboard values, and random choices in a clear master-detail view.
+                </p>
               </div>
-              <p class="text-body-secondary small mb-0">
-                Direct access to complete YAML documents with automatic syntax validation before saving.
-              </p>
             </div>
           </div>
 
-          <!-- Statistics -->
-          <div class="col-12 col-sm-6 col-lg-3">
-            <div class="screenshot-item h-100 d-flex flex-column">
-              <a
-                href="#screenshotModal"
-                data-bs-toggle="modal"
-                data-bs-img="images/screenshots/statistics.png"
-                data-bs-title="Expansion Statistics"
-                class="d-flex align-items-center justify-content-center text-decoration-none mb-3"
-                style="min-height: 200px;"
-                title="Click to expand"
-              >
-                <img
-                  src="images/screenshots/statistics.png"
-                  alt="Expansion Statistics Dialog"
-                  class="img-fluid"
-                  style="max-height: 200px;"
-                />
-              </a>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <h6 class="fw-bold mb-0">Usage Statistics</h6>
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Global Search (<kbd>Ctrl+F</kbd>)</h3>
+                <p class="feature-item-desc">
+                  Quickly query triggers and templates across all YAML files with instant navigation directly to the match.
+                </p>
               </div>
-              <p class="text-body-secondary small mb-0">
-                Track expansion counts, most-used triggers, and monitor Espanso daemon status.
-              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Expert YAML & Validation</h3>
+                <p class="feature-item-desc">
+                  Inspect raw documents for regex triggers or word flags. The built-in YAML parser validates syntax before saving to disk.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-item">
+              <i class="bi bi-check-lg feature-check-icon"></i>
+              <div>
+                <h3 class="feature-item-title">Profiles & Daemon Control</h3>
+                <p class="feature-item-desc">
+                  Edit <kbd>default.yml</kbd>, configure application filters, and restart the background Espanso daemon with one click.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section
-      id="downloads"
-      class="py-5 border-top border-bottom"
-    >
-      <div class="container py-3">
-        <div class="section-intro mb-5">
-          <p class="eyebrow mb-2">Downloads</p>
-          <h2 class="fw-bold mb-2">Pick your package.</h2>
-          <p class="text-body-secondary mb-0">
-            Choose the appropriate package for your operating system.
+    <!-- Screenshots Showcase with Swiper Carousel -->
+    <section id="screenshots" class="py-5 border-top">
+      <div class="container py-lg-4">
+        <div class="section-header text-center mx-auto">
+          <h2 class="section-title">Screenshots</h2>
+          <p class="section-subtitle mx-auto">
+            Explore the interface. Click any screenshot to open the full-resolution preview.
+          </p>
+        </div>
+
+        <!-- Carousel Direct Selector Navigation -->
+        <div class="carousel-selector-nav" id="carouselPills">
+          <button class="carousel-pill-btn active" data-slide="0">Match &amp; Form Editor</button>
+          <button class="carousel-pill-btn" data-slide="1">Variables Inspector</button>
+          <button class="carousel-pill-btn" data-slide="2">Global Search (Ctrl+F)</button>
+          <button class="carousel-pill-btn" data-slide="3">Config Profiles</button>
+          <button class="carousel-pill-btn" data-slide="4">Expert YAML Mode</button>
+          <button class="carousel-pill-btn" data-slide="5">Usage Statistics</button>
+        </div>
+
+        <!-- Swiper Carousel Container -->
+        <div class="screenshot-swiper-container">
+          <div class="swiper screenshot-swiper" id="appSwiper">
+            <div class="swiper-wrapper">
+              <!-- Slide 1: Main Window -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/main_window.png"
+                    data-bs-title="Main Window — Match &amp; Form Editor"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/main_window.png"
+                      alt="Espanso GUI Main Editor"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Match &amp; Form Editor</h4>
+                  <p class="slide-caption-desc">
+                    Configuration file tree, trigger search filter, multi-line snippet editor, and automatic form field inputs.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 2: Variables -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/variables.png"
+                    data-bs-title="Variables &amp; Form Fields Inspector"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/variables.png"
+                      alt="Variables Inspector"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Master-Detail Variable Manager</h4>
+                  <p class="slide-caption-desc">
+                    Configure shell scripts, date formatters, choice lists, and clipboard variables with side-by-side properties.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 3: Search -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/search.png"
+                    data-bs-title="Global Search Across All Match Files (Ctrl+F)"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/search.png"
+                      alt="Global Search Dialog"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Global Match Search (<kbd>Ctrl+F</kbd>)</h4>
+                  <p class="slide-caption-desc">
+                    Fast query across triggers, notes, and templates in all match files with direct jump-to-line navigation.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 4: Config Profiles -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/espanso_config.png"
+                    data-bs-title="Espanso Configuration Profiles"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/espanso_config.png"
+                      alt="Configuration Profiles"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Configuration Profiles</h4>
+                  <p class="slide-caption-desc">
+                    Settings editor for <kbd>default.yml</kbd>, keyboard layout overrides, and application exclusions.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 5: Expert YAML -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/expert_yaml.png"
+                    data-bs-title="Expert YAML Mode with Syntax Validation"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/expert_yaml.png"
+                      alt="Expert YAML Editor"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Expert YAML Mode</h4>
+                  <p class="slide-caption-desc">
+                    Direct access to the complete document syntax with automatic pre-save validation to prevent syntax errors.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 6: Statistics -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/statistics.png"
+                    data-bs-title="Usage Statistics &amp; Metrics"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/statistics.png"
+                      alt="Usage Statistics Dialog"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Usage Statistics</h4>
+                  <p class="slide-caption-desc">
+                    Monitor expansion counters, trigger frequency, and active Espanso daemon status.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Swiper Controls -->
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev" aria-label="Previous slide"></div>
+            <div class="swiper-button-next" aria-label="Next slide"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Downloads Section -->
+    <section id="downloads" class="py-5 border-top">
+      <div class="container py-lg-4">
+        <div class="section-header">
+          <h2 class="section-title">Downloads</h2>
+          <p class="section-subtitle">
+            Free, open-source desktop software distributed under the GNU General Public License v3.
+            Select the pre-built package for your operating system.
           </p>
         </div>
 
         <div class="row g-4 justify-content-center">
+          <!-- Linux Card -->
           <div class="col-12 col-md-6 col-lg-4" id="downloads-linux">
-            <div class="card h-100 border download-card" id="card-linux">
-              <div
-                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
-              >
+            <div class="download-card" id="card-linux">
+              <div class="download-card-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-ubuntu fs-4 text-primary"></i>
-                  <h5 class="card-title mb-0 fw-bold">Linux</h5>
+                  <i class="bi bi-ubuntu fs-4" style="color: var(--espanso);"></i>
+                  <h3 class="fs-5 mb-0 fw-bold">Linux</h3>
                 </div>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-linux-badge">Your OS</span>
+                <span class="badge border d-none" style="background-color: var(--espanso-soft); color: var(--espanso); border-color: var(--espanso-border) !important;" id="detected-linux-badge">
+                  Your Platform
+                </span>
               </div>
-              <div class="card-body d-flex flex-column gap-3">
-                <p class="card-text text-body-secondary small mb-1">
-                  Pre-built binary packages for common Linux distributions:
+
+              <div class="download-card-body">
+                <p class="small text-secondary mb-1">
+                  Universal AppImage or distribution packages:
                 </p>
 
-                <!-- Universal Linux (AppImage) -->
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-play-circle me-1 text-primary"></i> Universal Linux</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="appimage-tag"
-                      >.AppImage</span
-                    >
+                <!-- Universal AppImage -->
+                <div class="package-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold small">
+                      <i class="bi bi-play-circle me-1" style="color: var(--espanso);"></i> Universal Linux
+                    </span>
+                    <span class="package-format-badge" id="appimage-tag">.AppImage</span>
                   </div>
                   <a
                     id="btn-download-appimage"
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-espanso-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
                     <span>Download AppImage</span>
                   </a>
                 </div>
 
-                <!-- Debian / Ubuntu / Pop!_OS Standalone -->
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
+                <!-- Debian / Ubuntu Standalone -->
+                <div class="package-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
-                      <span class="fw-bold"
-                        ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu / Pop!_OS</span
-                      >
-                      <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standalone (bundled dependencies)</small>
+                      <span class="fw-semibold small">
+                        <i class="bi bi-box-seam me-1 text-secondary"></i> Debian / Ubuntu / Pop!_OS
+                      </span>
+                      <div class="text-secondary" style="font-size: 0.725rem;">
+                        Standalone (bundled PySide6 dependencies)
+                      </div>
                     </div>
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="deb-standalone-tag"
-                      >.deb</span
-                    >
+                    <span class="package-format-badge" id="deb-standalone-tag">.deb</span>
                   </div>
                   <a
                     id="btn-download-deb-standalone"
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-outline-theme btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
                     <span>Download Standalone (.deb)</span>
                   </a>
                 </div>
 
-                <!-- Toggle for more Linux formats -->
+                <!-- More Linux Packages Collapsible -->
                 <button
-                  class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-between package-toggle-btn py-2 px-3"
+                  class="package-toggle-btn mt-1"
                   type="button"
                   data-bs-toggle="collapse"
                   data-bs-target="#linux-packages-more"
@@ -650,35 +1227,28 @@
                     <i class="bi bi-collection"></i>
                     <span id="linux-toggle-text">More Linux packages (RPM, Arch, Standard DEB)</span>
                   </span>
-                  <i class="bi bi-chevron-down toggle-icon"></i>
+                  <i class="bi bi-chevron-down toggle-arrow"></i>
                 </button>
 
-                <!-- Collapsed extra Linux packages -->
                 <div class="collapse" id="linux-packages-more">
-                  <div class="d-flex flex-column gap-3 pt-3">
-                    <!-- Debian / Ubuntu Standard -->
-                    <div class="p-3 border package-choice">
-                      <div
-                        class="d-flex justify-content-between align-items-center mb-2"
-                      >
+                  <div class="d-flex flex-column gap-3 pt-2">
+                    <!-- Standard Debian/Ubuntu -->
+                    <div class="package-box">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                          <span class="fw-bold"
-                            ><i class="bi bi-box-seam me-1 text-primary"></i> Debian / Ubuntu</span
-                          >
-                          <small class="d-block text-body-secondary" style="font-size: 0.75rem;">Standard (requires python3-pyside6)</small>
+                          <span class="fw-semibold small">Debian / Ubuntu Standard</span>
+                          <div class="text-secondary" style="font-size: 0.725rem;">
+                            Uses system python3-pyside6
+                          </div>
                         </div>
-                        <span
-                          class="badge bg-body-secondary text-body-secondary"
-                          id="deb-tag"
-                          >.deb</span
-                        >
+                        <span class="package-format-badge" id="deb-tag">.deb</span>
                       </div>
                       <a
                         id="btn-download-deb"
                         href="https://github.com/johannjdk/espanso-gui/releases"
                         target="_blank"
                         rel="noopener"
-                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        class="btn btn-outline-theme btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                       >
                         <i class="bi bi-download"></i>
                         <span>Download Standard (.deb)</span>
@@ -686,56 +1256,38 @@
                     </div>
 
                     <!-- Fedora / RHEL -->
-                    <div class="p-3 border package-choice">
-                      <div
-                        class="d-flex justify-content-between align-items-center mb-2"
-                      >
-                        <span class="fw-bold"
-                          ><i class="bi bi-box-seam me-1 text-primary"></i> Fedora /
-                          RHEL</span
-                        >
-                        <span
-                          class="badge bg-body-secondary text-body-secondary"
-                          id="rpm-tag"
-                          >.rpm</span
-                        >
+                    <div class="package-box">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold small">Fedora / RHEL</span>
+                        <span class="package-format-badge" id="rpm-tag">.rpm</span>
                       </div>
                       <a
                         id="btn-download-rpm"
                         href="https://github.com/johannjdk/espanso-gui/releases"
                         target="_blank"
                         rel="noopener"
-                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        class="btn btn-outline-theme btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                       >
                         <i class="bi bi-download"></i>
-                        <span>Download Fedora (.rpm)</span>
+                        <span>Download RPM</span>
                       </a>
                     </div>
 
                     <!-- Arch Linux -->
-                    <div class="p-3 border package-choice">
-                      <div
-                        class="d-flex justify-content-between align-items-center mb-2"
-                      >
-                        <span class="fw-bold"
-                          ><i class="bi bi-cpu me-1 text-primary"></i> Arch
-                          Linux</span
-                        >
-                        <span
-                          class="badge bg-body-secondary text-body-secondary"
-                          id="arch-tag"
-                          >.pkg.tar.zst</span
-                        >
+                    <div class="package-box">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold small">Arch Linux (pacman)</span>
+                        <span class="package-format-badge" id="arch-tag">.pkg.tar.zst</span>
                       </div>
                       <a
                         id="btn-download-arch"
                         href="https://github.com/johannjdk/espanso-gui/releases"
                         target="_blank"
                         rel="noopener"
-                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        class="btn btn-outline-theme btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                       >
                         <i class="bi bi-download"></i>
-                        <span>Download Arch (.pkg.tar.zst)</span>
+                        <span>Download Arch Package</span>
                       </a>
                     </div>
                   </div>
@@ -744,117 +1296,110 @@
             </div>
           </div>
 
+          <!-- macOS Card -->
           <div class="col-12 col-md-6 col-lg-4" id="downloads-macos">
-            <div class="card h-100 border download-card" id="card-macos">
-              <div
-                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
-              >
+            <div class="download-card" id="card-macos">
+              <div class="download-card-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-apple fs-4 text-primary"></i>
-                  <h5 class="card-title mb-0 fw-bold">macOS</h5>
+                  <i class="bi bi-apple fs-4" style="color: var(--espanso);"></i>
+                  <h3 class="fs-5 mb-0 fw-bold">macOS</h3>
                 </div>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-macos-badge">Your OS</span>
+                <span class="badge border d-none" style="background-color: var(--espanso-soft); color: var(--espanso); border-color: var(--espanso-border) !important;" id="detected-macos-badge">
+                  Your Platform
+                </span>
               </div>
-              <div class="card-body d-flex flex-column gap-3">
-                <p class="card-text text-body-secondary small mb-1">
-                  Native disk images for Apple silicon and Intel Macs.
+
+              <div class="download-card-body">
+                <p class="small text-secondary mb-1">
+                  Native disk images (.dmg) for Apple silicon and Intel processors:
                 </p>
 
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-apple me-1 text-primary"></i> Apple
-                      silicon</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="macos-arm64-tag"
-                      >arm64</span
-                    >
+                <!-- Apple Silicon -->
+                <div class="package-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold small">
+                      <i class="bi bi-cpu me-1" style="color: var(--espanso);"></i> Apple silicon
+                    </span>
+                    <span class="package-format-badge" id="macos-arm64-tag">arm64.dmg</span>
                   </div>
                   <a
                     id="btn-download-macos-arm64"
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-espanso-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
-                    <span>Download macOS (Apple silicon)</span>
+                    <span>Download for Apple Silicon</span>
                   </a>
                 </div>
 
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-cpu me-1 text-primary"></i> Intel
-                      Mac</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="macos-x64-tag"
-                      >x64</span
-                    >
+                <!-- Intel Mac -->
+                <div class="package-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold small">
+                      <i class="bi bi-cpu me-1 text-secondary"></i> Intel Mac
+                    </span>
+                    <span class="package-format-badge" id="macos-x64-tag">x64.dmg</span>
                   </div>
                   <a
                     id="btn-download-macos-x64"
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-outline-theme btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
-                    <span>Download macOS (Intel)</span>
+                    <span>Download for Intel Mac</span>
                   </a>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Windows Card -->
           <div class="col-12 col-md-6 col-lg-4" id="downloads-windows">
-            <div class="card h-100 border download-card" id="card-windows">
-              <div
-                class="card-header bg-body border-bottom d-flex align-items-center justify-content-between py-3"
-              >
+            <div class="download-card" id="card-windows">
+              <div class="download-card-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-windows fs-4 text-primary"></i>
-                  <h5 class="card-title mb-0 fw-bold">Windows</h5>
+                  <i class="bi bi-windows fs-4" style="color: var(--espanso);"></i>
+                  <h3 class="fs-5 mb-0 fw-bold">Windows</h3>
                 </div>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none" id="detected-windows-badge">Your OS</span>
+                <span class="badge border d-none" style="background-color: var(--espanso-soft); color: var(--espanso); border-color: var(--espanso-border) !important;" id="detected-windows-badge">
+                  Your Platform
+                </span>
               </div>
-              <div class="card-body d-flex flex-column gap-3">
-                <p class="card-text text-body-secondary small mb-1">
-                  Portable archive for 64-bit Windows systems. Extract it and
-                  run Espanso GUI.exe.
+
+              <div class="download-card-body">
+                <p class="small text-secondary mb-1">
+                  Standalone portable archive for 64-bit Windows:
                 </p>
-                <div class="p-3 border package-choice">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <span class="fw-bold"
-                      ><i class="bi bi-pc-display me-1 text-primary"></i> Windows
-                      x64</span
-                    >
-                    <span
-                      class="badge bg-body-secondary text-body-secondary"
-                      id="windows-x64-tag"
-                      >.zip</span
-                    >
+
+                <div class="package-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold small">
+                      <i class="bi bi-pc-display me-1" style="color: var(--espanso);"></i> Windows 10 / 11 (64-bit)
+                    </span>
+                    <span class="package-format-badge" id="windows-x64-tag">.zip</span>
                   </div>
                   <a
                     id="btn-download-windows-x64"
                     href="https://github.com/johannjdk/espanso-gui/releases"
                     target="_blank"
                     rel="noopener"
-                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                    class="btn btn-espanso-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                   >
                     <i class="bi bi-download"></i>
-                    <span>Download Windows (.zip)</span>
+                    <span>Download Windows ZIP</span>
                   </a>
+                </div>
+
+                <div class="p-3 rounded bg-surface-2 border border-subtle small text-secondary">
+                  <p class="mb-1 fw-semibold text-light">Quick Start on Windows:</p>
+                  <ol class="ps-3 mb-0">
+                    <li>Extract the downloaded <kbd>.zip</kbd> folder.</li>
+                    <li>Launch <kbd>Espanso GUI.exe</kbd>.</li>
+                  </ol>
                 </div>
               </div>
             </div>
@@ -863,114 +1408,345 @@
       </div>
     </section>
 
-    <section id="installation" class="py-5">
-      <div class="container py-3">
+    <!-- Installation Terminal Guide -->
+    <section id="installation" class="py-5 border-top">
+      <div class="container py-lg-4">
         <div class="row justify-content-center">
-          <div class="col-lg-8">
-            <div class="install-heading mb-4">
-              <h2 class="fw-bold mb-2">Installation via Terminal</h2>
-              <p class="text-body-secondary mb-0">
-                Instructions for installing or running directly from source
-                code.
+          <div class="col-lg-10 col-xl-9">
+            <div class="section-header text-center mx-auto mb-4">
+              <h2 class="section-title">Command-Line Installation</h2>
+              <p class="section-subtitle mx-auto">
+                Install Espanso GUI using system package managers or run directly from Python source code.
               </p>
             </div>
 
-            <div class="quick-install p-3 p-sm-4 mb-4 rounded-end">
-              <div class="d-flex align-items-start gap-3">
-                <i class="bi bi-lightning-charge fs-4 text-primary"></i>
-                <div class="flex-grow-1">
-                  <h5 class="fw-bold mb-1">Quick install for Linux</h5>
-                  <p class="small text-body-secondary mb-3">
-                    Detects Debian, Ubuntu, Arch Linux, and compatible distributions.
-                  </p>
-                  <div class="terminal-card code-container">
-                    <pre
-                      class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                    ><code>curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh</code></pre>
+            <!-- Install Tabs Nav -->
+            <ul class="nav install-tabs-nav justify-content-center mb-4" id="installTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  id="tab-script-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-script"
+                  type="button"
+                  role="tab"
+                  aria-controls="tab-script"
+                  aria-selected="true"
+                >
+                  <i class="bi bi-lightning-charge me-1"></i> Quick Script (Linux)
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-deb-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-deb"
+                  type="button"
+                  role="tab"
+                  aria-controls="tab-deb"
+                  aria-selected="false"
+                >
+                  Ubuntu / Debian (.deb)
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-arch-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-arch"
+                  type="button"
+                  role="tab"
+                  aria-controls="tab-arch"
+                  aria-selected="false"
+                >
+                  Arch Linux
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-source-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-source"
+                  type="button"
+                  role="tab"
+                  aria-controls="tab-source"
+                  aria-selected="false"
+                >
+                  Python Source
+                </button>
+              </li>
+            </ul>
+
+            <!-- Install Tabs Content -->
+            <div class="tab-content" id="installTabsContent">
+              <!-- Tab 1: Quick Script -->
+              <div
+                class="tab-pane fade show active"
+                id="tab-script"
+                role="tabpanel"
+                aria-labelledby="tab-script-btn"
+              >
+                <div class="terminal-window">
+                  <div class="terminal-topbar">
+                    <div class="terminal-dots">
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                    </div>
+                    <span class="small text-secondary">bash — install-linux.sh</span>
+                    <div style="width: 38px;"></div>
+                  </div>
+                  <div class="terminal-code-body">
+                    <pre><code>curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh</code></pre>
                     <button
-                      class="btn btn-outline-light btn-sm copy-btn"
+                      class="copy-btn"
                       onclick="copyCode('curl -fsSL https://raw.githubusercontent.com/johannjdk/espanso-gui/main/scripts/install-linux.sh | sh', this)"
+                      title="Copy command"
+                    >
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+                <p class="text-secondary small mt-2 mb-0">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Automatically identifies Ubuntu, Debian, Arch Linux, or Fedora, downloads the latest release, and installs it.
+                </p>
+              </div>
+
+              <!-- Tab 2: Ubuntu / Debian -->
+              <div
+                class="tab-pane fade"
+                id="tab-deb"
+                role="tabpanel"
+                aria-labelledby="tab-deb-btn"
+              >
+                <div class="terminal-window">
+                  <div class="terminal-topbar">
+                    <div class="terminal-dots">
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                    </div>
+                    <span class="small text-secondary">bash — Debian / Ubuntu / Pop!_OS</span>
+                    <div style="width: 38px;"></div>
+                  </div>
+                  <div class="terminal-code-body">
+                    <pre><code># Download standalone .deb (recommended for Ubuntu 22.04/24.04 and Pop!_OS):
+sudo apt install ./espanso-gui-*-linux-debian-ubuntu-standalone.deb
+
+# Or standard .deb (Ubuntu 24.10+ with system python3-pyside6):
+sudo apt install ./espanso-gui-*-linux-debian-ubuntu.deb</code></pre>
+                    <button
+                      class="copy-btn"
+                      onclick="copyCode('sudo apt install ./espanso-gui-*-linux-debian-ubuntu-standalone.deb', this)"
+                      title="Copy command"
                     >
                       <i class="bi bi-clipboard"></i>
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="install-item">
-              <h5 class="fw-bold mb-2">
-                <i class="bi bi-terminal me-2"></i>Debian / Ubuntu
-              </h5>
-              <div class="terminal-card code-container">
-                <pre
-                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>sudo dpkg -i espanso-gui-all.deb
-sudo apt-get install -f</code></pre>
-                <button
-                  class="btn btn-outline-light btn-sm copy-btn"
-                  onclick="
-                    copyCode(
-                      'sudo dpkg -i espanso-gui-all.deb\nsudo apt-get install -f',
-                      this,
-                    )
-                  "
-                >
-                  <i class="bi bi-clipboard"></i>
-                </button>
+              <!-- Tab 3: Arch Linux -->
+              <div
+                class="tab-pane fade"
+                id="tab-arch"
+                role="tabpanel"
+                aria-labelledby="tab-arch-btn"
+              >
+                <div class="terminal-window">
+                  <div class="terminal-topbar">
+                    <div class="terminal-dots">
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                    </div>
+                    <span class="small text-secondary">bash — Arch Linux</span>
+                    <div style="width: 38px;"></div>
+                  </div>
+                  <div class="terminal-code-body">
+                    <pre><code>sudo pacman -U espanso-gui-qt-*-linux-arch.pkg.tar.zst</code></pre>
+                    <button
+                      class="copy-btn"
+                      onclick="copyCode('sudo pacman -U espanso-gui-qt-*-linux-arch.pkg.tar.zst', this)"
+                      title="Copy command"
+                    >
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="install-item">
-              <h5 class="fw-bold mb-2">
-                <i class="bi bi-terminal me-2"></i>Arch Linux
-              </h5>
-              <div class="terminal-card code-container">
-                <pre
-                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>sudo pacman -U espanso-gui-qt-any.pkg.tar.zst</code></pre>
-                <button
-                  class="btn btn-outline-light btn-sm copy-btn"
-                  onclick="
-                    copyCode(
-                      'sudo pacman -U espanso-gui-qt-any.pkg.tar.zst',
-                      this,
-                    )
-                  "
-                >
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="install-item">
-              <h5 class="fw-bold mb-2">
-                <i class="bi bi-code-slash me-2"></i>Run from
-                Source
-              </h5>
-              <p class="small text-body-secondary mb-2">
-                Requires Python 3.10+ and PySide6
-              </p>
-              <div class="terminal-card code-container">
-                <pre
-                  class="bg-transparent text-light p-3 font-monospace mb-0 overflow-x-auto"
-                ><code>git clone https://github.com/johannjdk/espanso-gui.git
+              <!-- Tab 4: Python Source -->
+              <div
+                class="tab-pane fade"
+                id="tab-source"
+                role="tabpanel"
+                aria-labelledby="tab-source-btn"
+              >
+                <div class="terminal-window">
+                  <div class="terminal-topbar">
+                    <div class="terminal-dots">
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                      <div class="terminal-dot"></div>
+                    </div>
+                    <span class="small text-secondary">bash — Virtual Environment</span>
+                    <div style="width: 38px;"></div>
+                  </div>
+                  <div class="terminal-code-body">
+                    <pre><code>git clone https://github.com/johannjdk/espanso-gui.git
 cd espanso-gui
 python3 -m venv .venv
 source .venv/bin/activate
 pip install .
 python3 -m espanso_gui</code></pre>
-                <button
-                  class="btn btn-outline-light btn-sm copy-btn"
-                  onclick="
-                    copyCode(
-                      'git clone https://github.com/johannjdk/espanso-gui.git\ncd espanso-gui\npython3 -m venv .venv\nsource .venv/bin/activate\npip install .\npython3 -m espanso_gui',
-                      this,
-                    )
-                  "
+                    <button
+                      class="copy-btn"
+                      onclick="copyCode('git clone https://github.com/johannjdk/espanso-gui.git\ncd espanso-gui\npython3 -m venv .venv\nsource .venv/bin/activate\npip install .\npython3 -m espanso_gui', this)"
+                      title="Copy command"
+                    >
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+                <p class="text-secondary small mt-2 mb-0">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Requires Python 3.10+ and PySide6.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-5 border-top">
+      <div class="container py-lg-4">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="section-header text-center mx-auto mb-4">
+              <h2 class="section-title">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="accordion custom-accordion" id="faqAccordion">
+              <!-- Item 1 -->
+              <div class="accordion-item">
+                <h3 class="accordion-header" id="headingOne">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne"
+                    aria-expanded="true"
+                    aria-controls="collapseOne"
+                  >
+                    Do I need to install Espanso before using Espanso GUI?
+                  </button>
+                </h3>
+                <div
+                  id="collapseOne"
+                  class="accordion-collapse collapse show"
+                  aria-labelledby="headingOne"
+                  data-bs-parent="#faqAccordion"
                 >
-                  <i class="bi bi-clipboard"></i>
-                </button>
+                  <div class="accordion-body">
+                    Yes. Espanso GUI is a visual configuration manager and editor for your existing match files.
+                    The background text expansion service itself is managed by the
+                    <a href="https://espanso.org/install/" target="_blank" rel="noopener" style="color: var(--espanso);">Espanso daemon</a>.
+                    Espanso GUI will automatically locate your configuration folder on first launch.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="accordion-item">
+                <h3 class="accordion-header" id="headingTwo">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo"
+                    aria-expanded="false"
+                    aria-controls="collapseTwo"
+                  >
+                    Does Espanso GUI modify or delete my existing match files?
+                  </button>
+                </h3>
+                <div
+                  id="collapseTwo"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingTwo"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    No. Espanso GUI directly reads your standard <kbd>match/*.yml</kbd> files. When saving changes,
+                    it updates only the targeted match items. You can also view and edit the raw YAML at any time
+                    via the built-in Expert YAML mode.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="accordion-item">
+                <h3 class="accordion-header" id="headingThree">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree"
+                    aria-expanded="false"
+                    aria-controls="collapseThree"
+                  >
+                    Where does Espanso store configuration files?
+                  </button>
+                </h3>
+                <div
+                  id="collapseThree"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingThree"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    Depending on your operating system:
+                    <ul class="mt-2 mb-0">
+                      <li><strong>Linux:</strong> <kbd>~/.config/espanso/</kbd></li>
+                      <li><strong>macOS:</strong> <kbd>~/Library/Application Support/espanso/</kbd></li>
+                      <li><strong>Windows:</strong> <kbd>%APPDATA%\espanso\</kbd></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 4 -->
+              <div class="accordion-item">
+                <h3 class="accordion-header" id="headingFour">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFour"
+                    aria-expanded="false"
+                    aria-controls="collapseFour"
+                  >
+                    Is this an official project by the Espanso core team?
+                  </button>
+                </h3>
+                <div
+                  id="collapseFour"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingFour"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    Espanso GUI is an independent open-source project created by community contributors
+                    and is not officially affiliated with or endorsed by Espanso.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -979,59 +1755,72 @@ python3 -m espanso_gui</code></pre>
     </section>
 
     <!-- Footer -->
-    <footer class="py-4 border-top mt-5">
-      <div class="container text-center text-body-secondary small">
-        <div
-          class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"
-        >
-          <div>
-            &copy; <span id="year"></span> Espanso GUI. Open Source Software.
+    <footer class="site-footer py-4">
+      <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <img src="assets/espanso-gui.png" alt="Espanso GUI icon" width="22" height="22" />
+            <span>
+              &copy; <span id="year"></span> <strong>Espanso GUI</strong>. Released under the
+              <a
+                href="https://github.com/johannjdk/espanso-gui/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener"
+                class="footer-link"
+              >GNU GPL-3.0 License</a>.
+            </span>
           </div>
-          <div class="d-flex gap-3">
+
+          <div class="d-flex flex-wrap gap-4">
             <a
               href="https://github.com/johannjdk/espanso-gui"
-              class="footer-link text-body-secondary text-decoration-none"
+              class="footer-link"
               target="_blank"
               rel="noopener"
             >
-              <i class="bi bi-github me-1"></i> GitHub Repository
+              <i class="bi bi-github me-1"></i> Repository
             </a>
             <a
               href="https://github.com/johannjdk/espanso-gui/releases"
-              class="footer-link text-body-secondary text-decoration-none"
+              class="footer-link"
               target="_blank"
               rel="noopener"
             >
-              <i class="bi bi-tag-fill me-1"></i> Releases
+              <i class="bi bi-tag me-1"></i> Releases
             </a>
             <a
-              href="https://github.com/johannjdk/espanso-gui/blob/main/LICENSE"
-              class="footer-link text-body-secondary text-decoration-none"
+              href="https://github.com/johannjdk/espanso-gui/issues"
+              class="footer-link"
               target="_blank"
               rel="noopener"
             >
-              <i class="bi bi-file-text me-1"></i> License
+              <i class="bi bi-bug me-1"></i> Issues
+            </a>
+            <a
+              href="https://espanso.org/"
+              class="footer-link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="bi bi-box-arrow-up-right me-1"></i> Espanso Website
             </a>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- Screenshot Lightbox Modal -->
+    <!-- Fullscreen Modal Lightbox for Screenshots -->
     <div
-      class="modal fade"
+      class="modal fade screenshot-modal"
       id="screenshotModal"
       tabindex="-1"
       aria-labelledby="modalScreenshotTitle"
       aria-hidden="true"
     >
       <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div
-          class="modal-content border-0 bg-transparent"
-        >
-          <div
-            class="modal-header border-0 py-2 justify-content-end"
-          >
+        <div class="modal-content">
+          <div class="modal-header d-flex justify-content-between align-items-center">
+            <h5 class="modal-title fs-6 text-light mb-0" id="modalScreenshotTitle">Screenshot</h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -1043,17 +1832,21 @@ python3 -m espanso_gui</code></pre>
             <img
               id="modalScreenshotImg"
               src=""
-              alt="Screenshot Preview"
+              alt="Screenshot preview"
               class="img-fluid"
-              style="max-height: 86vh; object-fit: contain; border: none !important; box-shadow: none !important; background: transparent !important;"
             />
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Swiper Carousel JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Client-side Logic -->
     <script>
       function detectOS() {
         const userAgent = window.navigator.userAgent || "";
@@ -1086,7 +1879,7 @@ python3 -m espanso_gui</code></pre>
           if (heroIcon) heroIcon.className = `${os.icon} me-1`;
           if (heroBtn) heroBtn.href = `#downloads-${os.id}`;
           if (heroNote) {
-            heroNote.innerHTML = `Detected <strong>${os.name}</strong> &bull; Also available for other platforms below.`;
+            heroNote.innerHTML = `Detected <strong>${os.name}</strong> &bull; Pre-built binary packages ready for download.`;
           }
 
           const targetCard = document.getElementById(`card-${os.id}`);
@@ -1111,29 +1904,6 @@ python3 -m espanso_gui</code></pre>
         }
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("year").textContent = new Date().getFullYear();
-
-        setupOSDetection();
-        setupLinuxCollapseToggle();
-
-        const screenshotModal = document.getElementById("screenshotModal");
-        if (screenshotModal) {
-          screenshotModal.addEventListener("show.bs.modal", (event) => {
-            const trigger = event.relatedTarget;
-            if (!trigger) return;
-            const imgSrc = trigger.getAttribute("data-bs-img");
-            const imgTitle = trigger.getAttribute("data-bs-title");
-            const modalImg = document.getElementById("modalScreenshotImg");
-            const modalTitle = document.getElementById("modalScreenshotTitle");
-            if (modalImg && imgSrc) modalImg.src = imgSrc;
-            if (modalTitle && imgTitle) modalTitle.textContent = imgTitle;
-          });
-        }
-
-        fetchLatestRelease();
-      });
-
       function copyCode(text, buttonElement) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text);
@@ -1155,6 +1925,49 @@ python3 -m espanso_gui</code></pre>
         }
       }
 
+      function setupSwiper() {
+        const swiper = new Swiper("#appSwiper", {
+          slidesPerView: 1,
+          spaceBetween: 24,
+          centeredSlides: true,
+          loop: true,
+          grabCursor: true,
+          keyboard: {
+            enabled: true,
+          },
+          pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+          },
+          navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          },
+          on: {
+            slideChange: function () {
+              const realIndex = this.realIndex;
+              const pills = document.querySelectorAll("#carouselPills .carousel-pill-btn");
+              pills.forEach((pill, idx) => {
+                if (idx === realIndex) {
+                  pill.classList.add("active");
+                } else {
+                  pill.classList.remove("active");
+                }
+              });
+            },
+          },
+        });
+
+        // Click on category pill to slide
+        const pills = document.querySelectorAll("#carouselPills .carousel-pill-btn");
+        pills.forEach((pill) => {
+          pill.addEventListener("click", () => {
+            const slideIdx = parseInt(pill.getAttribute("data-slide"), 10);
+            swiper.slideToLoop(slideIdx);
+          });
+        });
+      }
+
       async function fetchLatestRelease() {
         const repoOwner = "johannjdk";
         const repoName = "espanso-gui";
@@ -1174,6 +1987,7 @@ python3 -m espanso_gui</code></pre>
             const macosArmTag = document.getElementById("macos-arm64-tag");
             const macosX64Tag = document.getElementById("macos-x64-tag");
             const windowsX64Tag = document.getElementById("windows-x64-tag");
+
             if (appimageTag) appimageTag.textContent = release.tag_name;
             if (debStandaloneTag) debStandaloneTag.textContent = release.tag_name;
             if (debTag) debTag.textContent = release.tag_name;
@@ -1186,6 +2000,7 @@ python3 -m espanso_gui</code></pre>
 
           let appimageUrl = "";
           let windowsUrl = "";
+          let macosArmUrl = "";
 
           if (release.assets && release.assets.length > 0) {
             release.assets.forEach((asset) => {
@@ -1211,6 +2026,7 @@ python3 -m espanso_gui</code></pre>
                 if (archBtn) archBtn.href = asset.browser_download_url;
               }
               if (name.includes("macos") && (name.includes("arm64") || name.includes("apple"))) {
+                macosArmUrl = asset.browser_download_url;
                 const macosArmBtn = document.getElementById("btn-download-macos-arm64");
                 if (macosArmBtn) macosArmBtn.href = asset.browser_download_url;
               }
@@ -1233,15 +2049,40 @@ python3 -m espanso_gui</code></pre>
                 heroBtn.href = windowsUrl;
               } else if (os.id === "linux" && appimageUrl) {
                 heroBtn.href = appimageUrl;
-              } else if (os.id === "macos") {
-                heroBtn.href = "#downloads-macos";
+              } else if (os.id === "macos" && macosArmUrl) {
+                heroBtn.href = macosArmUrl;
               }
             }
           }
         } catch (err) {
-          console.log("Release fetching fallback:", err);
+          console.log("GitHub release fetch fallback:", err);
         }
       }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const yearEl = document.getElementById("year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+        setupOSDetection();
+        setupLinuxCollapseToggle();
+        setupSwiper();
+
+        const screenshotModal = document.getElementById("screenshotModal");
+        if (screenshotModal) {
+          screenshotModal.addEventListener("show.bs.modal", (event) => {
+            const trigger = event.relatedTarget;
+            if (!trigger) return;
+            const imgSrc = trigger.getAttribute("data-bs-img");
+            const imgTitle = trigger.getAttribute("data-bs-title");
+            const modalImg = document.getElementById("modalScreenshotImg");
+            const modalTitle = document.getElementById("modalScreenshotTitle");
+            if (modalImg && imgSrc) modalImg.src = imgSrc;
+            if (modalTitle && imgTitle) modalTitle.textContent = imgTitle;
+          });
+        }
+
+        fetchLatestRelease();
+      });
     </script>
   </body>
 </html>
