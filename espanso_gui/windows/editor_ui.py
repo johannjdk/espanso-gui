@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QMenu,
     QPlainTextEdit,
     QPushButton,
     QRadioButton,
@@ -179,7 +180,14 @@ class WindowLayoutMixin:
         self.replace_widget = QWidget()
         replace_layout = QVBoxLayout(self.replace_widget)
         replace_layout.setContentsMargins(0, 0, 0, 0)
-        replace_layout.addWidget(QLabel("Replacement text"))
+        replace_header = QHBoxLayout()
+        replace_header.addWidget(QLabel("Replacement text"))
+        replace_header.addStretch()
+        self.btn_insert_var = QPushButton("Insert variable…")
+        self.btn_insert_var.setToolTip("Insert variable placeholder at cursor position")
+        self.btn_insert_var.clicked.connect(self._show_insert_variable_menu)
+        replace_header.addWidget(self.btn_insert_var)
+        replace_layout.addLayout(replace_header)
         self.replace_edit = CodeEditor()
         self.replace_edit.setFont(mono_font(10))
         self.replace_edit.setTabStopDistance(self.replace_edit.fontMetrics().horizontalAdvance(" ") * 2)
