@@ -221,6 +221,7 @@ class MatchManagementMixin:
         is_form = self.radio_form.isChecked()
         self.content_stack.setCurrentIndex(1 if is_form else 0)
         self.details_tabs.setCurrentIndex(0)
+        self._update_variables_tab_state()
         if not self._loading and 0 <= self.selected_match < len(self.matches):
             # A new mode starts empty; hidden editors must not restore old text.
             self._loading = True
@@ -273,6 +274,7 @@ class MatchManagementMixin:
         else:
             self.radio_replace.setChecked(True)
             self.content_stack.setCurrentIndex(0)
+        self._update_variables_tab_state()
         self._loading = False
 
         self.refresh_form_fields_table()
@@ -289,8 +291,20 @@ class MatchManagementMixin:
         self.content_stack.setCurrentIndex(0)
         self.details_tabs.setCurrentIndex(0)
         self.word_check.setChecked(False)
+        self._update_variables_tab_state()
         self._loading = False
         self.refresh_form_fields_table()
         self.clear_form_field_form()
         self.refresh_variable_table()
         self.clear_variable_form()
+
+    def _update_variables_tab_state(self) -> None:
+        if not hasattr(self, "details_tabs") or not hasattr(self, "radio_form"):
+            return
+        is_form = self.radio_form.isChecked()
+        self.details_tabs.setTabEnabled(1, not is_form)
+        self.details_tabs.setTabToolTip(
+            1, "Variables are not supported in Form mode" if is_form else ""
+        )
+        if is_form and self.details_tabs.currentIndex() == 1:
+            self.details_tabs.setCurrentIndex(0)

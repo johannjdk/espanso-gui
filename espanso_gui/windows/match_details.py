@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QLineEdit,
+    QMenu,
     QMessageBox,
     QPushButton,
     QTableWidgetItem,
@@ -759,3 +760,38 @@ class MatchDetailsMixin:
 
     def update_parameter_label(self, variable_type: str) -> None:
         pass
+
+    def _show_insert_variable_menu(self) -> None:
+        menu = QMenu(self)
+
+        vars_list: list[EspansoVariable] = []
+        if 0 <= self.selected_match < len(self.matches):
+            match = self.matches[self.selected_match]
+            vars_list = [v for v in match.variables if v.name]
+
+        if vars_list:
+            menu.addSection("Variables")
+            for var in vars_list:
+                action = menu.addAction(f"{{{{{var.name}}}}} ({var.type})")
+                action.triggered.connect(
+                    lambda checked=False, name=var.name: self._insert_token_to_editor(self.replace_edit, f"{{{{{name}}}}}")
+                )
+        else:
+            menu.addSection("Variables")
+            empty_action = menu.addAction("No variables defined yet")
+            empty_action.setEnabled(False)
+
+        menu.addSeparator()
+        new_var_action = menu.addAction("Define new variable…")
+        new_var_action.triggered.connect(self._create_and_insert_variable_flow)
+
+        menu.exec(self.btn_insert_var.mapToGlobal(self.btn_insert_var.rect().bottomLeft()))
+
+    def _insert_token_to_editor(self, editor: QWidget, token: str) -> None:
+        if hasattr(editor, "insertPlainText"):
+            editor.insertPlainText(token)
+            editor.setFocus()
+
+    def _create_and_insert_variable_flow(self) -> None:
+        self.details_tabs.setCurrentIndex(1)
+        self.add_variable()

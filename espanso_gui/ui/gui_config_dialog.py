@@ -43,6 +43,10 @@ class EspansoGuiConfigDialog(QDialog):
         self.check_updates_cb.setChecked(ConfigService.get_check_updates())
         layout.addWidget(self.check_updates_cb)
 
+        self.show_line_numbers_cb = QCheckBox("Show line numbers in editor")
+        self.show_line_numbers_cb.setChecked(ConfigService.get_show_line_numbers())
+        layout.addWidget(self.show_line_numbers_cb)
+
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
@@ -61,6 +65,7 @@ class EspansoGuiConfigDialog(QDialog):
     def _restore_defaults(self) -> None:
         self.path_edit.setText(str(ConfigService.default_espanso_path()))
         self.check_updates_cb.setChecked(True)
+        self.show_line_numbers_cb.setChecked(True)
         ConfigService.set_ignored_update_version("")
 
     def _save(self) -> None:
@@ -76,4 +81,5 @@ class EspansoGuiConfigDialog(QDialog):
         else:
             ConfigService.set_custom_espanso_path(path)
         ConfigService.set_check_updates(self.check_updates_cb.isChecked())
+        ConfigService.set_show_line_numbers(self.show_line_numbers_cb.isChecked())
         self.accept()

@@ -185,6 +185,7 @@ class FileManagementMixin:
             return
         dialog = EspansoGuiConfigDialog(self)
         if dialog.exec():
+            self._update_editor_line_numbers()
             self.config_path = ConfigService.detect_config_path()
             self.current_file = None
             self.matches = []
