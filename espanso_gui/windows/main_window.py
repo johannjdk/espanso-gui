@@ -248,6 +248,8 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self._update_thread = check_for_updates(self, __version__, manual=manual)
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        if hasattr(self, "_status_timer") and self._status_timer.isActive():
+            self._status_timer.stop()
         if getattr(self, "_update_thread", None) and self._update_thread.isRunning():
             self._update_thread.wait(500)
         if self._ask_save_changes():
