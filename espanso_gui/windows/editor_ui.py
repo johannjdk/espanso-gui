@@ -523,11 +523,8 @@ class WindowLayoutMixin:
         bottom = QHBoxLayout()
         bottom.addStretch()
         self.save_btn = QPushButton("Save")
-        self.restart_btn = QPushButton("Restart Espanso")
         self.save_btn.clicked.connect(self.save_current_file)
-        self.restart_btn.clicked.connect(self.restart_espanso)
         bottom.addWidget(self.save_btn)
-        bottom.addWidget(self.restart_btn)
         content_layout.addLayout(bottom)
 
         editor_layout.addWidget(self.editor_content, 1)
