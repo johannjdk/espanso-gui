@@ -17,6 +17,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import QApplication, QMessageBox, QPlainTextEdit, QTextEdit, QWidget
 
 from ..config_service import ConfigService
+from .code_editor import CodeEditor
 from .fonts import mono_font
 
 
@@ -112,11 +113,12 @@ class YamlHighlighter(QSyntaxHighlighter):
                 break
 
 
-class YamlEditor(QPlainTextEdit):
+class YamlEditor(CodeEditor):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setFont(mono_font(10))
         self.setTabStopDistance(self.fontMetrics().horizontalAdvance(" ") * 2)
+        self.set_line_numbers_visible(ConfigService.get_show_line_numbers())
         self.highlighter = YamlHighlighter(self)
 
     def format_yaml(self) -> bool:

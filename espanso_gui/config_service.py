@@ -67,6 +67,21 @@ class ConfigService:
         QSettings("EspansoGUI", "EspansoGUI").setValue("check_updates", bool(enabled))
 
     @staticmethod
+    def get_show_line_numbers() -> bool:
+        val = QSettings("EspansoGUI", "EspansoGUI").value("show_line_numbers", True)
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, (int, float)):
+            return bool(val)
+        if isinstance(val, str):
+            return val.lower() not in ("false", "0", "no")
+        return True
+
+    @staticmethod
+    def set_show_line_numbers(enabled: bool) -> None:
+        QSettings("EspansoGUI", "EspansoGUI").setValue("show_line_numbers", bool(enabled))
+
+    @staticmethod
     def get_ignored_update_version() -> str:
         return str(QSettings("EspansoGUI", "EspansoGUI").value("ignored_update_version", ""))
 

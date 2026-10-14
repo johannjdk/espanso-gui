@@ -28,7 +28,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..config_service import ConfigService
 from ..ui.bash_highlighter import BashHighlighter
+from ..ui.code_editor import CodeEditor
 from ..ui.fonts import mono_font
 from ..ui.match_drag_drop import MatchFileTreeWidget, MatchTableWidget
 from ..ui.template_highlighter import TemplateHighlighter
@@ -178,7 +180,7 @@ class WindowLayoutMixin:
         replace_layout = QVBoxLayout(self.replace_widget)
         replace_layout.setContentsMargins(0, 0, 0, 0)
         replace_layout.addWidget(QLabel("Replacement text"))
-        self.replace_edit = QTextEdit()
+        self.replace_edit = CodeEditor()
         self.replace_edit.setFont(mono_font(10))
         self.replace_edit.setTabStopDistance(self.replace_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.replace_edit.setPlaceholderText("Enter replacement text…")
@@ -192,7 +194,7 @@ class WindowLayoutMixin:
         form_layout = QVBoxLayout(self.form_widget)
         form_layout.setContentsMargins(0, 0, 0, 0)
         form_layout.addWidget(QLabel("Layout (use [[field_name]] for input fields)"))
-        self.form_layout_edit = QTextEdit()
+        self.form_layout_edit = CodeEditor()
         self.form_layout_edit.setFont(mono_font(10))
         self.form_layout_edit.setTabStopDistance(self.form_layout_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.form_layout_edit.setPlaceholderText("e.g. Hello [[name]], your ticket [[ticket_id]] is ready.")
@@ -358,7 +360,7 @@ class WindowLayoutMixin:
         shell_layout.setContentsMargins(0, 0, 0, 0)
         shell_layout.setSpacing(4)
         shell_layout.addWidget(QLabel("Command (cmd):"))
-        self.var_shell_edit = QPlainTextEdit()
+        self.var_shell_edit = CodeEditor()
         self.var_shell_edit.setFont(mono_font(10))
         self.var_shell_edit.setTabStopDistance(self.var_shell_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.var_shell_edit.setPlaceholderText("e.g. echo 'Hello World'")
@@ -383,7 +385,7 @@ class WindowLayoutMixin:
         layout_label_row.addWidget(self.btn_detect_var_fields)
         form_var_layout.addLayout(layout_label_row)
 
-        self.variable_layout_edit = QPlainTextEdit()
+        self.variable_layout_edit = CodeEditor()
         self.variable_layout_edit.setFont(mono_font(10))
         self.variable_layout_edit.setTabStopDistance(self.variable_layout_edit.fontMetrics().horizontalAdvance(" ") * 2)
         self.variable_layout_edit.setPlaceholderText("Form layout template, e.g.:\nEnter name: [[name]]\nSelect role: [[role]]")
@@ -521,4 +523,16 @@ class WindowLayoutMixin:
         content_layout.addLayout(bottom)
 
         editor_layout.addWidget(self.editor_content, 1)
+        self._update_editor_line_numbers()
         return self.editor
+
+    def _update_editor_line_numbers(self) -> None:
+        show = ConfigService.get_show_line_numbers()
+        for editor in (
+            getattr(self, "replace_edit", None),
+            getattr(self, "form_layout_edit", None),
+            getattr(self, "var_shell_edit", None),
+            getattr(self, "variable_layout_edit", None),
+        ):
+            if editor is not None and hasattr(editor, "set_line_numbers_visible"):
+                editor.set_line_numbers_visible(show)
