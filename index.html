@@ -930,12 +930,15 @@
 
         <!-- Carousel Direct Selector Navigation -->
         <div class="carousel-selector-nav" id="carouselPills">
-          <button class="carousel-pill-btn active" data-slide="0">Match &amp; Form Editor</button>
-          <button class="carousel-pill-btn" data-slide="1">Variables Inspector</button>
-          <button class="carousel-pill-btn" data-slide="2">Global Search (Ctrl+F)</button>
+          <button class="carousel-pill-btn active" data-slide="0">Main Window</button>
+          <button class="carousel-pill-btn" data-slide="1">Global Search (Ctrl+F)</button>
+          <button class="carousel-pill-btn" data-slide="2">Expert YAML (Matches)</button>
           <button class="carousel-pill-btn" data-slide="3">Config Profiles</button>
-          <button class="carousel-pill-btn" data-slide="4">Expert YAML Mode</button>
-          <button class="carousel-pill-btn" data-slide="5">Usage Statistics</button>
+          <button class="carousel-pill-btn" data-slide="4">Statistics</button>
+          <button class="carousel-pill-btn" data-slide="5">Playground</button>
+          <button class="carousel-pill-btn" data-slide="6">Regex Support</button>
+          <button class="carousel-pill-btn" data-slide="7">Expert YAML (Config)</button>
+          <button class="carousel-pill-btn" data-slide="8">GUI Settings</button>
         </div>
 
         <!-- Swiper Carousel Container -->
@@ -968,43 +971,12 @@
                 <div class="slide-caption-bar">
                   <h4 class="slide-caption-title">Match &amp; Form Editor</h4>
                   <p class="slide-caption-desc">
-                    Configuration file tree, trigger search filter, multi-line snippet editor, and automatic form field inputs.
+                    Configuration file tree, trigger search filter, snippet editor, and interactive form fields.
                   </p>
                 </div>
               </div>
 
-              <!-- Slide 2: Variables -->
-              <div class="swiper-slide">
-                <div class="slide-img-box">
-                  <div
-                    class="screenshot-zoom-wrap"
-                    data-bs-toggle="modal"
-                    data-bs-target="#screenshotModal"
-                    data-bs-img="images/screenshots/variables.png"
-                    data-bs-title="Variables &amp; Form Fields Inspector"
-                    role="button"
-                    tabindex="0"
-                    title="Click to enlarge"
-                  >
-                    <img
-                      src="images/screenshots/variables.png"
-                      alt="Variables Inspector"
-                      class="img-fluid"
-                    />
-                    <div class="zoom-indicator-badge">
-                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
-                    </div>
-                  </div>
-                </div>
-                <div class="slide-caption-bar">
-                  <h4 class="slide-caption-title">Master-Detail Variable Manager</h4>
-                  <p class="slide-caption-desc">
-                    Configure shell scripts, date formatters, choice lists, and clipboard variables with side-by-side properties.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Slide 3: Search -->
+              <!-- Slide 2: Search -->
               <div class="swiper-slide">
                 <div class="slide-img-box">
                   <div
@@ -1035,22 +1007,53 @@
                 </div>
               </div>
 
-              <!-- Slide 4: Config Profiles -->
+              <!-- Slide 3: Expert YAML Match File -->
               <div class="swiper-slide">
                 <div class="slide-img-box">
                   <div
                     class="screenshot-zoom-wrap"
                     data-bs-toggle="modal"
                     data-bs-target="#screenshotModal"
-                    data-bs-img="images/screenshots/espanso_config.png"
+                    data-bs-img="images/screenshots/expert_yaml_mode_matchfile.png"
+                    data-bs-title="Expert YAML Mode — Match Files"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/expert_yaml_mode_matchfile.png"
+                      alt="Expert YAML Mode for Match Files"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Expert YAML Mode — Match Files</h4>
+                  <p class="slide-caption-desc">
+                    Direct access to the complete document syntax with real-time syntax validation before saving.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 4: Espanso Configuration Profiles -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/espanso_configuration.png"
                     data-bs-title="Espanso Configuration Profiles"
                     role="button"
                     tabindex="0"
                     title="Click to enlarge"
                   >
                     <img
-                      src="images/screenshots/espanso_config.png"
-                      alt="Configuration Profiles"
+                      src="images/screenshots/espanso_configuration.png"
+                      alt="Espanso Configuration Profiles"
                       class="img-fluid"
                     />
                     <div class="zoom-indicator-badge">
@@ -1059,45 +1062,14 @@
                   </div>
                 </div>
                 <div class="slide-caption-bar">
-                  <h4 class="slide-caption-title">Configuration Profiles</h4>
+                  <h4 class="slide-caption-title">Espanso Configuration Profiles</h4>
                   <p class="slide-caption-desc">
-                    Settings editor for <kbd>default.yml</kbd>, keyboard layout overrides, and application exclusions.
+                    Visual settings editor for <kbd>default.yml</kbd>, keyboard layout rules, backend options, and application filters.
                   </p>
                 </div>
               </div>
 
-              <!-- Slide 5: Expert YAML -->
-              <div class="swiper-slide">
-                <div class="slide-img-box">
-                  <div
-                    class="screenshot-zoom-wrap"
-                    data-bs-toggle="modal"
-                    data-bs-target="#screenshotModal"
-                    data-bs-img="images/screenshots/expert_yaml.png"
-                    data-bs-title="Expert YAML Mode with Syntax Validation"
-                    role="button"
-                    tabindex="0"
-                    title="Click to enlarge"
-                  >
-                    <img
-                      src="images/screenshots/expert_yaml.png"
-                      alt="Expert YAML Editor"
-                      class="img-fluid"
-                    />
-                    <div class="zoom-indicator-badge">
-                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
-                    </div>
-                  </div>
-                </div>
-                <div class="slide-caption-bar">
-                  <h4 class="slide-caption-title">Expert YAML Mode</h4>
-                  <p class="slide-caption-desc">
-                    Direct access to the complete document syntax with automatic pre-save validation to prevent syntax errors.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Slide 6: Statistics -->
+              <!-- Slide 5: Statistics -->
               <div class="swiper-slide">
                 <div class="slide-img-box">
                   <div
@@ -1121,9 +1093,133 @@
                   </div>
                 </div>
                 <div class="slide-caption-bar">
-                  <h4 class="slide-caption-title">Usage Statistics</h4>
+                  <h4 class="slide-caption-title">Usage Statistics &amp; Daemon Status</h4>
                   <p class="slide-caption-desc">
-                    Monitor expansion counters, trigger frequency, and active Espanso daemon status.
+                    Monitor daily and all-time expansion counters, most used triggers, and active Espanso daemon status.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 6: Playground -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/playground.png"
+                    data-bs-title="Interactive Expansion Playground"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/playground.png"
+                      alt="Interactive Expansion Playground"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Interactive Expansion Playground</h4>
+                  <p class="slide-caption-desc">
+                    Test your triggers, form expansions, and variables live inside the application without switching windows.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 7: Regex Support -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/regex_support.png"
+                    data-bs-title="Regex &amp; Dynamic Trigger Support"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/regex_support.png"
+                      alt="Regex & Dynamic Trigger Support"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Regex &amp; Dynamic Triggers</h4>
+                  <p class="slide-caption-desc">
+                    Define powerful regular expression triggers with named capture groups like <kbd>(?P&lt;name&gt;...)</kbd>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 8: Expert YAML Config -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/expert_yaml_mode_espansoconfig.png"
+                    data-bs-title="Expert YAML Mode — Daemon Configuration"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/expert_yaml_mode_espansoconfig.png"
+                      alt="Expert YAML Mode for Daemon Config"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Expert YAML Mode — Daemon Config</h4>
+                  <p class="slide-caption-desc">
+                    Direct YAML editor for advanced daemon configuration profiles and complex backend overrides.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Slide 9: GUI Preferences -->
+              <div class="swiper-slide">
+                <div class="slide-img-box">
+                  <div
+                    class="screenshot-zoom-wrap"
+                    data-bs-toggle="modal"
+                    data-bs-target="#screenshotModal"
+                    data-bs-img="images/screenshots/espanso_gui_configuration.png"
+                    data-bs-title="Espanso GUI Application Preferences"
+                    role="button"
+                    tabindex="0"
+                    title="Click to enlarge"
+                  >
+                    <img
+                      src="images/screenshots/espanso_gui_configuration.png"
+                      alt="Espanso GUI Application Preferences"
+                      class="img-fluid"
+                    />
+                    <div class="zoom-indicator-badge">
+                      <i class="bi bi-arrows-fullscreen me-1"></i> Full Size
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-caption-bar">
+                  <h4 class="slide-caption-title">Espanso GUI Preferences</h4>
+                  <p class="slide-caption-desc">
+                    Configure application behavior, toggle editor line numbers, manage update checks, and select custom paths.
                   </p>
                 </div>
               </div>
