@@ -68,7 +68,10 @@ class MenuMixin:
         tools_menu = self.menuBar().addMenu("Tools")
         self._menu_action(tools_menu, "Match playground", self.toggle_playground, "Ctrl+P")
         self._menu_action(tools_menu, "Statistics…", self.open_statistics)
-        self._menu_action(tools_menu, "Restart Espanso", self.restart_espanso, "Ctrl+Shift+R")
+        tools_menu.addSeparator()
+        self.start_espanso_action = self._menu_action(tools_menu, "Start Espanso", self.start_espanso)
+        self.stop_espanso_action = self._menu_action(tools_menu, "Stop Espanso", self.stop_espanso)
+        self.restart_espanso_action = self._menu_action(tools_menu, "Restart Espanso", self.restart_espanso, "Ctrl+Shift+R")
 
         help_menu = self.menuBar().addMenu("Help")
         self._menu_action(
@@ -83,6 +86,7 @@ class MenuMixin:
         )
         for menu in (file_menu, edit_menu, search_menu):
             menu.aboutToShow.connect(self._update_menu_actions)
+        tools_menu.aboutToShow.connect(self.update_espanso_status)
         self.file_tree.itemSelectionChanged.connect(self._update_menu_actions)
         self.match_table.itemSelectionChanged.connect(self._update_menu_actions)
         QApplication.instance().focusChanged.connect(self._update_menu_actions)

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QPoint, QTimer, Qt
 from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QLabel, QMainWindow, QMessageBox, QSplitter
+from PySide6.QtWidgets import QLabel, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter
 
 from .. import __version__
 from ..config_service import ConfigService
@@ -91,8 +91,21 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         ver_text = f"Espanso: {self.espanso_version}" if self.espanso_version else "Espanso: not detected"
         self.version_label = QLabel(ver_text)
         self.version_label.setEnabled(False)
+
+        self.status_btn = QPushButton("Espanso: checking…")
+        self.status_btn.setFlat(True)
+        self.status_btn.setToolTip("Click to view Espanso service control menu")
+        self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.status_btn.clicked.connect(self._show_espanso_control_menu)
+
+        self.statusBar().addPermanentWidget(self.status_btn)
         self.statusBar().addPermanentWidget(self.version_label)
         self.statusBar().showMessage(f"Configuration folder: {self.config_path}")
+
+        self._status_timer = QTimer(self)
+        self._status_timer.timeout.connect(self.update_espanso_status)
+        self._status_timer.start(5000)
+        self.update_espanso_status()
 
     def open_statistics(self) -> None:
         dialog = StatsDialog(self, getattr(self, "config_path", None))
@@ -141,6 +154,83 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         self.refresh_match_table(keep_selection=True)
         self.statusBar().showMessage(f"Saved {self.current_file.name}", 4000)
         return True
+    def update_espanso_status(self) -> None:
+        is_running, _ = ConfigService.get_espanso_status()
+        self._espanso_running = is_running
+        if is_running is True:
+            self.status_btn.setText("● Running")
+            self.status_btn.setStyleSheet(
+                "QPushButton { color: #3fb950; font-weight: bold; border: none; padding: 0 4px; } "
+                "QPushButton:hover { text-decoration: underline; }"
+            )
+            self.status_btn.setToolTip("Espanso is running. Click for control options.")
+        elif is_running is False:
+            self.status_btn.setText("● Stopped")
+            self.status_btn.setStyleSheet(
+                "QPushButton { color: #f85149; font-weight: bold; border: none; padding: 0 4px; } "
+                "QPushButton:hover { text-decoration: underline; }"
+            )
+            self.status_btn.setToolTip("Espanso is stopped. Click to start.")
+        else:
+            self.status_btn.setText("● Not found")
+            self.status_btn.setStyleSheet("QPushButton { color: #8b949e; border: none; padding: 0 4px; }")
+            self.status_btn.setToolTip("Espanso executable not detected.")
+
+        if hasattr(self, "start_espanso_action"):
+            self.start_espanso_action.setEnabled(is_running is False)
+        if hasattr(self, "stop_espanso_action"):
+            self.stop_espanso_action.setEnabled(is_running is True)
+        if hasattr(self, "restart_espanso_action"):
+            self.restart_espanso_action.setEnabled(is_running is not None)
+
+    def _show_espanso_control_menu(self) -> None:
+        menu = QMenu(self)
+        is_running = getattr(self, "_espanso_running", None)
+
+        start_act = menu.addAction("Start Espanso")
+        start_act.setEnabled(is_running is False)
+        start_act.triggered.connect(self.start_espanso)
+
+        stop_act = menu.addAction("Stop Espanso")
+        stop_act.setEnabled(is_running is True)
+        stop_act.triggered.connect(self.stop_espanso)
+
+        restart_act = menu.addAction("Restart Espanso")
+        restart_act.setEnabled(is_running is not None)
+        restart_act.triggered.connect(self.restart_espanso)
+
+        menu.addSeparator()
+        refresh_act = menu.addAction("Refresh status")
+        refresh_act.triggered.connect(self.update_espanso_status)
+
+        menu.exec(self.status_btn.mapToGlobal(QPoint(0, -menu.sizeHint().height())))
+
+    def start_espanso(self) -> None:
+        try:
+            result = ConfigService.start_espanso()
+        except (OSError, TimeoutError) as error:
+            QMessageBox.critical(self, "Start failed", f"Could not start espanso:\n{error}")
+            return
+        if result.returncode == 0:
+            self.statusBar().showMessage("Espanso started", 4000)
+        else:
+            detail = result.stderr.strip() or result.stdout.strip() or f"Exit code {result.returncode}"
+            QMessageBox.warning(self, "Start failed", detail)
+        self.update_espanso_status()
+
+    def stop_espanso(self) -> None:
+        try:
+            result = ConfigService.stop_espanso()
+        except (OSError, TimeoutError) as error:
+            QMessageBox.critical(self, "Stop failed", f"Could not stop espanso:\n{error}")
+            return
+        if result.returncode == 0:
+            self.statusBar().showMessage("Espanso stopped", 4000)
+        else:
+            detail = result.stderr.strip() or result.stdout.strip() or f"Exit code {result.returncode}"
+            QMessageBox.warning(self, "Stop failed", detail)
+        self.update_espanso_status()
+
     def restart_espanso(self) -> None:
         try:
             result = ConfigService.restart_espanso()
@@ -148,10 +238,12 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
             QMessageBox.critical(self, "Restart failed", f"Could not run espanso:\n{error}")
             return
         if result.returncode == 0:
+            self.statusBar().showMessage("Espanso restarted", 4000)
             QMessageBox.information(self, "Espanso restarted", "Espanso has been restarted.")
         else:
             detail = result.stderr.strip() or result.stdout.strip() or f"Exit code {result.returncode}"
             QMessageBox.warning(self, "Restart failed", detail)
+        self.update_espanso_status()
     def check_for_updates(self, *, manual: bool = False) -> None:
         self._update_thread = check_for_updates(self, __version__, manual=manual)
 

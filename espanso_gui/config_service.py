@@ -208,6 +208,37 @@ class ConfigService:
         )
 
     @staticmethod
+    def start_espanso() -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["espanso", "start"], text=True, capture_output=True, check=False, timeout=20
+        )
+
+    @staticmethod
+    def stop_espanso() -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["espanso", "stop"], text=True, capture_output=True, check=False, timeout=20
+        )
+
+    @staticmethod
+    def get_espanso_status() -> tuple[bool | None, str]:
+        """Return (is_running, status_message).
+
+        is_running is True if running, False if stopped, None if not installed / error.
+        """
+        try:
+            res = subprocess.run(
+                ["espanso", "status"], text=True, capture_output=True, check=False, timeout=5
+            )
+            output = (res.stdout.strip() or res.stderr.strip()).lower()
+            if res.returncode == 0 or "is running" in output:
+                return True, "Running"
+            if "not running" in output or "stopped" in output or res.returncode != 0:
+                return False, "Stopped"
+            return False, "Stopped"
+        except (OSError, subprocess.SubprocessError):
+            return None, "Not found"
+
+    @staticmethod
     def detect_espanso_version() -> str | None:
         try:
             res = subprocess.run(["espanso", "--version"], text=True, capture_output=True, check=False, timeout=5)
