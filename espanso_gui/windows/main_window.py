@@ -158,21 +158,21 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
         is_running, _ = ConfigService.get_espanso_status()
         self._espanso_running = is_running
         if is_running is True:
-            self.status_btn.setText("● Running")
+            self.status_btn.setText("Espanso: Running")
             self.status_btn.setStyleSheet(
                 "QPushButton { color: #3fb950; font-weight: bold; border: none; padding: 0 4px; } "
                 "QPushButton:hover { text-decoration: underline; }"
             )
             self.status_btn.setToolTip("Espanso is running. Click for control options.")
         elif is_running is False:
-            self.status_btn.setText("● Stopped")
+            self.status_btn.setText("Espanso: Stopped")
             self.status_btn.setStyleSheet(
                 "QPushButton { color: #f85149; font-weight: bold; border: none; padding: 0 4px; } "
                 "QPushButton:hover { text-decoration: underline; }"
             )
             self.status_btn.setToolTip("Espanso is stopped. Click to start.")
         else:
-            self.status_btn.setText("● Not found")
+            self.status_btn.setText("Espanso: Not found")
             self.status_btn.setStyleSheet("QPushButton { color: #8b949e; border: none; padding: 0 4px; }")
             self.status_btn.setToolTip("Espanso executable not detected.")
 
