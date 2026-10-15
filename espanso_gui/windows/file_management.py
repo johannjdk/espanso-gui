@@ -24,14 +24,30 @@ class FileManagementMixin:
         root = QTreeWidgetItem(["Configs"])
         root.setData(0, Qt.ItemDataRole.UserRole, None)
         self.file_tree.addTopLevelItem(root)
+
+        pkg_root: QTreeWidgetItem | None = None
         if self.config_path.is_dir():
             for path in ConfigService.match_files(self.config_path):
-                item = QTreeWidgetItem([path.relative_to(self.config_path).as_posix()])
-                item.setData(0, Qt.ItemDataRole.UserRole, path)
-                root.addChild(item)
+                rel = path.relative_to(self.config_path)
+                if rel.parts and rel.parts[0] == "packages":
+                    if pkg_root is None:
+                        pkg_root = QTreeWidgetItem(["Packages"])
+                        pkg_root.setData(0, Qt.ItemDataRole.UserRole, None)
+                        self.file_tree.addTopLevelItem(pkg_root)
+                    display = "/".join(rel.parts[1:]) if len(rel.parts) > 1 else rel.as_posix()
+                    item = QTreeWidgetItem([display])
+                    item.setData(0, Qt.ItemDataRole.UserRole, path)
+                    pkg_root.addChild(item)
+                else:
+                    item = QTreeWidgetItem([rel.as_posix()])
+                    item.setData(0, Qt.ItemDataRole.UserRole, path)
+                    root.addChild(item)
                 if path == selected_path:
                     self.file_tree.setCurrentItem(item)
+
         root.setExpanded(True)
+        if pkg_root is not None:
+            pkg_root.setExpanded(True)
         self.file_tree.blockSignals(False)
         self._update_menu_actions()
     def _ask_save_changes(self) -> bool:
