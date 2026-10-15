@@ -20,7 +20,7 @@ class EspansoVariable:
         if self.type == "shell":
             return "cmd"
         if self.type == "script":
-            return "path"
+            return "args" if "args" in self.params else "path"
         if self.type == "form":
             return "layout"
         if self.type == "choice":
@@ -32,13 +32,59 @@ class EspansoVariable:
         value = self.params.get(self.parameter_key, "")
         if self.type == "choice" and isinstance(value, list):
             return ", ".join(str(item) for item in value)
+        if self.type == "script" and isinstance(value, list):
+            return " ".join(str(item) for item in value)
         return "" if value is None else str(value)
 
     def set_parameter_value(self, value: str) -> None:
         if self.type == "choice":
             self.params[self.parameter_key] = [item.strip() for item in value.split(",") if item.strip()]
+        elif self.type == "script" and self.parameter_key == "args":
+            self.params["args"] = [value] if value else []
         else:
             self.params[self.parameter_key] = value
+
+    @property
+    def script_mode(self) -> str:
+        if "args" in self.params:
+            args = self.params.get("args")
+            if isinstance(args, list) and len(args) >= 2 and any(a in ("-c", "-e", "-Command", "/c") for a in args[:-1]):
+                return "inline"
+            return "args"
+        return "path"
+
+    def get_script_inline(self) -> tuple[str, str]:
+        args = self.params.get("args")
+        if not isinstance(args, list) or not args:
+            return "python -c", ""
+        flag_idx = -1
+        for idx in range(len(args) - 1):
+            if args[idx] in ("-c", "-e", "-Command", "/c"):
+                flag_idx = idx
+                break
+        if flag_idx != -1:
+            cmd = " ".join(str(a) for a in args[:flag_idx + 1])
+            code = str(args[flag_idx + 1]) if flag_idx + 1 < len(args) else ""
+            return cmd, code
+        return str(args[0]), "\n".join(str(a) for a in args[1:])
+
+    def set_script_inline(self, command: str, code: str) -> None:
+        import shlex
+        parts = [p for p in shlex.split(command.strip()) if p] if command.strip() else ["python", "-c"]
+        if code:
+            if not code.endswith("\n"):
+                code += "\n"
+            parts.append(code)
+        self.params.pop("path", None)
+        self.params["args"] = parts
+
+    def set_script_path(self, path: str) -> None:
+        self.params.pop("args", None)
+        self.params["path"] = path
+
+    def set_script_args(self, args_list: list[str]) -> None:
+        self.params.pop("path", None)
+        self.params["args"] = args_list
 
     def detect_field_names(self) -> list[str]:
         """Extract all unique [[field_name]] variables found in the form layout."""

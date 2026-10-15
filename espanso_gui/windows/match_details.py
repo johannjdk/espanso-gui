@@ -568,7 +568,12 @@ class MatchDetailsMixin:
         self.variable_name.clear()
         self.variable_type.setCurrentIndex(0)
         self.var_shell_edit.clear()
+        self.var_script_mode.setCurrentIndex(0)
+        self.var_script_cmd_edit.clear()
+        self.var_script_code_edit.clear()
         self.var_script_edit.clear()
+        self.var_script_raw_args_edit.clear()
+        self.var_script_stack.setCurrentIndex(0)
         self.var_date_edit.clear()
         self.variable_layout_edit.clear()
         self.param_stack.setCurrentIndex(0)
@@ -640,9 +645,84 @@ class MatchDetailsMixin:
             self.variable_layout_edit.setPlainText(val)
             self.refresh_var_fields_table()
         elif variable.type == "script":
-            self.var_script_edit.setText(val)
+            mode = variable.script_mode
+            if mode == "inline":
+                self.var_script_mode.setCurrentIndex(0)
+                self.var_script_stack.setCurrentIndex(0)
+                cmd, code = variable.get_script_inline()
+                self.var_script_cmd_edit.setText(cmd)
+                self.var_script_code_edit.setPlainText(code)
+            elif mode == "path":
+                self.var_script_mode.setCurrentIndex(1)
+                self.var_script_stack.setCurrentIndex(1)
+                self.var_script_edit.setText(str(variable.params.get("path") or ""))
+            else:
+                self.var_script_mode.setCurrentIndex(2)
+                self.var_script_stack.setCurrentIndex(2)
+                raw_args = variable.params.get("args") or []
+                self.var_script_raw_args_edit.setPlainText("\n".join(str(a) for a in raw_args))
         elif variable.type == "date":
             self.var_date_edit.setText(val)
+
+    def on_var_script_mode_changed(self, index: int) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        self.var_script_stack.setCurrentIndex(index)
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type != "script":
+            return
+        mode = self.var_script_mode.currentData()
+        if mode == "inline":
+            var.set_script_inline(self.var_script_cmd_edit.text(), self.var_script_code_edit.toPlainText())
+        elif mode == "path":
+            var.set_script_path(self.var_script_edit.text())
+        elif mode == "args":
+            var.set_script_args([line for line in self.var_script_raw_args_edit.toPlainText().splitlines() if line])
+        self.dirty = True
+
+    def on_var_script_inline_changed(self) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type == "script":
+            var.set_script_inline(self.var_script_cmd_edit.text(), self.var_script_code_edit.toPlainText())
+            self.dirty = True
+
+    def on_var_script_path_changed(self, text: str) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type == "script":
+            var.set_script_path(text)
+            self.dirty = True
+
+    def on_var_script_raw_args_changed(self) -> None:
+        if getattr(self, "_loading_var", False):
+            return
+        if not (0 <= self.selected_match < len(self.matches)):
+            return
+        match = self.matches[self.selected_match]
+        if not (0 <= self.selected_variable < len(match.variables)):
+            return
+        var = match.variables[self.selected_variable]
+        if var.type == "script":
+            var.set_script_args([line for line in self.var_script_raw_args_edit.toPlainText().splitlines() if line])
+            self.dirty = True
 
     def on_variable_name_changed(self, text: str) -> None:
         if getattr(self, "_loading_var", False):
@@ -694,8 +774,6 @@ class MatchDetailsMixin:
         var = match.variables[self.selected_variable]
         if var.type == "shell":
             var.set_parameter_value(self.var_shell_edit.toPlainText())
-        elif var.type == "script":
-            var.set_parameter_value(self.var_script_edit.text())
         elif var.type == "date":
             var.set_parameter_value(self.var_date_edit.text())
         self.dirty = True
