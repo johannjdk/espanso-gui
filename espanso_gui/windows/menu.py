@@ -67,6 +67,7 @@ class MenuMixin:
 
         tools_menu = self.menuBar().addMenu("Tools")
         self._menu_action(tools_menu, "Match playground", self.toggle_playground, "Ctrl+P")
+        self._menu_action(tools_menu, "Packages…", self.open_packages, "Ctrl+Shift+P")
         self._menu_action(tools_menu, "Statistics…", self.open_statistics)
         tools_menu.addSeparator()
         self.start_espanso_action = self._menu_action(tools_menu, "Start Espanso", self.start_espanso)

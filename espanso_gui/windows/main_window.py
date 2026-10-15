@@ -13,6 +13,7 @@ from ..config_service import ConfigService
 from ..models import EspansoMatch
 from ..runtime import application_icon
 from ..ui.about_dialog import APP_NAME
+from ..ui.packages_dialog import PackagesDialog
 from ..ui.search_dialog import SearchDialog
 from ..ui.stats_dialog import StatsDialog
 from ..updater import check_for_updates
@@ -109,6 +110,10 @@ class MainWindow(MenuMixin, WindowLayoutMixin, FileManagementMixin, MatchManagem
 
     def open_statistics(self) -> None:
         dialog = StatsDialog(self, getattr(self, "config_path", None))
+        dialog.exec()
+
+    def open_packages(self) -> None:
+        dialog = PackagesDialog(self, getattr(self, "config_path", None))
         dialog.exec()
 
     def search_all_configurations(self) -> None:

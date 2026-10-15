@@ -15,6 +15,7 @@ Espanso GUI is an independent project and is not affiliated with Espanso.
 - Search across all match files and open a result directly with **Ctrl+F**
 - Open the complete match-file YAML when an option is not exposed by the editor
 - Manage Espanso's `default.yml` and application-specific configuration profiles
+- Browse, install, update, and manage packages from Espanso Hub or Git repositories
 - Restart Espanso after saving changes
 
 The graphical editor handles the common match types. Expert YAML mode is available for advanced Espanso options and validates the document before saving.

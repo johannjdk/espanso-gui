@@ -34,7 +34,12 @@ class ConfigService:
     @staticmethod
     def match_files(directory: Path) -> list[Path]:
         return sorted(
-            (path for path in directory.rglob("*") if path.is_file() and path.suffix in (".yml", ".yaml")),
+            (
+                path for path in directory.rglob("*")
+                if path.is_file()
+                and path.suffix in (".yml", ".yaml")
+                and not path.name.startswith(("_", "."))
+            ),
             key=lambda path: path.relative_to(directory).as_posix().casefold(),
         )
 
@@ -295,4 +300,179 @@ class ConfigService:
         return subprocess.run(
             ["espanso", "stats", "clear"], text=True, capture_output=True, check=False, timeout=10
         )
+
+    @staticmethod
+    def detect_packages_path() -> Path:
+        """Return the directory containing installed Espanso packages."""
+        return ConfigService.detect_config_path() / "packages"
+
+    @staticmethod
+    def list_installed_packages(config_dir: Path | None = None) -> list[dict[str, object]]:
+        base = config_dir or ConfigService.detect_config_path()
+        packages_dir = base / "packages"
+        installed: list[dict[str, object]] = []
+        if not packages_dir.is_dir():
+            return installed
+
+        for pkg_dir in sorted(packages_dir.iterdir(), key=lambda p: p.name.casefold()):
+            if not pkg_dir.is_dir():
+                continue
+            manifest_file = pkg_dir / "_manifest.yml"
+            manifest: dict[str, object] = {}
+            if manifest_file.is_file():
+                try:
+                    with manifest_file.open("r", encoding="utf-8") as stream:
+                        doc = yaml.safe_load(stream)
+                        if isinstance(doc, dict):
+                            manifest = doc
+                except Exception:
+                    pass
+
+            source_file = pkg_dir / "_pkgsource.yml"
+            source = ""
+            if source_file.is_file():
+                try:
+                    source = source_file.read_text(encoding="utf-8").strip()
+                except Exception:
+                    pass
+
+            name = str(manifest.get("name") or pkg_dir.name)
+            title = str(manifest.get("title") or name)
+            version = str(manifest.get("version") or "")
+            author = str(manifest.get("author") or "")
+            description = str(manifest.get("description") or "")
+            homepage = str(manifest.get("homepage") or "")
+            tags = manifest.get("tags") or []
+            if not isinstance(tags, list):
+                tags = []
+
+            installed.append({
+                "name": name,
+                "title": title,
+                "version": version,
+                "author": author,
+                "description": description,
+                "homepage": homepage,
+                "tags": [str(t) for t in tags],
+                "source": source,
+                "path": pkg_dir,
+            })
+        return installed
+
+    @staticmethod
+    def install_package(
+        name: str,
+        version: str | None = None,
+        force: bool = False,
+        git: str | None = None,
+        git_branch: str | None = None,
+        external: bool = False,
+    ) -> subprocess.CompletedProcess[str]:
+        cmd = ["espanso", "package", "install"]
+        if force:
+            cmd.append("--force")
+        if version:
+            cmd.extend(["--version", version])
+        if git:
+            cmd.extend(["--git", git])
+            if git_branch:
+                cmd.extend(["--git-branch", git_branch])
+        if external or git:
+            cmd.append("--external")
+        cmd.append(name)
+        return subprocess.run(cmd, text=True, capture_output=True, check=False, timeout=60)
+
+    @staticmethod
+    def uninstall_package(name: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["espanso", "package", "uninstall", name],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+
+    @staticmethod
+    def update_package(name: str = "all") -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["espanso", "package", "update", name],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+
+    @staticmethod
+    def fetch_hub_packages(force_refresh: bool = False) -> list[dict[str, object]]:
+        import json
+        import time
+        import urllib.request
+        from .updater import get_ssl_context, parse_version
+
+        if sys.platform.startswith("win"):
+            cache_base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+        elif sys.platform == "darwin":
+            cache_base = Path.home() / "Library" / "Caches"
+        else:
+            cache_base = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+        cache_file = cache_base / "espanso-gui" / "hub_packages.json"
+
+        now = time.time()
+        if not force_refresh and cache_file.is_file():
+            try:
+                if now - cache_file.stat().st_mtime < 3600:
+                    cached = json.loads(cache_file.read_text(encoding="utf-8"))
+                    if isinstance(cached, list) and cached:
+                        return cached
+            except Exception:
+                pass
+
+        url = "https://github.com/espanso/hub/releases/latest/download/package_index.json"
+        req = urllib.request.Request(url, headers={"User-Agent": "Espanso-GUI"})
+        with urllib.request.urlopen(req, timeout=10, context=get_ssl_context()) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        grouped: dict[str, dict[str, object]] = {}
+        for item in data.get("packages", []):
+            name = item.get("name")
+            if not name:
+                continue
+            ver = item.get("version", "")
+            if name not in grouped:
+                grouped[name] = {
+                    "name": name,
+                    "title": item.get("title") or name,
+                    "author": item.get("author", ""),
+                    "description": item.get("description", ""),
+                    "tags": list(item.get("tags") or []),
+                    "version": ver,
+                    "versions": [ver] if ver else [],
+                    "archive_url": item.get("archive_url", ""),
+                }
+            else:
+                entry = grouped[name]
+                versions = entry["versions"]
+                if ver and ver not in versions:
+                    versions.append(ver)
+                if parse_version(ver) > parse_version(str(entry.get("version", ""))):
+                    entry["version"] = ver
+                    entry["title"] = item.get("title") or entry["title"]
+                    entry["author"] = item.get("author") or entry["author"]
+                    entry["description"] = item.get("description") or entry["description"]
+                    if item.get("tags"):
+                        entry["tags"] = sorted(set(entry["tags"] + item["tags"]))
+                    if item.get("archive_url"):
+                        entry["archive_url"] = item["archive_url"]
+
+        for entry in grouped.values():
+            entry["versions"].sort(key=parse_version, reverse=True)
+
+        package_list = sorted(grouped.values(), key=lambda p: str(p["name"]).casefold())
+        try:
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cache_file.write_text(json.dumps(package_list), encoding="utf-8")
+        except OSError:
+            pass
+
+        return package_list
 
