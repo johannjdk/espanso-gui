@@ -41,10 +41,19 @@ for size in 16 32 128 256 512; do
 done
 iconutil -c icns "$iconset" -o "$icon"
 
-python3 -m pip install --upgrade pip
-python3 -m pip install "$project_root" pyinstaller
+build_venv="$build_dir/build-venv"
+python3 -m venv "$build_venv"
+python_bin="$build_venv/bin/python"
 
-python3 -m PyInstaller \
+"$python_bin" -m pip install \
+    --require-hashes \
+    --requirement "$project_root/requirements-build-macos.txt"
+"$python_bin" -m pip install \
+    --no-build-isolation \
+    --no-deps \
+    "$project_root"
+
+"$python_bin" -m PyInstaller \
     --noconfirm \
     --clean \
     --windowed \
