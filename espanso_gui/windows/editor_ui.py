@@ -157,6 +157,11 @@ class WindowLayoutMixin:
         trigger_layout.addLayout(self.optional_trigger_layout)
         top_form.addRow("Trigger:", trigger_widget)
 
+        self.label_edit = QLineEdit()
+        self.label_edit.setPlaceholderText("Optional description in search bar")
+        self.label_edit.textChanged.connect(self._on_match_field_changed)
+        top_form.addRow("Label:", self.label_edit)
+
         mode_widget = QWidget()
         mode_layout = QHBoxLayout(mode_widget)
         mode_layout.setContentsMargins(0, 0, 0, 0)
