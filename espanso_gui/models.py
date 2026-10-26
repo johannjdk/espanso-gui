@@ -182,6 +182,7 @@ class EspansoMatch:
     trigger: str = ""
     triggers: list[str] = field(default_factory=list)
     regex: str = ""
+    label: str = ""
     replace: str = ""
     form: str = ""
     form_fields: dict[str, EspansoFormField] = field(default_factory=dict)
@@ -227,7 +228,7 @@ class EspansoMatch:
     @property
     def search_text(self) -> str:
         match_type = "Form" if self.is_form else "Replace"
-        return f"{self.trigger_text} {match_type} {self.replace} {self.form} {self.to_yaml()}".casefold()
+        return f"{self.trigger_text} {self.label} {match_type} {self.replace} {self.form} {self.to_yaml()}".casefold()
 
     @property
     def preview(self) -> str:
@@ -281,11 +282,13 @@ class EspansoMatch:
         # Treat the list form under ``trigger`` as a legacy editor value so it
         # is normalized to Espanso's documented ``triggers`` key when saved.
         triggers = raw_triggers if isinstance(raw_triggers, list) else raw_trigger if isinstance(raw_trigger, list) else []
-        known = {"trigger", "triggers", "regex", "replace", "form", "form_fields", "vars", "word"}
+        label = str(data.get("label", "")) if data.get("label") is not None else ""
+        known = {"trigger", "triggers", "regex", "label", "replace", "form", "form_fields", "vars", "word"}
         return cls(
             trigger="" if isinstance(raw_trigger, list) or raw_trigger is None else str(raw_trigger),
             triggers=[str(item) for item in triggers if item is not None],
             regex="" if raw_regex is None else str(raw_regex),
+            label=label,
             replace=replace,
             form=form,
             form_fields=form_fields,
@@ -306,6 +309,9 @@ class EspansoMatch:
             data["triggers"] = self.triggers
         else:
             data["trigger"] = self.trigger
+        data.pop("label", None)
+        if self.label:
+            data["label"] = self.label
         data.pop("replace", None)
         data.pop("form", None)
         data.pop("form_fields", None)

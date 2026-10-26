@@ -35,6 +35,7 @@ class MatchManagementMixin:
             trigger_values = [self.trigger_edit.text().strip()]
             trigger_values.extend(edit.text().strip() for edit, _ in self.optional_trigger_edits)
             match.set_trigger_values(trigger_values, preserve_multiple=bool(match.triggers))
+        match.label = self.label_edit.text().strip()
         match.word = self.word_check.isChecked()
         if self.radio_form.isChecked():
             match.mode = "form"
@@ -264,6 +265,7 @@ class MatchManagementMixin:
                     self.add_optional_trigger(trigger)
             else:
                 self.trigger_edit.setText(match.trigger)
+        self.label_edit.setText(match.label)
         self.word_check.setChecked(match.word)
         # Refresh hidden content too, so it cannot leak between matches.
         self.replace_edit.setPlainText(match.replace)
@@ -283,6 +285,7 @@ class MatchManagementMixin:
     def clear_match_form(self) -> None:
         self._loading = True
         self.trigger_edit.clear()
+        self.label_edit.clear()
         self.regex_check.setChecked(False)
         self.clear_optional_triggers()
         self.replace_edit.clear()
